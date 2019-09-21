@@ -35,6 +35,7 @@ SETTINGS_PROJECT_HISTORY = "project-history.log"
 SETTINGS_DEVICE_IP_HISTORY = "device-ip-history.log"
 SETTINGS_WINSCP_HISTORY = "winscp-history.log"
 SETTINGS_PUTTY_HISTORY = "putty-history.log"
+cache_files = [SETTINGS_DEVICE_IP_HISTORY, SETTINGS_PROJECT_HISTORY, SETTINGS_PUTTY_HISTORY, SETTINGS_WINSCP_HISTORY, SETTINGS_SOURCE_HISTORY]
 
 
 class MySFTPClient(paramiko.SFTPClient):
@@ -122,8 +123,6 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_clear_cache')
     def on_button_clear_cache(self):
-        cache_files = [SETTINGS_DEVICE_IP_HISTORY, SETTINGS_PROJECT_HISTORY, SETTINGS_PUTTY_HISTORY, SETTINGS_WINSCP_HISTORY, SETTINGS_SOURCE_HISTORY]
-
         for file in cache_files:
             f = open(file, "w")
             f.write("")
@@ -500,6 +499,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
 def main():
     import sys
+    fs.cache_create(cache_files)
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
     window = MainWindow()

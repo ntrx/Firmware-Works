@@ -32,3 +32,11 @@ def cache_read(self, HISTORY_FILE):
                     break
                 self.addItem(line)
         f.close()
+
+
+def cache_create(file_list):
+    for file in file_list:
+        if not os.path.isfile(file):
+            f = open(file, "w")
+            f.write("")
+            f.close()
