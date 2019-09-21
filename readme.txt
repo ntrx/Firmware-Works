@@ -25,3 +25,13 @@ install.bat - auto install modules depents on this project
 addit:
 pyuic5.exe - convertor from qt template to python code
 
+
+installation Windows:
+
+1. install Python 3.x
+2. install Qt Designer (for modify pycontrol.ui)
+3. run install.bat
+4. Take pyuic5.exe from Python 3.x/Scripts installed directory
+5. translate XML GUI code to python code with '0 translate.ui.py'
+6. run core.pyw or run '0 make 64bits.py' for create executable 64bit version
+
