@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # list of functions for scripts
-
 import os
 import settings
 import paramiko

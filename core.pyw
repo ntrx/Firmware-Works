@@ -12,6 +12,7 @@ import func
 import paramiko
 import os
 import subprocess
+import fs
 
 
 SETTINGS_USER: str = ""
@@ -134,7 +135,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_button_edit')
     def on_button_edit(self):
         CREATE_NO_WINDOW = 0x08000000
-        return subprocess.Popen("notepad %s" % (SETTINGS_FILE), creationflags=CREATE_NO_WINDOW)
+        return subprocess.Popen("notepad %s" % SETTINGS_FILE, creationflags=CREATE_NO_WINDOW)
 
     @pyqtSlot(name='on_winscp_change')
     def on_winscp_change(self):
@@ -276,94 +277,15 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.label_9.setText("New configuration applied.")
 
         # cache saving source history
-        already_exist: bool = False
-
-        if not os.path.isfile(SETTINGS_SOURCE_HISTORY):
-            f = open(SETTINGS_SOURCE_HISTORY, "w")
-            f.write("")
-            f.close()
-
-        with open(SETTINGS_SOURCE_HISTORY, "r") as f:
-            if SETTINGS_SOURCE in f.read():
-                already_exist = True
-        f.close()
-
-        if not already_exist:
-            f = open(SETTINGS_SOURCE_HISTORY, "a")
-            f.write(SETTINGS_SOURCE+"\n")
-            f.close()
-
+        fs.cache_save(SETTINGS_SOURCE_HISTORY, SETTINGS_SOURCE)
         # cache saving project name history
-        already_exist = False
-
-        if not os.path.isfile(SETTINGS_PROJECT_HISTORY):
-            f = open(SETTINGS_PROJECT_HISTORY, "w")
-            f.write("")
-            f.close()
-
-        with open(SETTINGS_PROJECT_HISTORY, "r") as f:
-            if SETTINGS_PROJECT in f.read():
-                already_exist = True
-        f.close()
-
-        if not already_exist:
-            f = open(SETTINGS_PROJECT_HISTORY, "a")
-            f.write(SETTINGS_PROJECT+"\n")
-            f.close()
-
+        fs.cache_save(SETTINGS_PROJECT_HISTORY, SETTINGS_PROJECT)
         # cache saving device ip history
-        already_exist = False
-
-        if not os.path.isfile(SETTINGS_DEVICE_IP_HISTORY):
-            f = open(SETTINGS_DEVICE_IP_HISTORY, "w")
-            f.write("")
-            f.close()
-
-        with open(SETTINGS_DEVICE_IP_HISTORY, "r") as f:
-            if SETTINGS_HOST in f.read():
-                already_exist = True
-        f.close()
-
-        if not already_exist:
-            f = open(SETTINGS_DEVICE_IP_HISTORY, "a")
-            f.write(SETTINGS_HOST+"\n")
-            f.close()
-
+        fs.cache_save(SETTINGS_DEVICE_IP_HISTORY, SETTINGS_HOST)
         # cache saving winscp path history
-        already_exist = False
-
-        if not os.path.isfile(SETTINGS_WINSCP_HISTORY):
-            f = open(SETTINGS_WINSCP_HISTORY, "w")
-            f.write("")
-            f.close()
-
-        with open(SETTINGS_WINSCP_HISTORY, "r") as f:
-            if PATH_WINSCP in f.read():
-                already_exist = True
-        f.close()
-
-        if not already_exist:
-            f = open(SETTINGS_WINSCP_HISTORY, "a")
-            f.write(PATH_WINSCP+"\n")
-            f.close()
-
+        fs.cache_save(SETTINGS_WINSCP_HISTORY, PATH_WINSCP)
         # cache saving putty path history
-        already_exist = False
-
-        if not os.path.isfile(SETTINGS_PUTTY_HISTORY):
-            f = open(SETTINGS_PUTTY_HISTORY, "w")
-            f.write("")
-            f.close()
-
-        with open(SETTINGS_PUTTY_HISTORY, "r") as f:
-            if PATH_PUTTY in f.read():
-                already_exist = True
-        f.close()
-
-        if not already_exist:
-            f = open(SETTINGS_PUTTY_HISTORY, "a")
-            f.write(PATH_PUTTY+"\n")
-            f.close()
+        fs.cache_save(SETTINGS_PUTTY_HISTORY, PATH_PUTTY)
 
     @pyqtSlot(name='on_path_project')
     def on_path_project(self):
@@ -384,7 +306,6 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         print(path_tmp)
         SETTINGS_PROJECT = path_tmp
         self.lineEdit_5.setText(SETTINGS_PROJECT)
-
 
     @pyqtSlot(name='on_button_reload')
     def on_button_reload(self):
@@ -570,51 +491,11 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
                 self.lineEdit_10.setStyleSheet("background-color: red")
             self.lineEdit_10.setText(PATH_PUTTY)
 
-        if os.path.isfile(SETTINGS_SOURCE_HISTORY):
-            self.comboBox_3.clear()
-            with open(SETTINGS_SOURCE_HISTORY, "r") as f:
-                while True:
-                    line = f.readline()
-                    if not line:
-                        break
-                    self.comboBox_3.addItem(line)
-            f.close()
-
-        if os.path.isfile(SETTINGS_PROJECT_HISTORY):
-            self.comboBox.clear()
-            with open(SETTINGS_PROJECT_HISTORY, "r") as f:
-                while True:
-                    line = f.readline()
-                    if not line:
-                        break
-                    self.comboBox.addItem(line)
-
-        if os.path.isfile(SETTINGS_DEVICE_IP_HISTORY):
-            self.comboBox_2.clear()
-            with open(SETTINGS_DEVICE_IP_HISTORY, "r") as f:
-                while True:
-                    line = f.readline()
-                    if not line:
-                        break
-                    self.comboBox_2.addItem(line)
-
-        if os.path.isfile(SETTINGS_PUTTY_HISTORY):
-            self.comboBox_5.clear()
-            with open(SETTINGS_PUTTY_HISTORY, "r") as f:
-                while True:
-                    line = f.readline()
-                    if not line:
-                        break
-                    self.comboBox_5.addItem(line)
-
-        if os.path.isfile(SETTINGS_WINSCP_HISTORY):
-            self.comboBox_4.clear()
-            with open(SETTINGS_WINSCP_HISTORY, "r") as f:
-                while True:
-                    line = f.readline()
-                    if not line:
-                        break
-                    self.comboBox_4.addItem(line)
+        fs.cache_read(self.comboBox_3, SETTINGS_SOURCE_HISTORY)
+        fs.cache_read(self.comboBox, SETTINGS_PROJECT_HISTORY)
+        fs.cache_read(self.comboBox_2, SETTINGS_DEVICE_IP_HISTORY)
+        fs.cache_read(self.comboBox_4, SETTINGS_PUTTY_HISTORY)
+        fs.cache_read(self.comboBox_5, SETTINGS_WINSCP_HISTORY)
 
 
 def main():
