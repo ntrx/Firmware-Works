@@ -5,7 +5,7 @@ code:
 pycontrol.ui - Qt Template (created in Qt Designer)
 core.pyw - launch file
 func.py - list of functions used in scripts
-
+fs.py - file system functions
 
 
 
