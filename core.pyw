@@ -28,6 +28,9 @@ SETTINGS_FTP_MODE: str = ""
 PATH_WINSCP: str = ""
 PATH_PUTTY: str = ""
 
+PATH_WINSCP_OK: bool = False
+PATH_PUTTY_OK: bool = False
+
 SETTINGS_EMPTY: str = ""
 SETTINGS_FILE: str = "settings.py"
 SETTINGS_SOURCE_HISTORY = "source-history.log"
@@ -158,7 +161,10 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_open_putty')
     def on_open_putty(self):
-        func.putty_path(SETTINGS_HOST, SETTINGS_USER, PATH_PUTTY)
+        if PATH_PUTTY_OK:
+            func.putty_path(SETTINGS_HOST, SETTINGS_USER, PATH_PUTTY)
+        else:
+            self.label_9.setText("Putty not found!")
 
     @pyqtSlot(name='on_path_putty')
     def on_path_putty(self):
@@ -421,6 +427,8 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     def settings_init(self):
         global SETTINGS_UPDATE
+        global PATH_PUTTY_OK
+        global PATH_WINSCP_OK
         if len(SETTINGS_PROJECT) == 0:
             self.lineEdit.setText(SETTINGS_EMPTY)
         else:
@@ -481,6 +489,9 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         else:
             if not os.path.isfile(PATH_WINSCP):
                 self.lineEdit_9.setStyleSheet("background-color: red")
+                PATH_WINSCP_OK = False
+            else:
+                PATH_WINSCP_OK = True
             self.lineEdit_9.setText(PATH_WINSCP)
 
         if len(PATH_PUTTY) == 0:
@@ -488,6 +499,9 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         else:
             if not os.path.isfile(PATH_PUTTY):
                 self.lineEdit_10.setStyleSheet("background-color: red")
+                PATH_PUTTY_OK = False
+            else:
+                PATH_PUTTY_OK = True
             self.lineEdit_10.setText(PATH_PUTTY)
 
         fs.cache_read(self.comboBox_3, SETTINGS_SOURCE_HISTORY)
