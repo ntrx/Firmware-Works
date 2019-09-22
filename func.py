@@ -198,8 +198,8 @@ def scp_restart(user, secret, host):
 
 
 # return 1 if online
-def is_online(host):
-    ping_status = subprocess.call("ping -n 1 %s" % host)
+def is_online(host, times=1):
+    ping_status = subprocess.call("ping -n %d %s" % (times, host))
     if ping_status == 0:  # active
         return 1
     elif ping_status > 0:
@@ -266,36 +266,3 @@ def scp_compile(source, user, secret, project, is_update, build='release'):
         sftp.get(remotepath="projects/" + project + "/Build/bin/" + project + ".bin",
                  localpath=path_loc_win + "\\Build\\bin\\" + project + ".bin")
         sftp.close()
-
-
-# isUpdate = 1 :: files already been on SERVER (SYNC, faster)
-# isUpdate = 0 :: no file on server, its first upload
-def scp_compile_vb(source, user, secret, project, is_update):
-    path_loc_win = source  # os.getcwd()
-    path_dest_win = "//home//" + user + "//projects//" + project
-    file_name = 'compile' + project
-    host = global_build_server
-    f = open(file_name, 'w+')
-    f.write("option confirm off\n")
-    f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
-    if is_update == 0:
-        f.write("put %s %s\n" % (path_loc_win, path_dest_win))
-    elif is_update == 1:
-        f.write("synchronize remote %s %s\n" % (path_loc_win, path_dest_win))
-    f.write("cd //home//" + user + "//projects//" + project + "//Src\n")
-    f.write("call make clean\n")
-    f.write("call make -j7\n")
-    f.write("cd ..\n")
-    f.write("cd Build//\n")
-    f.write("get %s %s\n" % (project + ".bin", path_loc_win + "\\Build\\objects\n"))
-
-    f.write("exit\n")
-    f.close()
-
-    result = scp_path(file_name)
-    # replace /script with /command
-    os.remove(file_name)
-
-    if result >= 1:
-        print("error while executing code")
-        print(result)

@@ -413,17 +413,20 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, 'release')
 
         if self.checkBox.isChecked():
-            is_online = func.is_online(SETTINGS_HOST)
+            is_online = func.is_online(SETTINGS_HOST, 9999)
             self.label_9.setText("Trying to connect...")
-            while is_online == 0:
-                is_online = func.is_online(SETTINGS_HOST)
-                self.label_9.setText("Trying to connect...")
             self.label_9.setText("Connect established.")
-        
-        func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
-        func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
-        func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
-        self.label_9.setText("Auto compile&stop&upload command has been sent")
+            if is_online:
+                func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+                func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+                func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+                self.label_9.setText("Auto compile&stop&upload command has been sent")
+            else:
+                self.label_9.setText("process has been interrupted")
+        else:
+            func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+            func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+            func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
 
     def settings_init(self):
         global SETTINGS_UPDATE
