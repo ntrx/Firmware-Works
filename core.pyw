@@ -199,6 +199,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             return
 
         PATH_WINSCP = conf_file[0]
+        print('[%s]' % conf_file[0])
         settings_save()
         settings_load()
         self.settings_init()
@@ -515,8 +516,8 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         fs.cache_read(self.comboBox_3, SETTINGS_SOURCE_HISTORY)
         fs.cache_read(self.comboBox, SETTINGS_PROJECT_HISTORY)
         fs.cache_read(self.comboBox_2, SETTINGS_DEVICE_IP_HISTORY)
-        fs.cache_read(self.comboBox_4, SETTINGS_PUTTY_HISTORY)
-        fs.cache_read(self.comboBox_5, SETTINGS_WINSCP_HISTORY)
+        fs.cache_read(self.comboBox_5, SETTINGS_PUTTY_HISTORY)
+        fs.cache_read(self.comboBox_4, SETTINGS_WINSCP_HISTORY)
 
         cache_files_size = 0
         for file in cache_files:
