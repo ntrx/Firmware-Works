@@ -657,7 +657,7 @@
     </widget>
     <widget class="QPushButton" name="pushButton_12">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -669,6 +669,9 @@
      </property>
      <property name="text">
       <string>detect project</string>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButton_13">
@@ -1240,7 +1243,7 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;It works with only 'Build server' tasks&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remember! Built-in SSH client not support no password auth!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
        <string>use winSCP</string>

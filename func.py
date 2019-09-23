@@ -2,9 +2,10 @@
 # list of functions for scripts
 import os
 import settings
-import paramiko
 import core
+import paramiko
 import subprocess
+from io import StringIO
 
 global_build_server = settings.global_build_server
 global_bs_user = settings.global_bs_user
@@ -18,10 +19,26 @@ pb_cur = 0
 
 
 def scp_path(file_name, winscp_path=PATH_WINSCP):
+    """
+    :param file_name: script file name, auto-fill value
+    :type file_name: str
+    :param winscp_path: loc to winscp.com or winscp.exe
+    :type winscp_path: str (regular path)
+    :return:
+    """
     return os.system("\"%s\" /ini=nul /script=%s" % (winscp_path, file_name))
 
 
 def putty_path(host, user, path_putty=PATH_PUTTY):
+    """
+    :param host: IP
+    :type host: str
+    :param user: user name
+    :type user: str
+    :param path_putty:
+    :type path_putty: str (regular path)
+    :return:
+    """
     CREATE_NO_WINDOW = 0x08000000
     return subprocess.Popen("\"%s\" -ssh %s@%s" % (path_putty, user, host), creationflags=CREATE_NO_WINDOW)
 
@@ -29,7 +46,7 @@ def putty_path(host, user, path_putty=PATH_PUTTY):
 def scp_upload(source, project, user, secret, host):
     path_loc_win = source + "\\Build\\bin\\" + project + ".bin"
     path_dest_win = "//home//" + user + "//" + project + "//bin//" + project + ".bin"
-    if SETTINGS_FTP_MODE == '1' or '0':
+    if SETTINGS_FTP_MODE == '1':
         file_name = 'upload' + host
         f = open(file_name, "w+")
         f.write("option confirm off\n")
@@ -39,16 +56,17 @@ def scp_upload(source, project, user, secret, host):
         f.close()
         scp_path(file_name, PATH_WINSCP)
         os.remove(file_name)
-    elif SETTINGS_FTP_MODE == '2':
-        transport = paramiko.Transport(host, 22)
-        transport.connect(username=user, password=secret)
+    elif SETTINGS_FTP_MODE == '0':
+        transport = paramiko.Transport((host, 22))
+        transport.connect()
+        transport.auth_none(username=user)
         sftp = core.MySFTPClient.from_transport(transport)
         sftp.put(path_loc_win, path_dest_win)
         sftp.close()
 
 
 def scp_killall(user, secret, host, project):
-    if SETTINGS_FTP_MODE == '1' or '0':  # via winSCP
+    if SETTINGS_FTP_MODE == '1':  # via winSCP
         file_name = 'killall' + host
         f = open(file_name, "w+")
         f.write("option confirm off\n")
@@ -58,17 +76,17 @@ def scp_killall(user, secret, host, project):
         f.close()
         scp_path(file_name, PATH_WINSCP)
         os.remove(file_name)
-    if SETTINGS_FTP_MODE == '2':  # via paramiko
+    if SETTINGS_FTP_MODE == '0':  # via paramiko
         paramiko.util.log_to_file('killall_command.log')
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(host, 22, user, secret)
+        client.connect(hostname=host, port=22, username=user, password=secret)
         client.exec_command("killall sn4215_respawn.sh %s.bin" % project)
         client.close()
 
 
 def scp_reboot(user, secret, host):
-    if SETTINGS_FTP_MODE == '1' or '0':  # via winSCP
+    if SETTINGS_FTP_MODE == '1':  # via winSCP
         file_name = 'reboot' + host
         f = open(file_name, "w+")
         f.write("option confirm off\n")
@@ -78,7 +96,7 @@ def scp_reboot(user, secret, host):
         f.close()
         scp_path(file_name, PATH_WINSCP)
         os.remove(file_name)
-    if SETTINGS_FTP_MODE == '2':  # via paramiko
+    if SETTINGS_FTP_MODE == '0':  # via paramiko
         paramiko.util.log_to_file('reboot_command.log')
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -88,7 +106,7 @@ def scp_reboot(user, secret, host):
 
 
 def scp_poweroff(user, secret, host):
-    if SETTINGS_FTP_MODE == '1' or '0':  # via winSCP
+    if SETTINGS_FTP_MODE == '1':  # via winSCP
         file_name = 'poweroff' + host
         f = open(file_name, "w+")
         f.write("option confirm off\n")
@@ -98,7 +116,7 @@ def scp_poweroff(user, secret, host):
         f.close()
         scp_path(file_name, PATH_WINSCP)
         os.remove(file_name)
-    if SETTINGS_FTP_MODE == '2':  # via paramiko
+    if SETTINGS_FTP_MODE == '0':  # via paramiko
         paramiko.util.log_to_file('poweroff_command.log')
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -108,7 +126,7 @@ def scp_poweroff(user, secret, host):
 
 
 def scp_ts_test(user, secret, host):
-    if SETTINGS_FTP_MODE == '1' or '0':  # via winSCP
+    if SETTINGS_FTP_MODE == '1':  # via winSCP
         file_name = 'ts_test' + host
         f = open(file_name, "w+")
         f.write("option confirm off\n")
@@ -119,7 +137,7 @@ def scp_ts_test(user, secret, host):
         f.close()
         scp_path(file_name, PATH_WINSCP)
         os.remove(file_name)
-    if SETTINGS_FTP_MODE == '2':  # via paramiko
+    if SETTINGS_FTP_MODE == '0':  # via paramiko
         paramiko.util.log_to_file('ts_test_command.log')
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -130,7 +148,7 @@ def scp_ts_test(user, secret, host):
 
 
 def scp_ts_calibrate(user, secret, host):
-    if SETTINGS_FTP_MODE == '1' or '0':  # via winSCP
+    if SETTINGS_FTP_MODE == '1':  # via winSCP
         file_name = 'ts_calibrate' + host
         f = open(file_name, "w+")
         f.write("option confirm off\n")
@@ -141,7 +159,7 @@ def scp_ts_calibrate(user, secret, host):
         f.close()
         scp_path(file_name)
         os.remove(file_name)
-    if SETTINGS_FTP_MODE == '2':  # via paramiko
+    if SETTINGS_FTP_MODE == '0':  # via paramiko
         paramiko.util.log_to_file('ts_calibrate_command.log')
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -152,7 +170,7 @@ def scp_ts_calibrate(user, secret, host):
 
 
 def scp_stop(user, secret, host):
-    if SETTINGS_FTP_MODE == '1' or '0':  # via winSCP
+    if SETTINGS_FTP_MODE == '1':  # via winSCP
         file_name = 'stop' + host
         f = open(file_name, "w+")
         f.write("option confirm off\n")
@@ -162,7 +180,7 @@ def scp_stop(user, secret, host):
         f.close()
         scp_path(file_name)
         os.remove(file_name)
-    if SETTINGS_FTP_MODE == '2':  # via paramiko
+    if SETTINGS_FTP_MODE == '0':  # via paramiko
         paramiko.util.log_to_file('stop_command.log')
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -173,7 +191,7 @@ def scp_stop(user, secret, host):
 
 def scp_restart(user, secret, host):
     file_name = 'restart' + host
-    if SETTINGS_FTP_MODE == '1' or '0':  # via winSCP
+    if SETTINGS_FTP_MODE == '1':  # via winSCP
         f = open(file_name, "w+")
         f.write("option confirm off\n")
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
@@ -182,7 +200,7 @@ def scp_restart(user, secret, host):
         f.close()
         scp_path(file_name)
         os.remove(file_name)
-    if SETTINGS_FTP_MODE == '2':  # via paramiko
+    if SETTINGS_FTP_MODE == '0':  # via paramiko
         paramiko.util.log_to_file('restart_command.log')
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -272,3 +290,19 @@ def scp_compile(source, user, secret, project, is_update, build='release'):
         sftp.get(remotepath="projects/" + project + "/Build/bin/" + project + ".bin",
                  localpath=path_loc_win + "\\Build\\bin\\" + project + ".bin")
         sftp.close()
+
+
+def scp_detect_project(host, user, secret, self):
+    transport = paramiko.Transport((host, 22))
+    transport.connect()
+    transport.auth_none(username=user)
+    sftp = core.MySFTPClient.from_transport(transport)
+    result = sftp.listdir("/home/root/")
+    for obj in result:
+        if obj[0] != '.':
+            result = obj
+            break
+        else:
+            result = 'None'
+    self.setText("Detect result: %s" % result)
+    sftp.close()

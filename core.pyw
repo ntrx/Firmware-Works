@@ -103,6 +103,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.pushButton_8.clicked.connect(self.on_button_apply)
         self.pushButton_10.clicked.connect(self.on_button_open)
         self.pushButton_11.clicked.connect(self.on_button_killall)
+        self.pushButton_12.clicked.connect(self.on_button_detect)
         self.pushButton_14.clicked.connect(self.on_button_ts_test)
         self.pushButton_13.clicked.connect(self.on_button_ts_calibrate)
         self.pushButton_15.clicked.connect(self.on_button_poweroff)
@@ -123,6 +124,10 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.comboBox_2.currentIndexChanged.connect(self.on_device_ip_change)
         self.comboBox_4.currentIndexChanged.connect(self.on_winscp_change)
         self.comboBox_5.currentIndexChanged.connect(self.on_putty_change)
+
+    @pyqtSlot(name='on_button_detect')
+    def on_button_detect(self):
+        func.scp_detect_project(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET, self.label_9)
 
     @pyqtSlot(name='on_button_clear_cache')
     def on_button_clear_cache(self):
@@ -611,8 +616,6 @@ def settings_load():
             if line.find('ftp_mode') == 0:
                 index = 8
                 SETTINGS_FTP_MODE = get_value(line, index)
-            else:
-                SETTINGS_FTP_MODE = '1'
 
             if line.find('path_scp') == 0:
                 index = 8
