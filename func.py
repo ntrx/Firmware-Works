@@ -227,7 +227,13 @@ def scp_compile(source, user, secret, project, is_update, build='release'):
             f.write("synchronize remote %s %s//Src\n" % (path_loc_win + "\\Src", path_dest_win))
         f.write("cd //home//" + global_bs_user + "//projects//" + project + "//Src\n")
         f.write("call make clean\n")
-        f.write("call make %s -j7\n" % build)
+        if build == 'release':
+            f.write("call make -j7\n")
+        elif build == 'debug':
+            f.write("call make debug -j7\n")
+        else:
+            print("Error while exclude code, exiting.")
+            return
         f.write("cd ..\n")
         f.write("cd Build//bin//\n")
         f.write("get %s %s\n" % (project + ".bin", path_loc_win + "\\Build\\bin\\" + project + ".bin\n"))
