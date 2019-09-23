@@ -513,12 +513,6 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         fs.cache_read(self.comboBox_4, SETTINGS_PUTTY_HISTORY)
         fs.cache_read(self.comboBox_5, SETTINGS_WINSCP_HISTORY)
 
-        cache_files_size = 0
-        for file in cache_files:
-            cache_files_size += os.path.getsize(file)
-
-        self.label_13.setText("%s b" % cache_files_size)
-
 
 def main():
     import sys
