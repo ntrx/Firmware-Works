@@ -40,3 +40,33 @@ def cache_create(file_list):
             f = open(file, "w")
             f.write("")
             f.close()
+
+
+def path_double_win(path):
+    """
+    :param path: PATH string without doubled slashes
+    :type path: str
+    :return:
+    """
+    result = ""
+    for symbol in range(0, len(path)):
+        if path[symbol] == '/':
+            result += '\\'
+            continue
+        result += path[symbol]
+    return result
+
+
+def path_double_nix(path):
+    """
+    :param path: PATH string without doubled slashes
+    :type path: str
+    :return:
+    """
+    result = ""
+    for symbol in range(0, len(path)):
+        if path[symbol] == '/':
+            result += '//'
+            continue
+        result += path[symbol]
+    return result

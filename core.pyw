@@ -141,8 +141,11 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_edit')
     def on_button_edit(self):
-        CREATE_NO_WINDOW = 0x08000000
-        return subprocess.Popen("notepad %s" % SETTINGS_FILE, creationflags=CREATE_NO_WINDOW)
+        if os.name == "nt":
+            CREATE_NO_WINDOW = 0x08000000
+            return subprocess.Popen("notepad %s" % SETTINGS_FILE, creationflags=CREATE_NO_WINDOW)
+        else:
+            os.system("xdg-open %s" % SETTINGS_FILE)
 
     @pyqtSlot(name='on_winscp_change')
     def on_winscp_change(self):
@@ -166,10 +169,13 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_open_putty')
     def on_open_putty(self):
-        if PATH_PUTTY_OK:
-            func.putty_path(SETTINGS_HOST, SETTINGS_USER, PATH_PUTTY)
+        if os.name == "nt":
+            if PATH_PUTTY_OK:
+                func.putty_path(SETTINGS_HOST, SETTINGS_USER, PATH_PUTTY)
+            else:
+                self.label_9.setText("Putty not found!")
         else:
-            self.label_9.setText("Putty not found!")
+            os.system("xterm -hold -e 'ssh %s@%s'" % (SETTINGS_USER, SETTINGS_HOST))
 
     @pyqtSlot(name='on_path_putty')
     def on_path_putty(self):
@@ -308,13 +314,13 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         if path_project == "":
             return
         path_tmp = ""
-        for letter in range(0, len(path_project)):
-            if path_project[letter] == '/':
-                path_tmp += "\\"
-                continue
-            path_tmp += path_project[letter]
+        if os.name == "nt":
+            path_tmp = fs.path_double_win(path_project)
+        else:
+            path_tmp = fs.path_double_nix(path_project)
 
-        print(path_tmp)
+        print('Path changes with SYSTEM requires: \n')
+        print('From: %s\nTo: %s\n' % (path_project, path_tmp))
         SETTINGS_PROJECT = path_tmp
         self.lineEdit_5.setText(SETTINGS_PROJECT)
 
