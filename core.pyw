@@ -326,6 +326,16 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_reload')
     def on_button_reload(self):
+        self.lineEdit.clear()
+        self.lineEdit_2.clear()
+        self.lineEdit_3.clear()
+        self.lineEdit_4.clear()
+        self.lineEdit_5.clear()
+        self.lineEdit_6.clear()
+        self.lineEdit_7.clear()
+        self.lineEdit_8.clear()
+        self.lineEdit_9.clear()
+        self.lineEdit_10.clear()
         settings_load()
         self.settings_init()
         self.label_9.setText("Configuration re-init")
@@ -551,22 +561,42 @@ def get_value(line, start):
                 j += 1
     return value
 
+def check_value(line):
+    new_value = ""
+    for i in range(0, len(line)):
+        if line[i] != '\n':
+            new_value += line[i]
+    return new_value
+
 
 def settings_save():
     fp = open(SETTINGS_FILE, 'w')
     fp.write("# Auto created settings file. Remember that value is framed by '' \n")
-    fp.write("user = '%s' # user login to device (root) \n" % SETTINGS_USER)
-    fp.write("host = '%s' # device IP \n" % SETTINGS_HOST)
-    fp.write("secret = '%s' # user pass to device (empty) \n" % SETTINGS_SECRET)
-    fp.write("project = '%s' # project name (sn4215, sn3307) \n" % SETTINGS_PROJECT)
-    fp.write("source = '%s' # path to project (must contain: Build, Src) \n" % SETTINGS_SOURCE)
-    fp.write("global_build_server = '%s' # Build-Server IP  \n" % SETTINGS_GLOB_BLD_SRV)
-    fp.write("global_bs_user = '%s' # Your login to build-server \n" % SETTINGS_GLOB_BS_USR)
-    fp.write("global_bs_secret = '%s' # Pass\n" % SETTINGS_GLOB_BS_SCRT)
-    fp.write("update = '%s' #  0 - update, 1 - sync \n" % SETTINGS_UPDATE)
-    fp.write("ftp_mode = '%s' # - 1 - use winSCP, 0 - paramiko  \n" % SETTINGS_FTP_MODE)
-    fp.write("path_scp = '%s' # - path to WinSCP .com file \n" % PATH_WINSCP)
-    fp.write("path_putty = '%s' # - path to Putty exe file \n" % PATH_PUTTY)
+    check = check_value(SETTINGS_USER)
+    fp.write("user = '%s' # user login to device (default: root) \n" % check)
+    check = check_value(SETTINGS_HOST)
+    fp.write("host = '%s' # device IP \n" % check)
+    check = check_value(SETTINGS_SECRET)
+    fp.write("secret = '%s' # user pass to device (default: empty) \n" % check)
+    check = check_value(SETTINGS_PROJECT)
+    fp.write("project = '%s' # project name (sn4215, sn3307) \n" % check)
+    check = check_value(SETTINGS_SOURCE)
+    fp.write("source = '%s' # path to project (must contain: Build, Src) \n" % check)
+    check = check_value(SETTINGS_GLOB_BLD_SRV)
+    fp.write("global_build_server = '%s' # Build-Server IP  \n" % check)
+    check = check_value(SETTINGS_GLOB_BS_USR)
+    fp.write("global_bs_user = '%s' # Your login to build-server \n" % check)
+    check = check_value(SETTINGS_GLOB_BS_SCRT)
+    fp.write("global_bs_secret = '%s' # Pass\n" % check)
+    check = check_value(SETTINGS_UPDATE)
+    fp.write("update = '%s' #  0 - update, 1 - sync \n" % check)
+    check = check_value(SETTINGS_FTP_MODE)
+    fp.write("ftp_mode = '%s' # - 1 - use winSCP, 0 - paramiko  \n" % check)
+    check = check_value(PATH_WINSCP)
+    fp.write("path_scp = '%s' # - path to WinSCP .com file \n" % check)
+    check = check_value(PATH_PUTTY)
+    fp.write("path_putty = '%s' # - path to Putty exe file \n" % check)
+    fp.close()
 
 
 def settings_load():
@@ -631,6 +661,7 @@ def settings_load():
             if line.find('path_putty') == 0:
                 index = 10
                 PATH_PUTTY = get_value(line, index)
+        fp.close()
 
 
 if __name__ == '__main__':

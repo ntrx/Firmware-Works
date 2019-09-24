@@ -837,6 +837,15 @@
         <height>20</height>
        </rect>
       </property>
+      <property name="inputMask">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string notr="true"/>
+      </property>
+      <property name="maxLength">
+       <number>15</number>
+      </property>
      </widget>
      <widget class="QToolButton" name="toolButton_2">
       <property name="geometry">
