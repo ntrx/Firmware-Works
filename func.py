@@ -328,7 +328,7 @@ def scp_compile(source, user, secret, project, is_update, build='release'):
         pass  # in process
 
 
-def scp_detect_project(host, user, secret, self):
+def scp_detect_project(host, user, secret):
     transport = paramiko.Transport((host, 22))
     transport.connect()
     transport.auth_none(username=user)
@@ -340,5 +340,21 @@ def scp_detect_project(host, user, secret, self):
             break
         else:
             result = 'None'
-    self.setText("Detect result: %s" % result)
+    return result
+    sftp.close()
+
+
+def scp_detect_outdated_firmware(host, user, secret, project, source):
+    transport = paramiko.Transport((host, 22))
+    transport.connect()
+    transport.auth_none(username=user)
+    sftp = core.MySFTPClient.from_transport(transport)
+    local_firmware = os.stat('%s/Build/bin/%s.bin' % (source, project))
+    device_firmware = sftp.lstat('/home/root/%s/bin/%s.bin' % (project, project))
+    if device_firmware.st_mtime < local_firmware.st_mtime:
+        return -1  # outdated
+    elif device_firmware.st_mtime < local_firmware.st_mtime:
+        return 1  # newer
+    elif device_firmware.st_mtime == local_firmware.st_mtime:
+        return 0  # similar
     sftp.close()

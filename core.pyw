@@ -127,7 +127,9 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_detect')
     def on_button_detect(self):
-        func.scp_detect_project(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET, self.label_9)
+        result_detect = func.scp_detect_project(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET)
+        result_actual = func.scp_detect_outdated_firmware(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_PROJECT, SETTINGS_SOURCE)
+        self.label_9.setText('Detected firmware: %s, relevance: %s' % (result_detect, 'actual or newer' if result_actual >= 0 else 'outdated'))
 
     @pyqtSlot(name='on_button_clear_cache')
     def on_button_clear_cache(self):
@@ -560,6 +562,7 @@ def get_value(line, start):
                 value += line[j]
                 j += 1
     return value
+
 
 def check_value(line):
     new_value = ""
