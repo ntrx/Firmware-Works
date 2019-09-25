@@ -52,6 +52,7 @@ def scp_upload(source, project, user, secret, host):
             f.write("option confirm off\n")
             f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
             f.write("put %s %s\n" % (path_loc_win, path_dest_win))
+            f.write("chmod -R 777 %s\n" % path_dest_win)
             f.write("exit\n")
             f.close()
             scp_path(file_name, PATH_WINSCP)
@@ -62,6 +63,7 @@ def scp_upload(source, project, user, secret, host):
             transport.auth_none(username=user)
             sftp = core.MySFTPClient.from_transport(transport)
             sftp.put(path_loc_win, path_dest_win)
+            sftp.chmod(path_dest_win, 777)
             sftp.close()
     else:
         pass
@@ -89,8 +91,6 @@ def scp_killall(user, secret, host, project):
             client.close()
     else:
         os.system("ssh %s@%s 'killall sn4215_respawn.sh %s.bin | exit'" % (user, host, project))
-    #linux
-
 
 def scp_reboot(user, secret, host):
     if os.name == 'nt':
@@ -327,7 +327,7 @@ def scp_compile(source, user, secret, project, is_update, build='release'):
         pass  # in process
 
 
-def scp_detect_project(host, user, secret):
+def scp_detect_project(host, user, secret, self):
     transport = paramiko.Transport((host, 22))
     transport.connect()
     transport.auth_none(username=user)
@@ -340,10 +340,10 @@ def scp_detect_project(host, user, secret):
         else:
             result = 'None'
     sftp.close()
-    return result
+    self.setText("Detected firmware: %s" % result)
 
 
-def scp_detect_outdated_firmware(host, user, secret, project, source):
+def scp_detect_outdated_firmware(host, user, secret, project, source, self):
     transport = paramiko.Transport((host, 22))
     transport.connect()
     transport.auth_none(username=user)
@@ -352,9 +352,10 @@ def scp_detect_outdated_firmware(host, user, secret, project, source):
     device_firmware = sftp.lstat('/home/root/%s/bin/%s.bin' % (project, project))
     sftp.close()
     if device_firmware.st_mtime < float(local_firmware.st_mtime):
-        return -1  # outdated
-    elif device_firmware.st_mtime < float(local_firmware.st_mtime):
-        return 1  # newer
+        self.setText("Firmware is outdated!")
+    elif device_firmware.st_mtime > float(local_firmware.st_mtime):
+        self.setText("Firmware is newer than local!")
     elif device_firmware.st_mtime == float(local_firmware.st_mtime):
-        return 0  # similar
-
+        self.setText("Firmware is similar to local!")
+    else:
+        self.setText("Unavailable to compare firmwares!")

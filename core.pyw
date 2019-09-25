@@ -114,6 +114,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.pushButton_18.clicked.connect(self.on_button_compile_debug)
         self.pushButton_19.clicked.connect(self.on_button_edit)
         self.pushButton_20.clicked.connect(self.on_button_clear_cache)
+        self.pushButton_21.clicked.connect(self.on_button_outdated)
 
         # check boxes
         self.checkBox_3.clicked.connect(self.on_winscp_use)
@@ -125,11 +126,19 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.comboBox_4.currentIndexChanged.connect(self.on_winscp_change)
         self.comboBox_5.currentIndexChanged.connect(self.on_putty_change)
 
+    @pyqtSlot(name='on_button_outdated')
+    def on_button_outdated(self):
+        if func.is_online(SETTINGS_HOST):
+            func.scp_detect_outdated_firmware(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_PROJECT, SETTINGS_SOURCE, self.label_9)
+        else:
+            self.label_9.setText('Host is unreachable')
+
     @pyqtSlot(name='on_button_detect')
     def on_button_detect(self):
-        result_detect = func.scp_detect_project(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET)
-        result_actual = func.scp_detect_outdated_firmware(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET, result_detect, SETTINGS_SOURCE)
-        self.label_9.setText('Detected firmware: %s, relevance: %s' % (result_detect, 'actual or newer' if result_actual >= 0 else 'outdated'))
+        if func.is_online(SETTINGS_HOST):
+            func.scp_detect_project(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET, self.label_9)
+        else:
+            self.label_9.setText('Host is unreachable')
 
     @pyqtSlot(name='on_button_clear_cache')
     def on_button_clear_cache(self):
