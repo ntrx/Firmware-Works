@@ -5,7 +5,6 @@ import settings
 import core
 import paramiko
 import subprocess
-from io import StringIO
 
 global_build_server = settings.global_build_server
 global_bs_user = settings.global_bs_user
