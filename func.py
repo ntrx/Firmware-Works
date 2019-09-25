@@ -339,8 +339,8 @@ def scp_detect_project(host, user, secret):
             break
         else:
             result = 'None'
-    return result
     sftp.close()
+    return result
 
 
 def scp_detect_outdated_firmware(host, user, secret, project, source):
@@ -350,10 +350,11 @@ def scp_detect_outdated_firmware(host, user, secret, project, source):
     sftp = core.MySFTPClient.from_transport(transport)
     local_firmware = os.stat('%s/Build/bin/%s.bin' % (source, project))
     device_firmware = sftp.lstat('/home/root/%s/bin/%s.bin' % (project, project))
-    if device_firmware.st_mtime < local_firmware.st_mtime:
-        return -1  # outdated
-    elif device_firmware.st_mtime < local_firmware.st_mtime:
-        return 1  # newer
-    elif device_firmware.st_mtime == local_firmware.st_mtime:
-        return 0  # similar
     sftp.close()
+    if device_firmware.st_mtime < float(local_firmware.st_mtime):
+        return -1  # outdated
+    elif device_firmware.st_mtime < float(local_firmware.st_mtime):
+        return 1  # newer
+    elif device_firmware.st_mtime == float(local_firmware.st_mtime):
+        return 0  # similar
+
