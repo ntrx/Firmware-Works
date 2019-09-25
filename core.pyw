@@ -200,9 +200,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             return
 
         PATH_PUTTY = conf_file[0]
-        settings_save()
-        settings_load()
-        self.settings_init()
+        self.lineEdit_10.setText(PATH_PUTTY)
 
     @pyqtSlot(name='on_path_winscp')
     def on_path_winscp(self):
@@ -216,10 +214,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             return
 
         PATH_WINSCP = conf_file[0]
-        print('[%s]' % conf_file[0])
-        settings_save()
-        settings_load()
-        self.settings_init()
+        self.lineEdit_9.setText(PATH_WINSCP)
 
     @pyqtSlot(name='on_button_reboot')
     def on_button_reboot(self):
