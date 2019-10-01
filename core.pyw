@@ -13,6 +13,7 @@ import paramiko
 import os
 import subprocess
 import fs
+import sys
 
 
 SETTINGS_USER: str = ""
@@ -78,7 +79,7 @@ class EProgBar_debug(QThread):
         self.working_status_debug.emit(0)
 
 
-class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):   
+class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         # gui init
         super(MainWindow, self).__init__(parent)
@@ -99,22 +100,23 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.pushButton.clicked.connect(self.on_button_auto)
         self.pushButton_6.clicked.connect(self.on_button_save)
         self.pushButton_9.clicked.connect(self.on_button_reload)
-        self.toolButton_2.clicked.connect(self.on_path_project)
         self.pushButton_8.clicked.connect(self.on_button_apply)
         self.pushButton_10.clicked.connect(self.on_button_open)
         self.pushButton_11.clicked.connect(self.on_button_killall)
         self.pushButton_12.clicked.connect(self.on_button_detect)
         self.pushButton_14.clicked.connect(self.on_button_ts_test)
         self.pushButton_13.clicked.connect(self.on_button_ts_calibrate)
-        self.pushButton_15.clicked.connect(self.on_button_poweroff)
-        self.pushButton_16.clicked.connect(self.on_button_reboot)
-        self.toolButton_3.clicked.connect(self.on_path_winscp)
-        self.toolButton_4.clicked.connect(self.on_path_putty)
         self.pushButton_17.clicked.connect(self.on_open_putty)
         self.pushButton_18.clicked.connect(self.on_button_compile_debug)
         self.pushButton_19.clicked.connect(self.on_button_edit)
         self.pushButton_20.clicked.connect(self.on_button_clear_cache)
         self.pushButton_21.clicked.connect(self.on_button_outdated)
+
+        # tool buttons
+        self.toolButton_2.clicked.connect(self.on_path_project)
+        self.toolButton_3.clicked.connect(self.on_path_winscp)
+        self.toolButton_4.clicked.connect(self.on_path_putty)
+        self.toolButton_5.clicked.connect(self.on_path_psplash)
 
         # check boxes
         self.checkBox_3.clicked.connect(self.on_winscp_use)
@@ -125,6 +127,19 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.comboBox_2.currentIndexChanged.connect(self.on_device_ip_change)
         self.comboBox_4.currentIndexChanged.connect(self.on_winscp_change)
         self.comboBox_5.currentIndexChanged.connect(self.on_putty_change)
+        self.comboBox_6.currentIndexChanged.connect(self.on_psplash_change)
+
+        # action menu
+        self.actionOpen_2.triggered.connect(self.on_button_open)
+        self.actionEdit.triggered.connect(self.on_button_edit)
+        self.actionPower_off.triggered.connect(self.on_button_poweroff)
+        self.actionReboot.triggered.connect(self.on_button_reboot)
+        self.actionReload.triggered.connect(self.on_button_reload)
+        self.actionSave.triggered.connect(self.on_button_save)
+
+    @pyqtSlot(name='on_psplash_change')
+    def on_psplash_change(self):
+        self.lineEdit_11.setText(self.comboBox_6.currentText())
 
     @pyqtSlot(name='on_button_outdated')
     def on_button_outdated(self):
@@ -201,6 +216,10 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
         PATH_PUTTY = conf_file[0]
         self.lineEdit_10.setText(PATH_PUTTY)
+
+    @pyqtSlot(name='on_path_psplash')
+    def on_path_psplash(self):
+        pass
 
     @pyqtSlot(name='on_path_winscp')
     def on_path_winscp(self):
@@ -455,6 +474,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
             func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
             func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+            self.label_9.setText("Once compile&stop&upload command has been sent")
 
     def settings_init(self):
         global SETTINGS_UPDATE
@@ -554,8 +574,7 @@ def main():
     app.setStyle('Fusion')
     window = MainWindow()
     window.show()
-    sys.exit(app.exec_())   
-
+    sys.exit(app.exec_())
 
 def get_value(line, start):
     value = ""
