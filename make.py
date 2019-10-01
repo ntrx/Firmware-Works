@@ -4,12 +4,12 @@ import shutil
 
 ## Arguments list:
 # --noconsole - hide console
-# --onfile    - portable file
+# --onefile    - portable file
 # --path *    - choose path
 
 MAIN_FILE = 'core.pyw'
 win32_dll = "\"C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\ucrt\\DLLs\\x86\""
-pyinst_32 = "C:\Python3-low\Scripts\pyinstaller.exe"
+pyinst_32 = "C:\python37-low\Scripts\pyinstaller.exe"
 QT_XML = 'pycontrol.ui'
 PY_XML = 'gui.py'
 
@@ -33,7 +33,7 @@ def clear_64():
     os.remove("PyQt5\\Qt\\plugins\\platforms\\qwebgl.dll")
     os.remove("PyQt5\\Qt\\plugins\\platformthemes\\qxdgdesktopportal.dll")
     os.remove("PyQt5\\Qt\\plugins\\styles\\qwindowsvistastyle.dll")
-    shutil.rmtree("PyQt5\\translations")
+    shutil.rmtree("PyQt5\\Qt\\translations")
     os.remove("libGLESv2.dll")
     os.remove("MSVCP140.dll")
     os.remove("Qt5DBus.dll")
@@ -63,7 +63,7 @@ def clear_32():
     os.remove("PyQt5\\Qt\\plugins\\platforms\\qwebgl.dll")
     os.remove("PyQt5\\Qt\\plugins\\platformthemes\\qxdgdesktopportal.dll")
     os.remove("PyQt5\\Qt\\plugins\\styles\\qwindowsvistastyle.dll")
-    shutil.rmtree("PyQt5\\translations")
+    shutil.rmtree("PyQt5\\Qt\\translations")
     os.remove("libGLESv2.dll")
     os.remove("MSVCP140.dll")
     os.remove("Qt5DBus.dll")
@@ -99,6 +99,8 @@ def main():
             print('  * 32 or 64 - 32bit or 64bit version')
             print('  * install - install requied modules')
             print('  * translate - translate Qt XML file to python code')
+            print('  * clear - remove harbage files')
+            print('  * auto - perform translate UI - make default - clear default')
         if sys.argv[1] == 'make':
             if sys.argv[2] == '32':
                 make_32("--noconsole")
