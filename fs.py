@@ -70,3 +70,25 @@ def path_double_nix(path):
             continue
         result += path[symbol]
     return result
+
+
+def path_get_filename(path):
+    """
+    :param path: PATH string with doubled slashes and file name at end
+    :type path: str
+    :return: only file name
+    """
+    result = ""
+    reversed_path = ""
+    reversed_result = ""
+    for symbol in reversed(range(len(path))):
+        reversed_path += path[symbol]
+    for symbol in range(0, len(reversed_path)):
+        if reversed_path[symbol] == '\\':
+            break
+        result += reversed_path[symbol]
+    for symbol in reversed(range(len(result))):
+        reversed_result += result[symbol]
+    return reversed_result
+
+

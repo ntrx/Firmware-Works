@@ -92,6 +92,7 @@ def scp_killall(user, secret, host, project):
     else:
         os.system("ssh %s@%s 'killall sn4215_respawn.sh %s.bin | exit'" % (user, host, project))
 
+
 def scp_reboot(user, secret, host):
     if os.name == 'nt':
         if SETTINGS_FTP_MODE == '1':  # via winSCP
@@ -359,3 +360,34 @@ def scp_detect_outdated_firmware(host, user, secret, project, source, self):
         self.setText("Firmware is similar to local!")
     else:
         self.setText("Unavailable to compare firmwares!")
+
+
+def scp_psplash_upload(host, user, secret, psplash_path, self):
+    if os.name == 'nt':
+        file_name = core.fs.path_get_filename(psplash_path)
+        path_loc_win = psplash_path
+        path_dest_win = "//usr//bin//" + file_name
+        if SETTINGS_FTP_MODE == '1':
+            file_name = 'psplash' + host
+            f = open(file_name, "w+")
+            f.write("option confirm off\n")
+            f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            f.write("put %s %s\n" % (path_loc_win, path_dest_win))
+            f.write("chmod -R 777 %s\n" % path_dest_win)
+            f.write("call ln -sfn %s psplash\n" % path_dest_win)
+            f.write("exit\n")
+            f.close()
+            scp_path(file_name, PATH_WINSCP)
+            os.remove(file_name)
+        elif SETTINGS_FTP_MODE == '0':
+            transport = paramiko.Transport((host, 22))
+            transport.connect()
+            transport.auth_none(username=user)
+            sftp = core.MySFTPClient.from_transport(transport)
+            sftp.put(path_loc_win, path_dest_win)
+            sftp.chmod(path_dest_win, 777)
+            sftp.close()
+        self.setText("psplash command sent")
+    else:
+        pass
+        # linux

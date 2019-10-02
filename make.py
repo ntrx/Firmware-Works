@@ -80,10 +80,12 @@ def clear_32():
     os.remove("_lzma.pyd")
     os.remove("pyexpat.pyd")
 
+
 def install_modules():
     os.system("pip install pyqt5")
     os.system("pip install paramiko")
     os.system("pip install pyinstaller")
+
 
 def translate():
     os.system("pyuic5.exe %s -o %s" % (QT_XML, PY_XML))

@@ -13,7 +13,6 @@ import paramiko
 import os
 import subprocess
 import fs
-import sys
 
 
 SETTINGS_USER: str = ""
@@ -28,6 +27,7 @@ SETTINGS_UPDATE: str = ""
 SETTINGS_FTP_MODE: str = ""
 PATH_WINSCP: str = ""
 PATH_PUTTY: str = ""
+PATH_PSPLASH: str = ""
 
 PATH_WINSCP_OK: bool = False
 PATH_PUTTY_OK: bool = False
@@ -39,7 +39,8 @@ SETTINGS_PROJECT_HISTORY = "project-history.log"
 SETTINGS_DEVICE_IP_HISTORY = "device-ip-history.log"
 SETTINGS_WINSCP_HISTORY = "winscp-history.log"
 SETTINGS_PUTTY_HISTORY = "putty-history.log"
-cache_files = [SETTINGS_DEVICE_IP_HISTORY, SETTINGS_PROJECT_HISTORY, SETTINGS_PUTTY_HISTORY, SETTINGS_WINSCP_HISTORY, SETTINGS_SOURCE_HISTORY]
+SETTINGS_PSPLASH_HISTORY = "psplash-history.log"
+cache_files = [SETTINGS_DEVICE_IP_HISTORY, SETTINGS_PROJECT_HISTORY, SETTINGS_PUTTY_HISTORY, SETTINGS_WINSCP_HISTORY, SETTINGS_SOURCE_HISTORY, SETTINGS_PSPLASH_HISTORY]
 
 
 class MySFTPClient(paramiko.SFTPClient):
@@ -111,6 +112,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.pushButton_19.clicked.connect(self.on_button_edit)
         self.pushButton_20.clicked.connect(self.on_button_clear_cache)
         self.pushButton_21.clicked.connect(self.on_button_outdated)
+        self.pushButton_22.clicked.connect(self.on_button_psplash)
 
         # tool buttons
         self.toolButton_2.clicked.connect(self.on_path_project)
@@ -136,6 +138,13 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.actionReboot.triggered.connect(self.on_button_reboot)
         self.actionReload.triggered.connect(self.on_button_reload)
         self.actionSave.triggered.connect(self.on_button_save)
+
+    @pyqtSlot(name='on_button_psplash')
+    def on_button_psplash(self):
+        if func.is_online(SETTINGS_HOST):
+            func.scp_psplash_upload(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET, fs.path_double_win(PATH_PSPLASH), self.label_9)
+        else:
+            self.label_9.setText("Host is unreachable")
 
     @pyqtSlot(name='on_psplash_change')
     def on_psplash_change(self):
@@ -219,7 +228,16 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_path_psplash')
     def on_path_psplash(self):
-        pass
+        self.set_psplash()
+
+    @pyqtSlot(name='set_psplash')
+    def set_psplash(self):
+        global PATH_PSPLASH
+        psplash_file = QFileDialog.getOpenFileName()
+        if psplash_file[0] == "":
+            return
+        PATH_PSPLASH = psplash_file[0]
+        self.lineEdit_11.setText(PATH_PSPLASH)
 
     @pyqtSlot(name='on_path_winscp')
     def on_path_winscp(self):
@@ -298,6 +316,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         global SETTINGS_FTP_MODE
         global PATH_WINSCP
         global PATH_PUTTY
+        global PATH_PSPLASH
         SETTINGS_USER = self.lineEdit_3.text()
         SETTINGS_HOST = self.lineEdit_2.text()
         SETTINGS_SECRET = self.lineEdit_4.text()
@@ -316,6 +335,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             SETTINGS_FTP_MODE = '0'
         PATH_WINSCP = self.lineEdit_9.text()
         PATH_PUTTY = self.lineEdit_10.text()
+        PATH_PSPLASH = self.lineEdit_11.text()
         self.label_9.setText("New configuration applied.")
 
         # cache saving source history
@@ -328,6 +348,8 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         fs.cache_save(SETTINGS_WINSCP_HISTORY, PATH_WINSCP)
         # cache saving putty path history
         fs.cache_save(SETTINGS_PUTTY_HISTORY, PATH_PUTTY)
+        # cache saving psplash path history
+        fs.cache_save(SETTINGS_PSPLASH_HISTORY, PATH_PSPLASH)
 
     @pyqtSlot(name='on_path_project')
     def on_path_project(self):
@@ -361,6 +383,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.lineEdit_8.clear()
         self.lineEdit_9.clear()
         self.lineEdit_10.clear()
+        self.lineEdit_11.clear(0)
         settings_load()
         self.settings_init()
         self.label_9.setText("Configuration re-init")
@@ -379,6 +402,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         global SETTINGS_FTP_MODE
         global PATH_WINSCP
         global PATH_PUTTY
+        global PATH_PSPLASH
         SETTINGS_USER = self.lineEdit_3.text()
         SETTINGS_HOST = self.lineEdit_2.text()
         SETTINGS_SECRET = self.lineEdit_4.text()
@@ -398,6 +422,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             SETTINGS_FTP_MODE = '0'
         PATH_WINSCP = self.lineEdit_9.text()
         PATH_PUTTY = self.lineEdit_10.text()
+        PATH_PSPLASH = self.lineEdit_11.text()
         settings_save()
         self.label_9.setText("Configuration save")
 
@@ -555,11 +580,17 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
                 PATH_PUTTY_OK = True
             self.lineEdit_10.setText(PATH_PUTTY)
 
+        if len(PATH_PSPLASH) == 0:
+            self.lineEdit_11.setText(SETTINGS_EMPTY)
+        else:
+            self.lineEdit_11.setText(PATH_PSPLASH)
+
         fs.cache_read(self.comboBox_3, SETTINGS_SOURCE_HISTORY)
         fs.cache_read(self.comboBox, SETTINGS_PROJECT_HISTORY)
         fs.cache_read(self.comboBox_2, SETTINGS_DEVICE_IP_HISTORY)
         fs.cache_read(self.comboBox_5, SETTINGS_PUTTY_HISTORY)
         fs.cache_read(self.comboBox_4, SETTINGS_WINSCP_HISTORY)
+        fs.cache_read(self.comboBox_6, SETTINGS_PSPLASH_HISTORY)
 
         cache_files_size = 0
         for file in cache_files:
@@ -575,6 +606,7 @@ def main():
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())
+
 
 def get_value(line, start):
     value = ""
@@ -622,6 +654,8 @@ def settings_save():
     fp.write("path_scp = '%s' # - path to WinSCP .com file \n" % check)
     check = check_value(PATH_PUTTY)
     fp.write("path_putty = '%s' # - path to Putty exe file \n" % check)
+    check = check_value(PATH_PSPLASH)
+    fp.write("path_psplash = '%s' # - path to pslpash file\n" % check)
     fp.close()
 
 
@@ -638,6 +672,7 @@ def settings_load():
     global SETTINGS_FTP_MODE
     global PATH_WINSCP
     global PATH_PUTTY
+    global PATH_PSPLASH
     with open(SETTINGS_FILE) as fp:
         for line in fp:
             if line.find('user') == 0:
@@ -687,6 +722,10 @@ def settings_load():
             if line.find('path_putty') == 0:
                 index = 10
                 PATH_PUTTY = get_value(line, index)
+
+            if line.find('path_psplash') == 0:
+                index = 12
+                PATH_PSPLASH = get_value(line, index)
         fp.close()
 
 
