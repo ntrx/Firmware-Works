@@ -269,6 +269,8 @@ def scp_compile(source, user, secret, project, is_update, build='release'):
         path_loc_win = source  # os.getcwd()
         path_dest_win = "//home//" + user + "//projects//" + project
         file_name = 'compile' + project
+        if not os.path.isdir(path_loc_win + "\\Build\\bin\\"):
+            os.mkdir(path_loc_win + "\\Build\\bin\\")
         if SETTINGS_FTP_MODE == '1':
             f = open(file_name, 'w+')
             f.write("option confirm off\n")
