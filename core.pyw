@@ -14,6 +14,9 @@ import os
 import subprocess
 import fs
 
+PROG_NAME = "Firmware Works"
+VERSION = "1.0.3"
+RELEASE = "beta"
 
 SETTINGS_USER: str = ""
 SETTINGS_HOST: str = ""
@@ -86,7 +89,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__(parent)
         QtWidgets.QMainWindow.__init__(self)
         self.setupUi(self)
-
+        self.setWindowTitle("%s %s %s" % (PROG_NAME, VERSION, RELEASE))
         # self.label_9.setStyleSheet('background-color: red') for future
         settings_load()
         # init text labels and 'end' panel
@@ -383,7 +386,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.lineEdit_8.clear()
         self.lineEdit_9.clear()
         self.lineEdit_10.clear()
-        self.lineEdit_11.clear(0)
+        self.lineEdit_11.clear()
         settings_load()
         self.settings_init()
         self.label_9.setText("Configuration re-init")
