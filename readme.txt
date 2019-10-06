@@ -8,13 +8,6 @@ func.py - list of functions used in scripts
 fs.py - file system functions
 
 
-
-compile:
-0 translate.ui - convert qt-template to python code
-0 make 64bits - create executable 64 bits file for Windows
-0 make 32bits - create executable 32 bits file for Windows
-install.bat - auto install modules depents on this project
-
 addit:
 pyuic5.exe - convertor from qt template to python code
 
