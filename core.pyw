@@ -13,6 +13,7 @@ import paramiko
 import os
 import subprocess
 import fs
+import time
 
 PROG_NAME = "Firmware Works"
 VERSION = "1.0.3"
@@ -31,6 +32,7 @@ SETTINGS_FTP_MODE: str = ""
 PATH_WINSCP: str = ""
 PATH_PUTTY: str = ""
 PATH_PSPLASH: str = ""
+SETTINGS_GLOB_BS_DIR: str = ""
 
 PATH_WINSCP_OK: bool = False
 PATH_PUTTY_OK: bool = False
@@ -50,7 +52,7 @@ class MySFTPClient(paramiko.SFTPClient):
     def put_dir(self, source, target):
         for item in os.listdir(source):
             if os.path.isfile(os.path.join(source, item)):
-                self.put(os.path.join(source, item), '%s/%s' % (target, item))
+                self.put(os.path.join(source, item), '%s/%s' % (target, item), callback=func.sftp_callback)
             else:
                 self.mkdir('%s/%s' % (target, item), ignore_existing=True)
                 self.put_dir(os.path.join(source, item), '%s/%s' % (target, item))
@@ -70,7 +72,7 @@ class EProgBar(QThread):
 
     def run(self):
         self.working_status.emit(1)
-        func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, 'release')
+        func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'release')
         self.working_status.emit(0)
 
 
@@ -79,7 +81,7 @@ class EProgBar_debug(QThread):
 
     def run(self):
         self.working_status_debug.emit(1)
-        func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, 'debug')
+        func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'debug')
         self.working_status_debug.emit(0)
 
 
@@ -94,6 +96,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         settings_load()
         # init text labels and 'end' panel
         self.settings_init()
+
 
         # buttons
         self.pushButton_7.clicked.connect(self.on_button_ping)
@@ -145,7 +148,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_button_psplash')
     def on_button_psplash(self):
         if func.is_online(SETTINGS_HOST):
-            func.scp_psplash_upload(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET, fs.path_double_win(PATH_PSPLASH), self.label_9)
+            func.scp_psplash_upload(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET, fs.path_double_win(PATH_PSPLASH), SETTINGS_FTP_MODE, self.label_9)
         else:
             self.label_9.setText("Host is unreachable")
 
@@ -191,7 +194,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_device_ip_change')
     def on_device_ip_change(self):
-        self.lineEdit_2.setText(self.comboBox_2.currentText())
+        self.lineEdit_2.setText(check_value(self.comboBox_2.currentText()))
         
     @pyqtSlot(name='on_putty_change')
     def on_putty_change(self):
@@ -258,27 +261,27 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_reboot')
     def on_button_reboot(self):
-        func.scp_reboot(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+        func.scp_reboot(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
         self.label_9.setText("Reboot command send.")
 
     @pyqtSlot(name='on_button_poweroff')
     def on_button_poweroff(self):
-        func.scp_poweroff(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+        func.scp_poweroff(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
         self.label_9.setText("Power off command activate.")
 
     @pyqtSlot(name='on_button_ts_test')
     def on_button_ts_test(self):
-        func.scp_ts_test(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+        func.scp_ts_test(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
         self.label_9.setText('Device stopped. TSLIB_TSDEVICE ts_test launched.')
 
     @pyqtSlot(name='on_button_ts_calibrate')
     def on_button_ts_calibrate(self):
-        func.scp_ts_calibrate(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+        func.scp_ts_calibrate(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
         self.label_9.setText("Device stopped. TSLIB_TSDEVICE ts_calibrate launched.")
 
     @pyqtSlot(name='on_button_killall')
     def on_button_killall(self):
-        func.scp_killall(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_PROJECT)
+        func.scp_killall(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_PROJECT, SETTINGS_FTP_MODE)
 
     @pyqtSlot(name='on_winscp_use')
     def on_winscp_user(self):
@@ -320,6 +323,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         global PATH_WINSCP
         global PATH_PUTTY
         global PATH_PSPLASH
+        global SETTINGS_GLOB_BS_DIR
         SETTINGS_USER = self.lineEdit_3.text()
         SETTINGS_HOST = self.lineEdit_2.text()
         SETTINGS_SECRET = self.lineEdit_4.text()
@@ -328,6 +332,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         SETTINGS_GLOB_BLD_SRV = self.lineEdit_6.text()
         SETTINGS_GLOB_BS_USR = self.lineEdit_7.text()
         SETTINGS_GLOB_BS_SCRT = self.lineEdit_8.text()
+        SETTINGS_GLOB_BS_DIR = self.lineEdit_12.text()
         if self.radioButton_2.isChecked():
             SETTINGS_UPDATE = '1'
         elif self.radioButton.isChecked():
@@ -387,6 +392,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.lineEdit_9.clear()
         self.lineEdit_10.clear()
         self.lineEdit_11.clear()
+        self.lineEdit_12.clear()
         settings_load()
         self.settings_init()
         self.label_9.setText("Configuration re-init")
@@ -406,6 +412,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         global PATH_WINSCP
         global PATH_PUTTY
         global PATH_PSPLASH
+        global SETTINGS_GLOB_BS_DIR
         SETTINGS_USER = self.lineEdit_3.text()
         SETTINGS_HOST = self.lineEdit_2.text()
         SETTINGS_SECRET = self.lineEdit_4.text()
@@ -414,6 +421,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         SETTINGS_GLOB_BLD_SRV = self.lineEdit_6.text()
         SETTINGS_GLOB_BS_USR = self.lineEdit_7.text()
         SETTINGS_GLOB_BS_SCRT = self.lineEdit_8.text()
+        SETTINGS_GLOB_BS_DIR = self.lineEdit_12.text()
         if self.radioButton_2.isChecked():
             SETTINGS_UPDATE = '1'
         elif self.radioButton.isChecked():
@@ -440,12 +448,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_stop')
     def on_button_stop(self):
-        func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+        func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
         self.label_9.setText("Stop command has been sent")
 
     @pyqtSlot(name='on_button_restart')
     def on_button_restart(self):
-        func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+        func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
         self.label_9.setText("Restart command has been sent")
 
     def on_working_change(self, value):
@@ -478,14 +486,14 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_upload')
     def on_button_upload(self):
-        func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+        func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
         self.label_9.setText("Update without restarting command has been sent")
 
     @pyqtSlot(name='on_button_auto')
     def on_button_auto(self):
         print(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
         if self.checkBox_2.isChecked():
-            func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, 'release')
+            func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'release')
 
         if self.checkBox.isChecked():
             is_online = func.is_online(SETTINGS_HOST, 9999)
@@ -493,14 +501,14 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.label_9.setText("Connect established.")
             if is_online:
                 func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
-                func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+                func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
                 func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
                 self.label_9.setText("Auto compile&stop&upload command has been sent")
             else:
                 self.label_9.setText("process has been interrupted")
         else:
             func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
-            func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+            func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
             func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
             self.label_9.setText("Once compile&stop&upload command has been sent")
 
@@ -508,6 +516,19 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         global SETTINGS_UPDATE
         global PATH_PUTTY_OK
         global PATH_WINSCP_OK
+
+        fs.cache_read(self.comboBox_3, SETTINGS_SOURCE_HISTORY)
+        fs.cache_read(self.comboBox, SETTINGS_PROJECT_HISTORY)
+        fs.cache_read(self.comboBox_2, SETTINGS_DEVICE_IP_HISTORY)
+        fs.cache_read(self.comboBox_5, SETTINGS_PUTTY_HISTORY)
+        fs.cache_read(self.comboBox_4, SETTINGS_WINSCP_HISTORY)
+        fs.cache_read(self.comboBox_6, SETTINGS_PSPLASH_HISTORY)
+
+        cache_files_size = 0
+        for file in cache_files:
+            cache_files_size += os.path.getsize(file)
+        self.label_13.setText("%s b" % cache_files_size)
+
         if len(SETTINGS_PROJECT) == 0:
             self.lineEdit.setText(SETTINGS_EMPTY)
         else:
@@ -547,6 +568,11 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.lineEdit_8.setText(SETTINGS_EMPTY)
         else:
             self.lineEdit_8.setText(SETTINGS_GLOB_BS_SCRT)
+
+        if len(SETTINGS_GLOB_BS_DIR) == 0:
+            self.lineEdit_12.setText(SETTINGS_EMPTY)
+        else:
+            self.lineEdit_12.setText(SETTINGS_GLOB_BS_DIR)
 
         if SETTINGS_FTP_MODE == '1':
             self.checkBox_3.setChecked(True)
@@ -588,17 +614,13 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         else:
             self.lineEdit_11.setText(PATH_PSPLASH)
 
-        fs.cache_read(self.comboBox_3, SETTINGS_SOURCE_HISTORY)
-        fs.cache_read(self.comboBox, SETTINGS_PROJECT_HISTORY)
-        fs.cache_read(self.comboBox_2, SETTINGS_DEVICE_IP_HISTORY)
-        fs.cache_read(self.comboBox_5, SETTINGS_PUTTY_HISTORY)
-        fs.cache_read(self.comboBox_4, SETTINGS_WINSCP_HISTORY)
-        fs.cache_read(self.comboBox_6, SETTINGS_PSPLASH_HISTORY)
-
-        cache_files_size = 0
-        for file in cache_files:
-            cache_files_size += os.path.getsize(file)
-        self.label_13.setText("%s b" % cache_files_size)
+        firmware_path = SETTINGS_SOURCE+"\\Build\\bin\\"+SETTINGS_PROJECT+".bin"
+        if os.path.exists(firmware_path):
+            firmware_size = os.path.getsize(firmware_path)
+            firmware_time = os.path.getctime(firmware_path)
+            self.label_16.setText("Firmware compiled at %s, size: %2.2f MB" % (time.ctime(firmware_time), firmware_size/1024000))
+        else:
+            self.label_16.setText("No firmware compiled found.")
 
 
 def main():
@@ -649,6 +671,8 @@ def settings_save():
     fp.write("global_bs_user = '%s' # Your login to build-server \n" % check)
     check = check_value(SETTINGS_GLOB_BS_SCRT)
     fp.write("global_bs_secret = '%s' # Pass\n" % check)
+    check = check_value(SETTINGS_GLOB_BS_DIR)
+    fp.write("global_bs_dir = '%s' # uploading directory on build-server\n" % check)
     check = check_value(SETTINGS_UPDATE)
     fp.write("update = '%s' #  0 - update, 1 - sync \n" % check)
     check = check_value(SETTINGS_FTP_MODE)
@@ -676,6 +700,7 @@ def settings_load():
     global PATH_WINSCP
     global PATH_PUTTY
     global PATH_PSPLASH
+    global SETTINGS_GLOB_BS_DIR
     with open(SETTINGS_FILE) as fp:
         for line in fp:
             if line.find('user') == 0:
@@ -709,6 +734,10 @@ def settings_load():
             if line.find('global_bs_secret') == 0:
                 index = 16
                 SETTINGS_GLOB_BS_SCRT = get_value(line, index)
+
+            if line.find('global_bs_dir') == 0:
+                index = 13
+                SETTINGS_GLOB_BS_DIR = get_value(line, index)
 
             if line.find('update') == 0:
                 index = 6
