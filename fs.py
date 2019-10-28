@@ -1,5 +1,6 @@
 # File operations functions
 import os
+import time
 
 
 def cache_save(HISTORY_FILE, SETTING_VALUE):
@@ -90,5 +91,15 @@ def path_get_filename(path):
     for symbol in reversed(range(len(result))):
         reversed_result += result[symbol]
     return reversed_result
+
+
+def path_get_firmware(path, self):
+    firmware_path = path
+    if os.path.exists(firmware_path):
+        firmware_size = os.path.getsize(firmware_path)
+        firmware_time = os.path.getctime(firmware_path)
+        self.setText("Firmware compiled at %s, size: %2.2f MB" % (time.ctime(firmware_time), firmware_size / 1024000))
+    else:
+        self.setText("No firmware compiled found.")
 
 

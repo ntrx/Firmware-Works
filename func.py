@@ -52,7 +52,7 @@ def scp_upload(source, project, user, secret, host, ftp_mode):
             f.write("option confirm off\n")
             f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
             f.write("put %s %s\n" % (path_loc_win, path_dest_win))
-            f.write("chmod -R 777 %s\n" % path_dest_win)
+            f.write("chmod u+x 777 %s\n" % path_dest_win)
             f.write("exit\n")
             f.close()
             scp_path(file_name, PATH_WINSCP)
@@ -276,6 +276,7 @@ def scp_compile(source, user, secret, project, is_update, dest_dir, ftp_mode, bu
             f.write("option confirm off\n")
             f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, global_build_server))
             if is_update == '0':
+                f.write("mkdir //home//%s//%s\n" % (user, dest_dir))
                 f.write("put %s %s//Src\n" % (path_loc_win + "\\Src", path_dest_win))
             elif is_update == '1':
                 f.write("synchronize remote %s %s//Src\n" % (path_loc_win + "\\Src", path_dest_win))

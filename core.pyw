@@ -13,7 +13,7 @@ import paramiko
 import os
 import subprocess
 import fs
-import time
+
 
 PROG_NAME = "Firmware Works"
 VERSION = "1.0.3"
@@ -461,6 +461,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.label_9.setText("Working...")
         elif value == 0:
             self.label_9.setText("Firmware is compiled.")
+            fs.path_get_firmware(SETTINGS_SOURCE + "\\Build\\bin\\" + SETTINGS_PROJECT + ".bin", self.label_16)
         else:
             self.label_9.setText("Unknown operation.")
 
@@ -500,16 +501,16 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.label_9.setText("Trying to connect...")
             self.label_9.setText("Connect established.")
             if is_online:
-                func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+                func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
                 func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
-                func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+                func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
                 self.label_9.setText("Auto compile&stop&upload command has been sent")
             else:
                 self.label_9.setText("process has been interrupted")
         else:
-            func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+            func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
             func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
-            func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
+            func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
             self.label_9.setText("Once compile&stop&upload command has been sent")
 
     def settings_init(self):
@@ -615,12 +616,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.lineEdit_11.setText(PATH_PSPLASH)
 
         firmware_path = SETTINGS_SOURCE+"\\Build\\bin\\"+SETTINGS_PROJECT+".bin"
-        if os.path.exists(firmware_path):
-            firmware_size = os.path.getsize(firmware_path)
-            firmware_time = os.path.getctime(firmware_path)
-            self.label_16.setText("Firmware compiled at %s, size: %2.2f MB" % (time.ctime(firmware_time), firmware_size/1024000))
-        else:
-            self.label_16.setText("No firmware compiled found.")
+        fs.path_get_firmware(firmware_path, self.label_16)
 
 
 def main():
