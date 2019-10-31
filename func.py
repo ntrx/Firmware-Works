@@ -302,9 +302,9 @@ def scp_compile(source, user, secret, project, is_update, dest_dir, ftp_mode, bu
             f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, global_build_server))
             if is_update == '0':
                 f.write("mkdir //home//%s//%s\n" % (user, dest_dir))
-                f.write("put %s %s//Src\n" % (path_loc_win + "\\Src", path_dest_win))
+                f.write("put -filemask=*|%s/Src/Windows/device/ %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
             elif is_update == '1':
-                f.write("synchronize remote %s %s//Src\n" % (path_loc_win + "\\Src", path_dest_win))
+                f.write("synchronize -filemask=*|%s/Src/Windows/device/ remote %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
             f.write("cd //home//" + global_bs_user + dest_dir + "//Src\n")
             if not is_clean_before:
                 f.write("call make clean\n")
