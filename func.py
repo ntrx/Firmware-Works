@@ -28,12 +28,18 @@ def scp_path(file_name, winscp_path=PATH_WINSCP):
     return os.system("\"%s\" /ini=nul /script=%s" % (winscp_path, file_name))
 
 
+def scp_command(command, winscp_path):
+    return os.system("\"%s\" %s" % (winscp_path, command))
+
+
 def putty_path(host, user, path_putty=PATH_PUTTY):
     """
     :param host: IP
     :type host: str
     :param user: user name
     :type user: str
+    :param secret: user pass
+    :type secret: str
     :param path_putty:
     :type path_putty: str (regular path)
     :return:
@@ -261,10 +267,29 @@ def is_online(host, times=1):
             return 0
 
 
-# isUpdate = 1 :: files already been on SERVER (SYNC, faster)
-# isUpdate = 0 :: no file on server, its first upload
-# build (release or debug type)
-def scp_compile(source, user, secret, project, is_update, dest_dir, ftp_mode, build='release'):
+def scp_compile(source, user, secret, project, is_update, dest_dir, ftp_mode, build, is_clean_before):
+    """
+    for compiling on remote linux server via SSH
+    :param source: sources location
+    :type source: str
+    :param user: server username
+    :type user: str
+    :param secret: server username password
+    :type secret: str
+    :param project: firmware name
+    :type project: str
+    :param is_update: 0 - sync dirs, 1 - new upload to server
+    :type is_update: str
+    :param dest_dir: server sources location
+    :type dest_dir: str
+    :param ftp_mode: 0 - use built-in scp module (paramiko), 1 - use winscp script for upload and exec command
+    :type ftp_mode: str
+    :param build: build type (release or debug)
+    :type build: str
+    :param is_clean_before: run make clean before make
+    :type is_clean_before: bool
+    :return:
+    """
     if os.name == 'nt':
         path_loc_win = source  # os.getcwd()
         path_dest_win = "//home//" + user + dest_dir
@@ -281,7 +306,8 @@ def scp_compile(source, user, secret, project, is_update, dest_dir, ftp_mode, bu
             elif is_update == '1':
                 f.write("synchronize remote %s %s//Src\n" % (path_loc_win + "\\Src", path_dest_win))
             f.write("cd //home//" + global_bs_user + dest_dir + "//Src\n")
-            f.write("call make clean\n")
+            if not is_clean_before:
+                f.write("call make clean\n")
             if build == 'release':
                 f.write("call make -j7\n")
             elif build == 'debug':
@@ -402,5 +428,45 @@ def scp_psplash_upload(host, user, secret, psplash_path, ftp_mode, self):
         # linux
 
 
+def scp_clean(host, user, secret, dest_dir, ftp_mode):
+    if os.name == 'nt':
+        path_dest_win = "//home//" + user + dest_dir
+        file_name = 'clean' + host
+        if ftp_mode == '1':
+            f = open(file_name, 'w+')
+            f.write("option confirm off\n")
+            f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            f.write("cd //home//" + global_bs_user + dest_dir + "//Src\n")
+            f.write("call make clean\n")
+            f.write("exit\n")
+            f.close()
+
+            result = scp_path(file_name)
+            # replace /script with /command
+            os.remove(file_name)
+
+            if result >= 1:
+                print("error while executing code")
+                print(result)
+
+        if ftp_mode == '0':
+            transport = paramiko.Transport(global_build_server, 22)
+            transport.connect(username=user, password=secret)
+            sftp = core.MySFTPClient.from_transport(transport)
+
+            paramiko.util.log_to_file('clean.log')
+            client = paramiko.SSHClient()
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            client.connect(host, 22, user, secret)
+            stdin, stdout, stderr = client.exec_command("cd " + dest_dir + "/Src;")
+            stdin, stdout, stderr = client.exec_command("make clean")
+            # data = stdout.read() + stderr.read()
+            client.close()
+            sftp.close()
+    else:
+        pass  # in process
+
+
 def sftp_callback(transferred, toBeTransferred):
     print("Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred))
+

@@ -33,6 +33,7 @@ PATH_WINSCP: str = ""
 PATH_PUTTY: str = ""
 PATH_PSPLASH: str = ""
 SETTINGS_GLOB_BS_DIR: str = ""
+SETTINGS_COMPILE_MODE: bool = False
 
 PATH_WINSCP_OK: bool = False
 PATH_PUTTY_OK: bool = False
@@ -71,8 +72,9 @@ class EProgBar(QThread):
     working_status = pyqtSignal(int)
 
     def run(self):
+        global SETTINGS_COMPILE_MODE
         self.working_status.emit(1)
-        func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'release')
+        func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'release', SETTINGS_COMPILE_MODE)
         self.working_status.emit(0)
 
 
@@ -80,8 +82,9 @@ class EProgBar_debug(QThread):
     working_status_debug = pyqtSignal(int)
 
     def run(self):
+        global SETTINGS_COMPILE_MODE
         self.working_status_debug.emit(1)
-        func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'debug')
+        func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'debug', SETTINGS_COMPILE_MODE)
         self.working_status_debug.emit(0)
 
 
@@ -97,6 +100,9 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         # init text labels and 'end' panel
         self.settings_init()
 
+        # radioButtons
+        self.radioButton_2.clicked.connect(self.on_radioButton_sync_mode)
+        self.radioButton.clicked.connect(self.on_radioButton_upload_mode)
 
         # buttons
         self.pushButton_7.clicked.connect(self.on_button_ping)
@@ -119,6 +125,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.pushButton_20.clicked.connect(self.on_button_clear_cache)
         self.pushButton_21.clicked.connect(self.on_button_outdated)
         self.pushButton_22.clicked.connect(self.on_button_psplash)
+        self.pushButton_15.clicked.connect(self.on_button_compile_once)
+        self.pushButton_16.clicked.connect(self.on_button_compile_debug_once)
+        self.pushButton_23.clicked.connect(self.on_button_clean)
+        self.pushButton_24.clicked.connect(self.on_button_winscp)
+        self.pushButton_25.clicked.connect(self.on_button_bs_winscp)
+        self.pushButton_26.clicked.connect(self.on_button_bs_putty)
 
         # tool buttons
         self.toolButton_2.clicked.connect(self.on_path_project)
@@ -144,6 +156,55 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.actionReboot.triggered.connect(self.on_button_reboot)
         self.actionReload.triggered.connect(self.on_button_reload)
         self.actionSave.triggered.connect(self.on_button_save)
+        self.actionRemove.triggered.connect(self.on_act_remove)
+
+    @pyqtSlot(name='on_button_bs_putty')
+    def on_button_bs_putty(self):
+        if os.name == "nt":
+            if PATH_PUTTY_OK:
+                func.putty_path(SETTINGS_GLOB_BLD_SRV, SETTINGS_GLOB_BS_USR, PATH_PUTTY)
+            else:
+                self.label_9.setText("Putty not found!")
+        else:
+            pass
+
+    @pyqtSlot(name='on_button_bs_winscp')
+    def on_button_bs_winscp(self):
+        winscp_exe = PATH_WINSCP.replace("com", "exe")
+        command = ("sftp://%s:%s@%s/" % (SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_GLOB_BLD_SRV))
+        print(winscp_exe, command)
+        func.scp_command(command, winscp_exe)
+
+    @pyqtSlot(name='on_button_winscp')
+    def on_button_winscp(self):
+        winscp_exe = PATH_WINSCP.replace("com", "exe")
+        command = ("sftp://%s:%s@%s/" % (SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST))
+        print(winscp_exe, command)
+        func.scp_command(command, winscp_exe)
+
+    @pyqtSlot(name='on_act_remove')
+    def on_act_remove(self):
+        dest_path = SETTINGS_SOURCE+"/Build/bin/"+SETTINGS_PROJECT+".bin"
+        if os.path.exists(dest_path):
+            os.remove(dest_path)
+            self.label_9.setText("Firmware remove command.")
+        else:
+            self.label_9.setText("Nothing to remove, firmware not found.")
+
+    @pyqtSlot(name='on_button_clean')
+    def on_button_clean(self):
+        func.scp_clean(SETTINGS_GLOB_BLD_SRV, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE)
+        self.label_9.setText("Cleaned firmware on remote server command.")
+
+    @pyqtSlot(name='on_radioButton_sync_mode')
+    def on_radioButton_sync_mode(self):
+        global SETTINGS_UPDATE
+        SETTINGS_UPDATE = '1'
+
+    @pyqtSlot(name='on_radioButton_upload_mode')
+    def on_radioButton_upload_mode(self):
+        global SETTINGS_UPDATE
+        SETTINGS_UPDATE = '0'
 
     @pyqtSlot(name='on_button_psplash')
     def on_button_psplash(self):
@@ -469,18 +530,38 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         if value == 1:
             self.label_9.setText("Working...")
         elif value == 0:
-            self.label_9.setText("Firmware is compiled.")
+            self.label_9.setText("Firmware debug is compiled.")
         else:
             self.label_9.setText("Unknown operation.")
 
-    @pyqtSlot(name='on_button_compile_debug')
-    def on_button_compile_debug(self):
+    @pyqtSlot(name='on_button_compile_debug_once')
+    def on_button_compile_debug_once(self):
+        global SETTINGS_COMPILE_MODE
+        SETTINGS_COMPILE_MODE = True
         self.calc = EProgBar_debug()
         self.calc.working_status_debug.connect(self.on_working_change_debug)
         self.calc.start()
 
+    @pyqtSlot(name='on_button_compile_debug')
+    def on_button_compile_debug(self):
+        global SETTINGS_COMPILE_MODE
+        SETTINGS_COMPILE_MODE = False
+        self.calc = EProgBar_debug()
+        self.calc.working_status_debug.connect(self.on_working_change_debug)
+        self.calc.start()
+
+    @pyqtSlot(name='on_button_compile_once')
+    def on_button_compile_once(self):
+        global SETTINGS_COMPILE_MODE
+        SETTINGS_COMPILE_MODE = True
+        self.calc = EProgBar()
+        self.calc.working_status.connect(self.on_working_change)
+        self.calc.start()
+
     @pyqtSlot(name='on_button_compile')
     def on_button_compile(self):
+        global SETTINGS_COMPILE_MODE
+        SETTINGS_COMPILE_MODE = False
         self.calc = EProgBar()
         self.calc.working_status.connect(self.on_working_change)
         self.calc.start()
@@ -494,7 +575,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_button_auto(self):
         print(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
         if self.checkBox_2.isChecked():
-            func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'release')
+            func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'release', False)
 
         if self.checkBox.isChecked():
             is_online = func.is_online(SETTINGS_HOST, 9999)
