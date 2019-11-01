@@ -106,7 +106,7 @@ def scp_reboot(user, secret, host, ftp_mode):
             f = open(file_name, "w+")
             f.write("option confirm off\n")
             f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
-            f.write("call shutdown -r now\n")
+            f.write("call sudo reboot\n") # shutdown -r now - on default linux its works
             f.write("exit\n")
             f.close()
             scp_path(file_name, PATH_WINSCP)
@@ -116,10 +116,10 @@ def scp_reboot(user, secret, host, ftp_mode):
             client = paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             client.connect(host, 22, user, secret)
-            client.exec_command("shutdown -r now")
+            client.exec_command("sudo reboot")
             client.close()
     else:
-        os.system("ssh %s@%s 'shutdown -r now | exit'" % (user, host))
+        os.system("ssh %s@%s 'sudo reboot | exit'" % (user, host))
 
 
 def scp_poweroff(user, secret, host, ftp_mode):
