@@ -15,11 +15,13 @@ pyuic5.exe - convertor from qt template to python code
 installation Windows:
 
 1. install Python 3.x
-2. install Qt Designer (for modify pycontrol.ui)
-3. run install.bat
-4. Take pyuic5.exe from Python 3.x/Scripts installed directory
-5. translate XML GUI code to python code with '0 translate.ui.py'
-6. run core.pyw or run '0 make 64bits.py' for create executable 64bit version
+2. install Qt Designer (If you need to edit Qt File)
+3. run make.py install (install required modules)
+4. Take pyuic5.exe from Python 3.x/Scripts installed directory (if you need p.2)
+5. translate XML GUI code to python code with make.py translate (if you need p.2)
+6. Make sure that settings.py is available with core.pyw or executable file.
+7. run core.pyw or run 'make.py make 64' for create executable 64bit version
+
 
 compiling win64 version (if you have only 32 bits just use 32bits scripts):
 
@@ -28,7 +30,7 @@ compiling win64 version (if you have only 32 bits just use 32bits scripts):
 3. make.py make 64
 4. make.py clear 64
 or make.py auto
-after copy settings.py
+now copy settings.py
 
 
 compiling win32 version (if additional):
@@ -37,7 +39,7 @@ compiling win32 version (if additional):
 2. make.py translate
 3. make.py make 32
 4. make.py clear 32
-after copy settings.py
+now copy settings.py
 
 
 
