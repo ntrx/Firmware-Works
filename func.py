@@ -58,7 +58,7 @@ def scp_upload(source, project, user, secret, host, ftp_mode):
             f.write("option confirm off\n")
             f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
             f.write("put %s %s\n" % (path_loc_win, path_dest_win))
-            f.write("chmod u+x 777 %s\n" % path_dest_win)
+            f.write("chmod 777 \"%s\"\n" % path_dest_win)
             f.write("exit\n")
             f.close()
             scp_path(file_name, PATH_WINSCP)
@@ -106,7 +106,7 @@ def scp_reboot(user, secret, host, ftp_mode):
             f = open(file_name, "w+")
             f.write("option confirm off\n")
             f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
-            f.write("call sudo reboot\n") # shutdown -r now - on default linux its works
+            f.write("call shutdown -r now\n") # shutdown -r now - on default linux its works
             f.write("exit\n")
             f.close()
             scp_path(file_name, PATH_WINSCP)
@@ -408,7 +408,7 @@ def scp_psplash_upload(host, user, secret, psplash_path, ftp_mode, self):
             f.write("option confirm off\n")
             f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
             f.write("put %s %s\n" % (path_loc_win, path_dest_win))
-            f.write("chmod -R 777 %s\n" % path_dest_win)
+            f.write("chmod 777 %s\n" % path_dest_win)
             f.write("call ln -sfn %s psplash\n" % path_dest_win)
             f.write("exit\n")
             f.close()
