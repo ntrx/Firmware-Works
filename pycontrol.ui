@@ -897,6 +897,15 @@
       <height>251</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Liberation Sans</family>
+      <pointsize>8</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
@@ -910,7 +919,7 @@
      <number>0</number>
     </property>
     <property name="elideMode">
-     <enum>Qt::ElideLeft</enum>
+     <enum>Qt::ElideNone</enum>
     </property>
     <property name="documentMode">
      <bool>false</bool>
@@ -975,7 +984,7 @@
      <widget class="QLabel" name="label_2">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>40</y>
         <width>81</width>
         <height>16</height>
@@ -1033,7 +1042,7 @@
      <widget class="QLabel" name="label_3">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>60</y>
         <width>101</width>
         <height>16</height>
@@ -1052,7 +1061,7 @@
      <widget class="QLabel" name="label">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>20</y>
         <width>101</width>
         <height>16</height>
@@ -1071,7 +1080,7 @@
      <widget class="QLabel" name="label_5">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>100</y>
         <width>101</width>
         <height>16</height>
@@ -1106,7 +1115,7 @@
      <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>80</y>
         <width>101</width>
         <height>16</height>
@@ -1203,7 +1212,7 @@
      <widget class="QLabel" name="label_14">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>120</y>
         <width>81</width>
         <height>16</height>
@@ -1448,7 +1457,7 @@
      <widget class="QLabel" name="label_10">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>10</y>
         <width>101</width>
         <height>16</height>
@@ -1565,7 +1574,7 @@
      <widget class="QLabel" name="label_11">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>70</y>
         <width>101</width>
         <height>16</height>
@@ -1609,7 +1618,7 @@
      <widget class="QPushButton" name="pushButton_20">
       <property name="geometry">
        <rect>
-        <x>190</x>
+        <x>210</x>
         <y>10</y>
         <width>75</width>
         <height>21</height>
@@ -1638,7 +1647,7 @@
      <widget class="QLabel" name="label_13">
       <property name="geometry">
        <rect>
-        <x>120</x>
+        <x>130</x>
         <y>10</y>
         <width>61</width>
         <height>16</height>
