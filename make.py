@@ -13,12 +13,15 @@ pyinst_32 = "C:\python37-low\Scripts\pyinstaller.exe"
 QT_XML = 'pycontrol.ui'
 PY_XML = 'gui.py'
 
+
 def make_64(arguments):
     os.system('pyinstaller %s %s' % (arguments, MAIN_FILE))
 
+
 def make_32(arguments):
     os.system('%s --path %s %s %s' % (pyinst_32, win32_dll, arguments, MAIN_FILE))
-    
+
+
 def clear_64():
     os.chdir("dist/core")
     shutil.rmtree("cryptography-2.7-py3.7.egg-info")
@@ -49,6 +52,7 @@ def clear_64():
     os.remove("_hashlib.pyd")
     os.remove("_lzma.pyd")
     os.remove("pyexpat.pyd")
+
 
 def clear_32():
     os.chdir("dist/core")
@@ -103,11 +107,28 @@ def main():
             print('  * translate - translate Qt XML file to python code')
             print('  * clear - remove harbage files')
             print('  * auto - perform translate UI - make default - clear default')
+            print('Arguments for make:')
+            print('  * --noconsole - hide console from executable file')
+            print('  * --onefile  - create portable version')
         if sys.argv[1] == 'make':
             if sys.argv[2] == '32':
-                make_32("--noconsole")
+                args = len(sys.argv)
+                if args > 3:
+                    arg_command = ""
+                    for i in range(3, args):
+                        arg_command += sys.argv[i] + " "
+                    make_32(arg_command)
+                else:
+                    make_32("--noconsole --onefile")
             if sys.argv[2] == '64':
-                make_64("--noconsole")
+                args = len(sys.argv)
+                if args > 3:
+                    arg_command = ""
+                    for i in range(3, args):
+                        arg_command += sys.argv[i] + " "
+                    make_64(arg_command)
+                else:
+                    make_64("--noconsole --onefile")
         if sys.argv[1] == 'clear':
             if sys.argv[2] == '32':
                 clear_32()
@@ -119,8 +140,8 @@ def main():
             translate()
         if sys.argv[1] == 'auto':
             translate()
-            make_64("--noconsole")
-            clear_64()
+            make_64("--noconsole --onefile")
+
 
 if __name__ == '__main__':
     main()
