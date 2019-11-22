@@ -29,7 +29,9 @@ def scp_path(file_name, winscp_path=PATH_WINSCP):
 
 
 def scp_command(command, winscp_path):
-    return os.system("\"%s\" %s" % (winscp_path, command))
+    # return os.system("\"%s\" %s" % (winscp_path, command))
+    CREATE_NO_WINDOW = 0x08000000
+    return subprocess.Popen("\"%s\" %s" % (winscp_path, command), creationflags=CREATE_NO_WINDOW)
 
 
 def putty_path(host, user, path_putty=PATH_PUTTY):

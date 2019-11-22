@@ -179,7 +179,6 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_button_winscp(self):
         winscp_exe = PATH_WINSCP.replace("com", "exe")
         command = ("sftp://%s:%s@%s/" % (SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST))
-        print(winscp_exe, command)
         func.scp_command(command, winscp_exe)
 
     @pyqtSlot(name='on_act_remove')
