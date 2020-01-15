@@ -34,6 +34,7 @@ PATH_PUTTY: str = ""
 PATH_PSPLASH: str = ""
 SETTINGS_GLOB_BS_DIR: str = ""
 SETTINGS_COMPILE_MODE: bool = False
+SETTINGS_COMPILER: str = ""
 
 PATH_WINSCP_OK: bool = False
 PATH_PUTTY_OK: bool = False
@@ -73,8 +74,9 @@ class EProgBar(QThread):
 
     def run(self):
         global SETTINGS_COMPILE_MODE
+        global SETTINGS_COMPILER
         self.working_status.emit(1)
-        func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'release', SETTINGS_COMPILE_MODE)
+        func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'release', SETTINGS_COMPILE_MODE, SETTINGS_COMPILER)
         self.working_status.emit(0)
 
 
@@ -83,8 +85,9 @@ class EProgBar_debug(QThread):
 
     def run(self):
         global SETTINGS_COMPILE_MODE
+        global SETTINGS_COMPILER
         self.working_status_debug.emit(1)
-        func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'debug', SETTINGS_COMPILE_MODE)
+        func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'debug', SETTINGS_COMPILE_MODE, SETTINGS_COMPILER)
         self.working_status_debug.emit(0)
 
 
@@ -537,6 +540,11 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_button_compile_debug_once(self):
         global SETTINGS_COMPILE_MODE
         SETTINGS_COMPILE_MODE = True
+        global SETTINGS_COMPILER
+        if self.comboBox_7.currentText().find('gcc8') == 0:
+            SETTINGS_COMPILER = 'gcc8'
+        else:
+            SETTINGS_COMPILER = ''
         self.calc = EProgBar_debug()
         self.calc.working_status_debug.connect(self.on_working_change_debug)
         self.calc.start()
@@ -545,6 +553,11 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_button_compile_debug(self):
         global SETTINGS_COMPILE_MODE
         SETTINGS_COMPILE_MODE = False
+        global SETTINGS_COMPILER
+        if self.comboBox_7.currentText().find('gcc8') == 0:
+            SETTINGS_COMPILER = 'gcc8'
+        else:
+            SETTINGS_COMPILER = ''
         self.calc = EProgBar_debug()
         self.calc.working_status_debug.connect(self.on_working_change_debug)
         self.calc.start()
@@ -553,6 +566,11 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_button_compile_once(self):
         global SETTINGS_COMPILE_MODE
         SETTINGS_COMPILE_MODE = True
+        global SETTINGS_COMPILER
+        if self.comboBox_7.currentText().find('gcc8') == 0:
+            SETTINGS_COMPILER = 'gcc8'
+        else:
+            SETTINGS_COMPILER = ''
         self.calc = EProgBar()
         self.calc.working_status.connect(self.on_working_change)
         self.calc.start()
@@ -560,7 +578,13 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_button_compile')
     def on_button_compile(self):
         global SETTINGS_COMPILE_MODE
+        global SETTINGS_COMPILER
+        if self.comboBox_7.currentText().find('gcc8') == 0:
+            SETTINGS_COMPILER = 'gcc8'
+        else:
+            SETTINGS_COMPILER = ''
         SETTINGS_COMPILE_MODE = False
+        GLOBAL_COMPILER = self.comboBox_7.currentText()
         self.calc = EProgBar()
         self.calc.working_status.connect(self.on_working_change)
         self.calc.start()
@@ -574,7 +598,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_button_auto(self):
         print(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
         if self.checkBox_2.isChecked():
-            func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'release', False)
+            global SETTINGS_COMPILER
+            if self.comboBox_7.currentText().find('gcc8') == 0:
+                SETTINGS_COMPILER = 'gcc8'
+            else:
+                SETTINGS_COMPILER = ''
+            func.scp_compile(SETTINGS_SOURCE, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_PROJECT, SETTINGS_UPDATE, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, 'release', SETTINGS_COMPILER)
 
         if self.checkBox.isChecked():
             is_online = func.is_online(SETTINGS_HOST, 9999)

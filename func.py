@@ -253,14 +253,18 @@ def scp_restart(user, secret, host, ftp_mode):
 def is_online(host, times=1):
     if os.name == 'nt':
         ping_status = subprocess.call("ping -n %d %s" % (times, host))
+
         if ping_status == 0:  # active
             return 1
+        elif ping_status == 0:
+            return 0
         elif ping_status > 0:
             return 0
         elif ping_status < 0:
             return 0
         else:
             return 0
+
     else:
         ping_status = os.system("ping -c %d %s" % (times, host))
         if ping_status == 0:
@@ -269,7 +273,7 @@ def is_online(host, times=1):
             return 0
 
 
-def scp_compile(source, user, secret, project, is_update, dest_dir, ftp_mode, build, is_clean_before):
+def scp_compile(source, user, secret, project, is_update, dest_dir, ftp_mode, build, is_clean_before, compiler):
     """
     for compiling on remote linux server via SSH
     :param source: sources location
@@ -311,9 +315,9 @@ def scp_compile(source, user, secret, project, is_update, dest_dir, ftp_mode, bu
             if not is_clean_before:
                 f.write("call make clean\n")
             if build == 'release':
-                f.write("call make -j7\n")
+                f.write("call make %s -j7\n" % compiler)
             elif build == 'debug':
-                f.write("call make debug -j7\n")
+                f.write("call make %s debug -j7\n" % compiler)
             else:
                 print("Error while exclude code, exiting.")
                 return
@@ -349,11 +353,11 @@ def scp_compile(source, user, secret, project, is_update, dest_dir, ftp_mode, bu
                 print("Join ", dest_dir + "/Src")
                 stdin, stdout, stderr = client.exec_command("cd " + dest_dir + "/Src;")
                 print("make begin")
-                stdin, stdout, stderr = client.exec_command("make clean; make")
+                stdin, stdout, stderr = client.exec_command("make clean; make %s" % compiler)
                 print("make end")
             # data = stdout.read() + stderr.read()
             elif is_update == '1':
-                stdin, stdout, stderr = client.exec_command("cd " + dest_dir + "/Src; make")
+                stdin, stdout, stderr = client.exec_command("cd " + dest_dir + "/Src; make %s" % compiler)
             # data = stdout.read() + stderr.read()
             client.close()
             print("Getting file: " + dest_dir + "/Build/bin/" + project + ".bin")
