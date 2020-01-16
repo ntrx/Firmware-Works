@@ -92,7 +92,11 @@ def install_modules():
 
 
 def translate():
-    os.system("pyuic5.exe %s -o %s" % (QT_XML, PY_XML))
+    if os.name == 'nt':
+        os.system("python -m PyQt5.uic.pyuic %s -o %s" % (QT_XML, PY_XML))
+    else: # i think you have preinstalled python 2.7
+        os.system("python3 -m PyQt5.uic.pyuic %s -o %s" % (QT_XML, PY_XML))
+
 
     
 def main():
