@@ -15,11 +15,11 @@ PY_XML = 'gui.py'
 
 
 def make_64(arguments):
-    os.system('pyinstaller %s %s' % (arguments, MAIN_FILE))
+    os.system('pyinstaller --icon=pycontrol.ico %s %s' % (arguments, MAIN_FILE))
 
 
 def make_32(arguments):
-    os.system('%s --path %s %s %s' % (pyinst_32, win32_dll, arguments, MAIN_FILE))
+    os.system('%s --path %s --icon=pycontrol.ico %s %s' % (pyinst_32, win32_dll, arguments, MAIN_FILE))
 
 
 def clear_64():
@@ -108,8 +108,12 @@ def main():
             print('  * clear - remove harbage files')
             print('  * auto - perform translate UI - make default - clear default')
             print('Arguments for make:')
-            print('  * --noconsole - hide console from executable file')
-            print('  * --onefile  - create portable version')
+            print('  * --noconsole - hide console from executable file (A)')
+            print('  * --onefile  - create portable version (A)')
+            print('  * --icon=icon.ico - app fav icon (A+)')
+            print('     (A) - this args would be added automatically, A+ - always included')
+            print('Example type:')
+            print('make.py make 64 --noconsole --onefile')
         if sys.argv[1] == 'make':
             if sys.argv[2] == '32':
                 args = len(sys.argv)
