@@ -4,6 +4,7 @@
 # use libs: PIP: pyqt5->pyiuc5 (for GUI
 # pyinstaller (for executable
 
+
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
@@ -16,7 +17,7 @@ import fs
 
 
 PROG_NAME = "Firmware Works"
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 RELEASE = "beta"
 
 SETTINGS_USER: str = ""
@@ -160,6 +161,8 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.actionReload.triggered.connect(self.on_button_reload)
         self.actionSave.triggered.connect(self.on_button_save)
         self.actionRemove.triggered.connect(self.on_act_remove)
+
+        print("Loaded")
 
     @pyqtSlot(name='on_button_bs_putty')
     def on_button_bs_putty(self):
@@ -806,6 +809,25 @@ def settings_load():
     global PATH_PUTTY
     global PATH_PSPLASH
     global SETTINGS_GLOB_BS_DIR
+
+    if not os.path.exists(SETTINGS_FILE):
+        print("User settings not found, creating preset file.")
+        SETTINGS_USER = 'example_user'
+        SETTINGS_HOST = '192.168.10.1'
+        SETTINGS_SECRET = '1111'
+        SETTINGS_PROJECT = 'example_proj'
+        SETTINGS_SOURCE = 'C:/example_proj'
+        SETTINGS_GLOB_BS_DIR = '/home/root/'
+        SETTINGS_GLOB_BLD_SRV = '192.168.10.2'
+        SETTINGS_GLOB_BS_USR = 'root'
+        SETTINGS_GLOB_BS_SCRT = '1111'
+        SETTINGS_UPDATE = '0'
+        SETTINGS_FTP_MODE = '1'
+        PATH_WINSCP = 'C:/example'
+        PATH_PUTTY = 'C:/example'
+        PATH_PSPLASH = 'C:/example'
+        settings_save()
+
     with open(SETTINGS_FILE) as fp:
         for line in fp:
             if line.find('user') == 0:
@@ -867,4 +889,5 @@ def settings_load():
 
 
 if __name__ == '__main__':
+    print("Loading...")
     main()
