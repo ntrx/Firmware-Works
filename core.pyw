@@ -162,8 +162,6 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.actionSave.triggered.connect(self.on_button_save)
         self.actionRemove.triggered.connect(self.on_act_remove)
 
-        print("Loaded")
-
     @pyqtSlot(name='on_button_bs_putty')
     def on_button_bs_putty(self):
         if os.name == "nt":
@@ -889,5 +887,4 @@ def settings_load():
 
 
 if __name__ == '__main__':
-    print("Loading...")
     main()
