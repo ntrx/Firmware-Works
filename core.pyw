@@ -1,10 +1,5 @@
 # #!/usr/bin/env python
 
-# python 3.7 last version 12:30 03072019
-# use libs: PIP: pyqt5->pyiuc5 (for GUI
-# pyinstaller (for executable
-
-
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal

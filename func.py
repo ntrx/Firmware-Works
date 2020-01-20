@@ -431,7 +431,7 @@ def scp_detect_project(host, user, secret, file_protocol, self):
         sftp.close()
         self.setText("Detected firmware: %s" % result)
     elif file_protocol == 'scp':
-        self.setText('SCP protocol currently not supported.')
+        self.setText('Cannot get directory list via SCP.')
 
 
 def scp_detect_outdated_firmware(host, user, secret, project, source, file_protocol, self):
@@ -444,14 +444,12 @@ def scp_detect_outdated_firmware(host, user, secret, project, source, file_proto
         device_firmware = sftp.lstat('/home/root/%s/bin/%s.bin' % (project, project))
         sftp.close()
     elif file_protocol == 'scp':
-        # ssh = paramiko.SSHClient()
-        # ssh.load_system_host_keys()
-        # ssh.connect(hostname=host, port=22, username=user)
-        # scp = SCPClient(ssh.get_transport())
-        # scp.get('/home/root/%s/bin/%s.bin' % (project, project), '%s/Build/bin/%s-remote' % (source, project))
-        # device_firmware = os.stat('%s/Build/bin/%s-remote' % (source, project))
-        self.setText('SCP protocol not currently not supported.')
-        return
+        transport = paramiko.Transport((host, 22))
+        transport.connect()
+        transport.auth_none(username=user)
+        scp = SCPClient(transport)
+        scp.get('/home/root/%s/bin/%s.bin' % (project, project), '%s/Build/bin/%s-remote' % (source, project))
+        device_firmware = os.stat('%s/Build/bin/%s-remote' % (source, project))
 
     if device_firmware.st_mtime < float(local_firmware.st_mtime):
         self.setText("Firmware is outdated!")
