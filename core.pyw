@@ -36,6 +36,7 @@ PATH_PSPLASH: str = ""
 SETTINGS_GLOB_BS_DIR: str = ""
 SETTINGS_COMPILE_MODE: bool = False
 SETTINGS_COMPILER: str = ""
+SETTINGS_PROTOCOL: str = ""
 
 PATH_WINSCP_OK: bool = False
 PATH_PUTTY_OK: bool = False
@@ -175,8 +176,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_button_bs_winscp')
     def on_button_bs_winscp(self):
         winscp_exe = PATH_WINSCP.replace("com", "exe")
-        command = ("sftp://%s:%s@%s/" % (SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_GLOB_BLD_SRV))
-        print(winscp_exe, command)
+        file_protocol = protocol_get(self)
+        if file_protocol == 'sftp':
+            command = ("sftp://%s:%s@%s/" % (SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_GLOB_BLD_SRV))
+        elif file_protocol == 'scp':
+            command = ("scp://%s@%s:%s/" % (SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BLD_SRV, SETTINGS_GLOB_BS_SCRT))
+
         func.scp_command(command, winscp_exe)
 
     @pyqtSlot(name='on_button_winscp')
@@ -196,7 +201,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_clean')
     def on_button_clean(self):
-        func.scp_clean(SETTINGS_GLOB_BLD_SRV, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE)
+        func.scp_clean(SETTINGS_GLOB_BLD_SRV, SETTINGS_GLOB_BS_USR, SETTINGS_GLOB_BS_SCRT, SETTINGS_GLOB_BS_DIR, SETTINGS_FTP_MODE, protocol_get(self))
         self.label_9.setText("Cleaned firmware on remote server command.")
 
     @pyqtSlot(name='on_radioButton_sync_mode')
@@ -212,7 +217,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_button_psplash')
     def on_button_psplash(self):
         if func.is_online(SETTINGS_HOST):
-            func.scp_psplash_upload(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET, fs.path_double_win(PATH_PSPLASH), SETTINGS_FTP_MODE, self.label_9)
+            func.scp_psplash_upload(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET, fs.path_double_win(PATH_PSPLASH), SETTINGS_FTP_MODE, protocol_get(self), self.label_9)
         else:
             self.label_9.setText("Host is unreachable")
 
@@ -223,7 +228,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_button_outdated')
     def on_button_outdated(self):
         if func.is_online(SETTINGS_HOST):
-            func.scp_detect_outdated_firmware(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_PROJECT, SETTINGS_SOURCE, self.label_9)
+            func.scp_detect_outdated_firmware(SETTINGS_HOST, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_PROJECT, SETTINGS_SOURCE, protocol_get(self), self.label_9)
         else:
             self.label_9.setText('Host is unreachable')
 
@@ -325,27 +330,27 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_reboot')
     def on_button_reboot(self):
-        func.scp_reboot(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
+        func.scp_reboot(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE, protocol_get(self))
         self.label_9.setText("Reboot command send.")
 
     @pyqtSlot(name='on_button_poweroff')
     def on_button_poweroff(self):
-        func.scp_poweroff(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
+        func.scp_poweroff(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE, protocol_get(self))
         self.label_9.setText("Power off command activate.")
 
     @pyqtSlot(name='on_button_ts_test')
     def on_button_ts_test(self):
-        func.scp_ts_test(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
+        func.scp_ts_test(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE, protocol_get(self))
         self.label_9.setText('Device stopped. TSLIB_TSDEVICE ts_test launched.')
 
     @pyqtSlot(name='on_button_ts_calibrate')
     def on_button_ts_calibrate(self):
-        func.scp_ts_calibrate(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
+        func.scp_ts_calibrate(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE, protocol_get(self))
         self.label_9.setText("Device stopped. TSLIB_TSDEVICE ts_calibrate launched.")
 
     @pyqtSlot(name='on_button_killall')
     def on_button_killall(self):
-        func.scp_killall(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_PROJECT, SETTINGS_FTP_MODE)
+        func.scp_killall(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_PROJECT, SETTINGS_FTP_MODE, protocol_get(self))
 
     @pyqtSlot(name='on_winscp_use')
     def on_winscp_user(self):
@@ -512,12 +517,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_stop')
     def on_button_stop(self):
-        func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
+        func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE, protocol_get(self))
         self.label_9.setText("Stop command has been sent")
 
     @pyqtSlot(name='on_button_restart')
     def on_button_restart(self):
-        func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
+        func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE, protocol_get(self))
         self.label_9.setText("Restart command has been sent")
 
     def on_working_change(self, value):
@@ -597,7 +602,6 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_auto')
     def on_button_auto(self):
-        print(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST)
         if self.checkBox_2.isChecked():
             global SETTINGS_COMPILER
             if self.comboBox_7.currentText().find('gcc8') == 0:
@@ -611,16 +615,16 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.label_9.setText("Trying to connect...")
             self.label_9.setText("Connect established.")
             if is_online:
-                func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
-                func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
-                func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
+                func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE, protocol_get(self))
+                func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE, protocol_get(self))
+                func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE, protocol_get(self))
                 self.label_9.setText("Auto compile&stop&upload command has been sent")
             else:
                 self.label_9.setText("process has been interrupted")
         else:
-            func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
-            func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
-            func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE)
+            func.scp_stop(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE, protocol_get(self))
+            func.scp_upload(SETTINGS_SOURCE, SETTINGS_PROJECT, SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE, protocol_get(self))
+            func.scp_restart(SETTINGS_USER, SETTINGS_SECRET, SETTINGS_HOST, SETTINGS_FTP_MODE, protocol_get(self))
             self.label_9.setText("Once compile&stop&upload command has been sent")
 
     def settings_init(self):
@@ -884,6 +888,13 @@ def settings_load():
                 index = 12
                 PATH_PSPLASH = get_value(line, index)
         fp.close()
+
+
+def protocol_get(self):
+    if self.comboBox_8.currentText() == 'SCP':
+        return str('scp')
+    elif self.comboBox_8.currentText() == 'SFTP':
+        return str('sftp')
 
 
 if __name__ == '__main__':

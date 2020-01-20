@@ -5,6 +5,7 @@ import settings
 import core
 import paramiko
 import subprocess
+from scp import SCPClient
 
 global_build_server = settings.global_build_server
 global_bs_user = settings.global_bs_user
@@ -15,6 +16,23 @@ PATH_PUTTY = settings.path_putty
 pb_overall = 0  # progress bar
 pb_total = 0
 pb_cur = 0
+
+
+def createSSHClient(server, port, user, secret):
+    client = paramiko.SSHClient()
+    client.load_system_host_keys()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(hostname=server, port=port, username=user, password=secret)
+    return client
+
+
+class MySCPClient(SCPClient):
+    def put_dir(self, source, target):
+        for item in os.listdir(source):
+            if os.path.isfile(os.path.join(source, item)):
+                self.put(os.path.join(source, item), '%s/%s' % (target, item))
+            else:
+                self.put_dir(os.path.join(source, item), '%s/%s' % (target, item))
 
 
 def scp_path(file_name, winscp_path=PATH_WINSCP):
@@ -50,7 +68,7 @@ def putty_path(host, user, path_putty=PATH_PUTTY):
     return subprocess.Popen("\"%s\" -ssh %s@%s" % (path_putty, user, host), creationflags=CREATE_NO_WINDOW)
 
 
-def scp_upload(source, project, user, secret, host, ftp_mode):
+def scp_upload(source, project, user, secret, host, ftp_mode, file_protocol):
     if os.name == 'nt':
         path_loc_win = source + "\\Build\\bin\\" + project + ".bin"
         path_dest_win = "//home//" + user + "//" + project + "//bin//" + project + ".bin"
@@ -58,7 +76,10 @@ def scp_upload(source, project, user, secret, host, ftp_mode):
             file_name = 'upload' + host
             f = open(file_name, "w+")
             f.write("option confirm off\n")
-            f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            if file_protocol == 'sftp':
+                f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            elif file_protocol == 'scp':
+                f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (user, host, secret))
             f.write("put %s %s\n" % (path_loc_win, path_dest_win))
             f.write("chmod 777 \"%s\"\n" % path_dest_win)
             f.write("exit\n")
@@ -78,13 +99,16 @@ def scp_upload(source, project, user, secret, host, ftp_mode):
         # linux
 
 
-def scp_killall(user, secret, host, project, ftp_mode):
+def scp_killall(user, secret, host, project, ftp_mode, file_protocol):
     if os.name == 'nt':
         if ftp_mode == '1':  # via winSCP
             file_name = 'killall' + host
             f = open(file_name, "w+")
             f.write("option confirm off\n")
-            f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            if file_protocol == 'sftp':
+                f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            elif file_protocol == 'scp':
+                f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (user, host, secret))
             f.write("call killall sn4215_respawn.sh %s.bin\n" % project)
             f.write("exit\n")
             f.close()
@@ -101,13 +125,16 @@ def scp_killall(user, secret, host, project, ftp_mode):
         os.system("ssh %s@%s 'killall sn4215_respawn.sh %s.bin | exit'" % (user, host, project))
 
 
-def scp_reboot(user, secret, host, ftp_mode):
+def scp_reboot(user, secret, host, ftp_mode, file_protocol):
     if os.name == 'nt':
         if ftp_mode == '1':  # via winSCP
             file_name = 'reboot' + host
             f = open(file_name, "w+")
             f.write("option confirm off\n")
-            f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            if file_protocol == 'sftp':
+                f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            elif file_protocol == 'scp':
+                f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (user, host, secret))
             f.write("call shutdown -r now\n") # shutdown -r now - on default linux its works
             f.write("exit\n")
             f.close()
@@ -124,13 +151,16 @@ def scp_reboot(user, secret, host, ftp_mode):
         os.system("ssh %s@%s 'sudo reboot | exit'" % (user, host))
 
 
-def scp_poweroff(user, secret, host, ftp_mode):
+def scp_poweroff(user, secret, host, ftp_mode, file_protocol):
     if os.name == 'nt':
         if ftp_mode == '1':  # via winSCP
             file_name = 'poweroff' + host
             f = open(file_name, "w+")
             f.write("option confirm off\n")
-            f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            if file_protocol == 'sftp':
+                f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            elif file_protocol == 'scp':
+                f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (user, host, secret))
             f.write("call poweroff\n")
             f.write("exit\n")
             f.close()
@@ -147,13 +177,16 @@ def scp_poweroff(user, secret, host, ftp_mode):
         os.system("ssh %s@%s 'poweroff | exit'" % (user, host))
 
 
-def scp_ts_test(user, secret, host, ftp_mode):
+def scp_ts_test(user, secret, host, ftp_mode, file_protocol):
     if os.name == 'nt':
         if ftp_mode == '1':  # via winSCP
             file_name = 'ts_test' + host
             f = open(file_name, "w+")
             f.write("option confirm off\n")
-            f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            if file_protocol == 'sftp':
+                f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            elif file_protocol == 'scp':
+                f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (user, host, secret))
             f.write("call /etc/init.d/autorun.sh stop\n")
             f.write("call TSLIB_TSDEVICE=/dev/input/event2 ts_test\n")
             f.write("exit\n")
@@ -172,13 +205,16 @@ def scp_ts_test(user, secret, host, ftp_mode):
         os.system("ssh %s@%s '/etc/init.d/autorun.sh stop | TSLIB_TSDEVICE=/dev/input/event2 ts_test | exit'" % (user, host))
 
 
-def scp_ts_calibrate(user, secret, host, ftp_mode):
+def scp_ts_calibrate(user, secret, host, ftp_mode, file_protocol):
     if os.name == 'nt':
         if ftp_mode == '1':  # via winSCP
             file_name = 'ts_calibrate' + host
             f = open(file_name, "w+")
             f.write("option confirm off\n")
-            f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            if file_protocol == 'sftp':
+                f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            elif file_protocol == 'scp':
+                f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (user, host, secret))
             f.write("call /etc/init.d/autorun.sh stop\n")
             f.write("call TSLIB_TSDEVICE=/dev/input/event2 ts_calibrate\n")
             f.write("exit\n")
@@ -197,13 +233,16 @@ def scp_ts_calibrate(user, secret, host, ftp_mode):
         os.system("ssh %s@%s '/etc/init.d/autorun.sh stop | TSLIB_TSDEVICE=/dev/input/event2 ts_calibrate | exit'" % (user, host))
 
 
-def scp_stop(user, secret, host, ftp_mode):
+def scp_stop(user, secret, host, ftp_mode, file_protocol):
     if os.name == 'nt':
         if ftp_mode == '1':  # via winSCP
             file_name = 'stop' + host
             f = open(file_name, "w+")
             f.write("option confirm off\n")
-            f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            if file_protocol == 'sftp':
+                f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            elif file_protocol == 'scp':
+                f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (user, host, secret))
             f.write("call /etc/init.d/autorun.sh stop\n")
             f.write("exit\n")
             f.close()
@@ -220,13 +259,17 @@ def scp_stop(user, secret, host, ftp_mode):
         os.system("ssh %s@%s '/etc/init.d/autorun.sh stop | exit'" % (user, host))
 
 
-def scp_restart(user, secret, host, ftp_mode):
+def scp_restart(user, secret, host, ftp_mode, file_protocol):
+    print(str(file_protocol))
     if os.name == 'nt':
         file_name = 'restart' + host
         if ftp_mode == '1':  # via winSCP
             f = open(file_name, "w+")
             f.write("option confirm off\n")
-            f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            if file_protocol == 'sftp':
+                f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            elif file_protocol == 'scp':
+                f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (user, host, secret))
             f.write("call /etc/init.d/autorun.sh restart\n")
             f.write("exit\n")
             f.close()
@@ -294,6 +337,8 @@ def scp_compile(source, user, secret, project, is_update, dest_dir, ftp_mode, bu
     :type build: str
     :param is_clean_before: run make clean before make
     :type is_clean_before: bool
+    :param compiler: type of compiler gcc or gcc8
+    :type compiler: str
     :return:
     """
     if os.name == 'nt':
@@ -369,30 +414,38 @@ def scp_compile(source, user, secret, project, is_update, dest_dir, ftp_mode, bu
         pass  # in process
 
 
-def scp_detect_project(host, user, secret, self):
-    transport = paramiko.Transport((host, 22))
-    transport.connect()
-    transport.auth_none(username=user)
-    sftp = core.MySFTPClient.from_transport(transport)
-    result = sftp.listdir("/home/root/")
-    for obj in result:
-        if obj[0] != '.':
-            result = obj
-            break
-        else:
-            result = 'None'
-    sftp.close()
-    self.setText("Detected firmware: %s" % result)
+def scp_detect_project(host, user, secret, file_protocol, self):
+    if file_protocol == 'sftp':
+        transport = paramiko.Transport((host, 22))
+        transport.connect()
+        transport.auth_none(username=user)
+        sftp = core.MySFTPClient.from_transport(transport)
+        result = sftp.listdir("/home/root/")
+        for obj in result:
+            if obj[0] != '.':
+                result = obj
+                break
+            else:
+                result = 'None'
+        sftp.close()
+        self.setText("Detected firmware: %s" % result)
+    elif file_protocol == 'scp':
+        self.setText('SCP protocol currently not supported.')
 
 
-def scp_detect_outdated_firmware(host, user, secret, project, source, self):
-    transport = paramiko.Transport((host, 22))
-    transport.connect()
-    transport.auth_none(username=user)
-    sftp = core.MySFTPClient.from_transport(transport)
+def scp_detect_outdated_firmware(host, user, secret, project, source, file_protocol, self):
     local_firmware = os.stat('%s/Build/bin/%s.bin' % (source, project))
-    device_firmware = sftp.lstat('/home/root/%s/bin/%s.bin' % (project, project))
-    sftp.close()
+    if file_protocol == 'sftp':
+        transport = paramiko.Transport((host, 22))
+        transport.connect()
+        transport.auth_none(username=user)
+        sftp = core.MySFTPClient.from_transport(transport)
+        device_firmware = sftp.lstat('/home/root/%s/bin/%s.bin' % (project, project))
+        sftp.close()
+    elif file_protocol == 'scp':
+        self.setText('SCP protocol not currently not supported.')
+        return
+
     if device_firmware.st_mtime < float(local_firmware.st_mtime):
         self.setText("Firmware is outdated!")
     elif device_firmware.st_mtime > float(local_firmware.st_mtime):
@@ -403,7 +456,7 @@ def scp_detect_outdated_firmware(host, user, secret, project, source, self):
         self.setText("Unavailable to compare firmwares!")
 
 
-def scp_psplash_upload(host, user, secret, psplash_path, ftp_mode, self):
+def scp_psplash_upload(host, user, secret, psplash_path, ftp_mode, file_protocol, self):
     if os.name == 'nt':
         file_name = core.fs.path_get_filename(psplash_path)
         path_loc_win = psplash_path
@@ -412,7 +465,10 @@ def scp_psplash_upload(host, user, secret, psplash_path, ftp_mode, self):
             file_name = 'psplash' + host
             f = open(file_name, "w+")
             f.write("option confirm off\n")
-            f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            if file_protocol == 'sftp':
+                f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            elif file_protocol == 'scp':
+                f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (user, host, secret))
             f.write("put %s %s\n" % (path_loc_win, path_dest_win))
             f.write("chmod 777 %s\n" % path_dest_win)
             f.write("call ln -sfn %s psplash\n" % path_dest_win)
@@ -434,14 +490,27 @@ def scp_psplash_upload(host, user, secret, psplash_path, ftp_mode, self):
         # linux
 
 
-def scp_clean(host, user, secret, dest_dir, ftp_mode):
+def scp_clean(host, user, secret, dest_dir, ftp_mode, file_protocol):
+    '''
+    Deleting firmware binary file on build-server
+    :param host: build-server IP
+    :param user: build-server login
+    :param secret: build-server pass
+    :param dest_dir: build-server binary file location (directory)
+    :param ftp_mode: via WinSCP or paramiko
+    :param file_protocol: not actual here
+    :return:
+    '''
     if os.name == 'nt':
         path_dest_win = "//home//" + user + dest_dir
         file_name = 'clean' + host
         if ftp_mode == '1':
             f = open(file_name, 'w+')
             f.write("option confirm off\n")
-            f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            if file_protocol == 'sftp':
+                f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (user, secret, host))
+            elif file_protocol == 'scp':
+                f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (user, host, secret))
             f.write("cd //home//" + global_bs_user + dest_dir + "//Src\n")
             f.write("call make clean\n")
             f.write("exit\n")

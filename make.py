@@ -89,6 +89,7 @@ def install_modules():
     os.system("pip install pyqt5")
     os.system("pip install paramiko")
     os.system("pip install pyinstaller")
+    os.system("pip install scp")
 
 
 def translate():
@@ -98,7 +99,6 @@ def translate():
         os.system("python3 -m PyQt5.uic.pyuic %s -o %s" % (QT_XML, PY_XML))
 
 
-    
 def main():
     if len(sys.argv) <= 1:
         print("Not enough arguments. Type %s help" % sys.argv[0])
