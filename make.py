@@ -121,22 +121,22 @@ def main():
         if sys.argv[1] == 'make':
             if sys.argv[2] == '32':
                 args = len(sys.argv)
-                if args > 3:
+                if args > 2:
                     arg_command = ""
                     for i in range(3, args):
                         arg_command += sys.argv[i] + " "
                     make_32(arg_command)
-                else:
-                    make_32("--noconsole --onefile")
+                #else:
+                #    make_32("--noconsole --onefile")
             if sys.argv[2] == '64':
                 args = len(sys.argv)
-                if args > 3:
+                if args > 2:
                     arg_command = ""
                     for i in range(3, args):
                         arg_command += sys.argv[i] + " "
                     make_64(arg_command)
-                else:
-                    make_64("--noconsole --onefile")
+                #else:
+                #    make_64("--noconsole --onefile")
         if sys.argv[1] == 'clear':
             if sys.argv[2] == '32':
                 clear_32()

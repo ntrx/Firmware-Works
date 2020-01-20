@@ -7,6 +7,7 @@ import paramiko
 import subprocess
 from scp import SCPClient
 
+
 global_build_server = settings.global_build_server
 global_bs_user = settings.global_bs_user
 global_bs_secret = settings.global_bs_secret
@@ -443,6 +444,12 @@ def scp_detect_outdated_firmware(host, user, secret, project, source, file_proto
         device_firmware = sftp.lstat('/home/root/%s/bin/%s.bin' % (project, project))
         sftp.close()
     elif file_protocol == 'scp':
+        # ssh = paramiko.SSHClient()
+        # ssh.load_system_host_keys()
+        # ssh.connect(hostname=host, port=22, username=user)
+        # scp = SCPClient(ssh.get_transport())
+        # scp.get('/home/root/%s/bin/%s.bin' % (project, project), '%s/Build/bin/%s-remote' % (source, project))
+        # device_firmware = os.stat('%s/Build/bin/%s-remote' % (source, project))
         self.setText('SCP protocol not currently not supported.')
         return
 
