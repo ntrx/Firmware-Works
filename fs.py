@@ -101,5 +101,3 @@ def path_get_firmware(path, self):
         self.setText("Firmware compiled at %s, size: %2.2f MB" % (time.ctime(firmware_time), firmware_size / 1024000))
     else:
         self.setText("No firmware compiled found.")
-
-

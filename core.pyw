@@ -1,4 +1,5 @@
 # #!/usr/bin/env python
+from typing import Type
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
@@ -17,13 +18,24 @@ RELEASE = "beta"
 
 SETTINGS_EMPTY: str = ""
 SETTINGS_FILE: str = "settings.py"
-SETTINGS_SOURCE_HISTORY = "source-history.log"
-SETTINGS_PROJECT_HISTORY = "project-history.log"
-SETTINGS_DEVICE_IP_HISTORY = "device-ip-history.log"
-SETTINGS_WINSCP_HISTORY = "winscp-history.log"
-SETTINGS_PUTTY_HISTORY = "putty-history.log"
-SETTINGS_PSPLASH_HISTORY = "psplash-history.log"
-cache_files = [SETTINGS_DEVICE_IP_HISTORY, SETTINGS_PROJECT_HISTORY, SETTINGS_PUTTY_HISTORY, SETTINGS_WINSCP_HISTORY, SETTINGS_SOURCE_HISTORY, SETTINGS_PSPLASH_HISTORY]
+
+
+class Cache_file:
+    source: str = "source-history.log"
+    project: str = "project-history.log"
+    device_ip: str = "device-ip-history.log"
+    winscp: str = "winscp-history.log"
+    putty: str = "putty-history.log"
+    psplash: str = "psplash-history.log"
+    list = []
+
+    def init(self):
+        listing = []
+        paths = vars(self)
+        for item in paths:
+            listing.append(str(paths[item]))
+        for i in range(2, 8):
+            self.list.append(listing[i])
 
 
 class Settings:
@@ -71,7 +83,7 @@ class Settings:
             self.local.path_winscp = 'C:/example'
             self.local.path_putty = 'C:/example'
             self.project.path_psplash = 'C:/example'
-            self.save(self)
+            self.save()
 
         with open(SETTINGS_FILE) as fp:
             for line in fp:
@@ -165,8 +177,107 @@ class Settings:
         fp.write("path_psplash = '%s' # - path to pslpash file\n" % check)
         fp.close()
 
+    def init(self, gui):
+        fs.cache_read(gui.comboBox_3, MyCache.source)
+        fs.cache_read(gui.comboBox, MyCache.project)
+        fs.cache_read(gui.comboBox_2, MyCache.device_ip)
+        fs.cache_read(gui.comboBox_5, MyCache.putty)
+        fs.cache_read(gui.comboBox_4, MyCache.winscp)
+        fs.cache_read(gui.comboBox_6, MyCache.psplash)
 
-MySettings = Settings
+        cache_files_size = 0
+
+        for file in Cache_file.list:
+            cache_files_size += os.path.getsize(file)
+        gui.label_13.setText("%s b" % cache_files_size)
+
+        if len(MySettings.project.name) == 0:
+            gui.lineEdit.setText(SETTINGS_EMPTY)
+        else:
+            gui.lineEdit.setText(MySettings.project.name)
+
+        if len(MySettings.device.ip) == 0:
+            gui.lineEdit_2.setText(SETTINGS_EMPTY)
+        else:
+            gui.lineEdit_2.setText(MySettings.device.ip)
+
+        if len(MySettings.device.user) == 0:
+            gui.lineEdit_3.setText(SETTINGS_EMPTY)
+        else:
+            gui.lineEdit_3.setText(MySettings.device.user)
+
+        if len(MySettings.device.password) == 0:
+            gui.lineEdit_4.setText(SETTINGS_EMPTY)
+        else:
+            gui.lineEdit_4.setText(MySettings.device.password)
+
+        if len(MySettings.project.path_local) == 0:
+            gui.lineEdit_5.setText(SETTINGS_EMPTY)
+        else:
+            gui.lineEdit_5.setText(MySettings.project.path_local)
+
+        if len(MySettings.server.ip) == 0:
+            gui.lineEdit_6.setText(SETTINGS_EMPTY)
+        else:
+            gui.lineEdit_6.setText(MySettings.server.ip)
+
+        if len(MySettings.server.user) == 0:
+            gui.lineEdit_7.setText(SETTINGS_EMPTY)
+        else:
+            gui.lineEdit_7.setText(MySettings.server.user)
+
+        if len(MySettings.server.password) == 0:
+            gui.lineEdit_8.setText(SETTINGS_EMPTY)
+        else:
+            gui.lineEdit_8.setText(MySettings.server.password)
+
+        if len(MySettings.server.path_external) == 0:
+            gui.lineEdit_12.setText(SETTINGS_EMPTY)
+        else:
+            gui.lineEdit_12.setText(MySettings.server.path_external)
+
+        if MySettings.device.ftp_mode == '1':
+            gui.checkBox_3.setChecked(True)
+            gui.radioButton.setEnabled(True)
+            gui.radioButton_2.setEnabled(True)
+        elif MySettings.device.ftp_mode == '0':
+            gui.checkBox_3.setChecked(False)
+            gui.radioButton.setEnabled(False)
+            gui.radioButton_2.setEnabled(False)
+            MySettings.server.sync_files = '0'
+
+        if MySettings.server.sync_files == '0':
+            gui.radioButton.setChecked(True)
+        elif MySettings.server.sync_files == '1':
+            gui.radioButton_2.setChecked(True)
+
+        if len(MySettings.local.path_winscp) == 0:
+            gui.lineEdit_9.setText(SETTINGS_EMPTY)
+        else:
+            if not os.path.isfile(Settings.local.path_winscp):
+                gui.lineEdit_9.setStyleSheet("background-color: red")
+                MySettings.local.winscp_ok = False
+            else:
+                MySettings.local.winscp_ok = True
+            gui.lineEdit_9.setText(Settings.local.path_winscp)
+
+        if len(MySettings.local.path_putty) == 0:
+            gui.lineEdit_10.setText(SETTINGS_EMPTY)
+        else:
+            if not os.path.isfile(MySettings.local.path_putty):
+                gui.lineEdit_10.setStyleSheet("background-color: red")
+                MySettings.local.putty_ok = False
+            else:
+                MySettings.local.putty_ok = True
+            gui.lineEdit_10.setText(MySettings.local.path_putty)
+
+        if len(MySettings.project.path_psplash) == 0:
+            gui.lineEdit_11.setText(SETTINGS_EMPTY)
+        else:
+            gui.lineEdit_11.setText(MySettings.project.path_psplash)
+
+        firmware_path = MySettings.project.path_local + "\\Build\\bin\\" + MySettings.project.name + ".bin"
+        fs.path_get_firmware(firmware_path, gui.label_16)
 
 
 class MySFTPClient(paramiko.SFTPClient):
@@ -211,13 +322,14 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         # gui init
         super(MainWindow, self).__init__(parent)
         QtWidgets.QMainWindow.__init__(self)
+        self.calc = EProgBar()
         self.setupUi(self)
         self.setWindowTitle("%s %s %s" % (PROG_NAME, VERSION, RELEASE))
         # self.label_9.setStyleSheet('background-color: red') for future
         MySettings.load(MySettings)
+        MyCache.init(MyCache)
         # init text labels and 'end' panel
-        self.settings_init()
-
+        MySettings.init(MySettings, self)
         # radioButtons
         self.radioButton_2.clicked.connect(self.on_radioButton_sync_mode)
         self.radioButton.clicked.connect(self.on_radioButton_upload_mode)
@@ -300,7 +412,9 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         if MySettings.device.file_protocol == 'sftp':
             command = ("sftp://%s:%s@%s/" % (MySettings.device.user, MySettings.device.password, MySettings.device.ip))
         elif MySettings.device.file_protocol == 'scp':
-            command = ("scp://%s@%s:%s/" % (MySettings.server.user, MySettings.device.ip, MySettings.device.password))
+            command = ("scp://%s@%s:%s/" % (MySettings.device.user, MySettings.device.ip, MySettings.device.password))
+        else:
+            return
         func.scp_command(command, winscp_exe)
 
     @pyqtSlot(name='on_act_remove')
@@ -355,11 +469,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_clear_cache')
     def on_button_clear_cache(self):
-        for file in cache_files:
-            f = open(file, "w")
-            f.write("")
-            f.close()
-
+        fs.cache_create(MyCache.list)
         self.on_button_apply()
         self.label_9.setText("Cached information has been clear.")
 
@@ -395,7 +505,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_open_putty(self):
         if os.name == "nt":
             if MySettings.local.putty_ok:
-                func.putty_path(MySettings, MySettings.local.path_putty)
+                func.putty_path(MySettings.device.user, MySettings.device.ip, MySettings.local.path_putty)
             else:
                 self.label_9.setText("Putty not found!")
         else:
@@ -490,7 +600,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         SETTINGS_FILE = conf_file[0]
         MySettings.save(MySettings)
         MySettings.load(MySettings)
-        self.settings_init()
+        MySettings.init(MySettings, self)
 
     @pyqtSlot(name='on_button_apply')
     def on_button_apply(self):
@@ -517,17 +627,17 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.label_9.setText("New configuration applied.")
 
         # cache saving source history
-        fs.cache_save(SETTINGS_SOURCE_HISTORY, MySettings.project.path_local)
+        fs.cache_save(MyCache.source, MySettings.project.path_local)
         # cache saving project name history
-        fs.cache_save(SETTINGS_PROJECT_HISTORY, MySettings.project.name)
+        fs.cache_save(MyCache.project, MySettings.project.name)
         # cache saving device ip history
-        fs.cache_save(SETTINGS_DEVICE_IP_HISTORY, MySettings.device.user)
+        fs.cache_save(MyCache.device_ip, MySettings.device.user)
         # cache saving winscp path history
-        fs.cache_save(SETTINGS_WINSCP_HISTORY, MySettings.local.path_winscp)
+        fs.cache_save(MyCache.winscp, MySettings.local.path_winscp)
         # cache saving putty path history
-        fs.cache_save(SETTINGS_PUTTY_HISTORY, MySettings.local.path_putty)
+        fs.cache_save(MyCache.putty, MySettings.local.path_putty)
         # cache saving psplash path history
-        fs.cache_save(SETTINGS_PSPLASH_HISTORY, MySettings.project.path_psplash)
+        fs.cache_save(MyCache.psplash, MySettings.project.path_psplash)
 
     @pyqtSlot(name='on_path_project')
     def on_path_project(self):
@@ -537,7 +647,6 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         path_project = QFileDialog.getExistingDirectory()
         if path_project == "":
             return
-        path_tmp = ""
         if os.name == "nt":
             path_tmp = fs.path_double_win(path_project)
         else:
@@ -563,7 +672,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.lineEdit_11.clear()
         self.lineEdit_12.clear()
         MySettings.load(MySettings)
-        self.settings_init()
+        MySettings.init(MySettings, self)
         self.label_9.setText("Configuration re-init")
 
     @pyqtSlot(name='on_button_save')
@@ -670,7 +779,6 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         else:
             MySettings.server.compiler = ''
         MySettings.server.compile_mode = False
-        self.calc = EProgBar()
         self.calc.working_status.connect(self.on_working_change)
         self.calc.start()
 
@@ -707,111 +815,10 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             func.scp_restart(MySettings)
             self.label_9.setText("Once compile&stop&upload command has been sent")
 
-    def settings_init(self):
-        fs.cache_read(self.comboBox_3, SETTINGS_SOURCE_HISTORY)
-        fs.cache_read(self.comboBox, SETTINGS_PROJECT_HISTORY)
-        fs.cache_read(self.comboBox_2, SETTINGS_DEVICE_IP_HISTORY)
-        fs.cache_read(self.comboBox_5, SETTINGS_PUTTY_HISTORY)
-        fs.cache_read(self.comboBox_4, SETTINGS_WINSCP_HISTORY)
-        fs.cache_read(self.comboBox_6, SETTINGS_PSPLASH_HISTORY)
-
-        cache_files_size = 0
-        for file in cache_files:
-            cache_files_size += os.path.getsize(file)
-        self.label_13.setText("%s b" % cache_files_size)
-
-        if len(MySettings.project.name) == 0:
-            self.lineEdit.setText(SETTINGS_EMPTY)
-        else:
-            self.lineEdit.setText(MySettings.project.name)
-
-        if len(MySettings.device.ip) == 0:
-            self.lineEdit_2.setText(SETTINGS_EMPTY)
-        else:
-            self.lineEdit_2.setText(MySettings.device.ip)
-
-        if len(MySettings.device.user) == 0:
-            self.lineEdit_3.setText(SETTINGS_EMPTY)
-        else:
-            self.lineEdit_3.setText(MySettings.device.user)
-
-        if len(MySettings.device.password) == 0:
-            self.lineEdit_4.setText(SETTINGS_EMPTY)
-        else:
-            self.lineEdit_4.setText(MySettings.device.password)
-
-        if len(MySettings.project.path_local) == 0:
-            self.lineEdit_5.setText(SETTINGS_EMPTY)
-        else:
-            self.lineEdit_5.setText(MySettings.project.path_local)
-
-        if len(MySettings.server.ip) == 0:
-            self.lineEdit_6.setText(SETTINGS_EMPTY)
-        else:
-            self.lineEdit_6.setText(MySettings.server.ip)
-
-        if len(MySettings.server.user) == 0:
-            self.lineEdit_7.setText(SETTINGS_EMPTY)
-        else:
-            self.lineEdit_7.setText(MySettings.server.user)
-
-        if len(MySettings.server.password) == 0:
-            self.lineEdit_8.setText(SETTINGS_EMPTY)
-        else:
-            self.lineEdit_8.setText(MySettings.server.password)
-
-        if len(MySettings.server.path_external) == 0:
-            self.lineEdit_12.setText(SETTINGS_EMPTY)
-        else:
-            self.lineEdit_12.setText(MySettings.server.path_external)
-
-        if MySettings.device.ftp_mode == '1':
-            self.checkBox_3.setChecked(True)
-            self.radioButton.setEnabled(True)
-            self.radioButton_2.setEnabled(True)
-        elif MySettings.device.ftp_mode == '0':
-            self.checkBox_3.setChecked(False)
-            self.radioButton.setEnabled(False)
-            self.radioButton_2.setEnabled(False)
-            MySettings.server.sync_files = '0'
-
-        if MySettings.server.sync_files == '0':
-            self.radioButton.setChecked(True)
-        elif MySettings.server.sync_files == '1':
-            self.radioButton_2.setChecked(True)
-
-        if len(MySettings.local.path_winscp) == 0:
-            self.lineEdit_9.setText(SETTINGS_EMPTY)
-        else:
-            if not os.path.isfile(Settings.local.path_winscp):
-                self.lineEdit_9.setStyleSheet("background-color: red")
-                MySettings.local.winscp_ok = False
-            else:
-                MySettings.local.winscp_ok = True
-            self.lineEdit_9.setText(Settings.local.path_winscp)
-
-        if len(MySettings.local.path_putty) == 0:
-            self.lineEdit_10.setText(SETTINGS_EMPTY)
-        else:
-            if not os.path.isfile(MySettings.local.path_putty):
-                self.lineEdit_10.setStyleSheet("background-color: red")
-                MySettings.local.putty_ok = False
-            else:
-                MySettings.local.putty_ok = True
-            self.lineEdit_10.setText(MySettings.local.path_putty)
-
-        if len(MySettings.project.path_psplash) == 0:
-            self.lineEdit_11.setText(SETTINGS_EMPTY)
-        else:
-            self.lineEdit_11.setText(MySettings.project.path_psplash)
-
-        firmware_path = MySettings.project.path_local+"\\Build\\bin\\"+MySettings.project.name+".bin"
-        fs.path_get_firmware(firmware_path, self.label_16)
-
 
 def main():
     import sys
-    fs.cache_create(cache_files)
+    fs.cache_create(MyCache.list)
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
     window = MainWindow()
@@ -846,4 +853,7 @@ def protocol_get(self):
 
 
 if __name__ == '__main__':
+    # init global variables
+    MySettings = Settings
+    MyCache = Cache_file
     main()

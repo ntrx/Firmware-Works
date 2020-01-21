@@ -2,10 +2,10 @@ import os
 import sys
 import shutil
 
-## Arguments list:
-# --noconsole - hide console
-# --onefile    - portable file
-# --path *    - choose path
+#  Arguments list:
+#  --noconsole - hide console
+#  --onefile    - portable file
+#  --path *    - choose path
 
 MAIN_FILE = 'core.pyw'
 win32_dll = "\"C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\ucrt\\DLLs\\x86\""
@@ -95,7 +95,7 @@ def install_modules():
 def translate():
     if os.name == 'nt':
         os.system("python -m PyQt5.uic.pyuic %s -o %s" % (QT_XML, PY_XML))
-    else: # i think you have preinstalled python 2.7
+    else:  # i think you have preinstalled python 2.7
         os.system("python3 -m PyQt5.uic.pyuic %s -o %s" % (QT_XML, PY_XML))
 
 
@@ -126,8 +126,6 @@ def main():
                     for i in range(3, args):
                         arg_command += sys.argv[i] + " "
                     make_32(arg_command)
-                #else:
-                #    make_32("--noconsole --onefile")
             if sys.argv[2] == '64':
                 args = len(sys.argv)
                 if args > 2:
@@ -135,8 +133,7 @@ def main():
                     for i in range(3, args):
                         arg_command += sys.argv[i] + " "
                     make_64(arg_command)
-                #else:
-                #    make_64("--noconsole --onefile")
+
         if sys.argv[1] == 'clear':
             if sys.argv[2] == '32':
                 clear_32()
