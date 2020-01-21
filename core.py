@@ -1,5 +1,4 @@
 # #!/usr/bin/env python
-from typing import Type
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
@@ -40,7 +39,6 @@ class Cache_file:
         for file in self.list:
             if not os.path.exists(file):
                 fs.cache_create(self.list)
-
 
 
 class Settings:
@@ -90,6 +88,7 @@ class Settings:
             self.project.path_psplash = 'C:/example'
             self.save(self)
 
+        # If find == 0 its our parameter (because all they is starting from 0)
         with open(SETTINGS_FILE) as fp:
             for line in fp:
                 if line.find('user') == 0:
@@ -289,7 +288,10 @@ class MySFTPClient(paramiko.SFTPClient):
     def put_dir(self, source, target):
         for item in os.listdir(source):
             if os.path.isfile(os.path.join(source, item)):
-                self.put(os.path.join(source, item), '%s/%s' % (target, item), callback=func.sftp_callback)
+                if item.find('.ipch') >= 0:
+                    continue
+                print("Proceed: %s\\%s [%d]" % (source, item, os.path.getsize(os.path.join(source, item))))
+                self.put(os.path.join(source, item), '%s/%s' % (target, item), )
             else:
                 self.mkdir('%s/%s' % (target, item), ignore_existing=True)
                 self.put_dir(os.path.join(source, item), '%s/%s' % (target, item))

@@ -72,7 +72,7 @@ def scp_upload(Settings):
             f.write("chmod 777 \"%s\"\n" % path_dest_win)
             f.write("exit\n")
             f.close()
-            scp_path(file_name, PATH_WINSCP)
+            scp_path(file_name, Settings.local.path_winscp)
             os.remove(file_name)
         elif Settings.device.ftp_mode == '0':
             transport = paramiko.Transport((Settings.device.ip, 22))
@@ -100,7 +100,7 @@ def scp_killall(Settings):
             f.write("call killall sn4215_respawn.sh %s.bin\n" % Settings.project.name)
             f.write("exit\n")
             f.close()
-            scp_path(file_name, PATH_WINSCP)
+            scp_path(file_name, Settings.local.path_winscp)
             os.remove(file_name)
         if Settings.device.ftp_mode == '0':  # via paramiko
             paramiko.util.log_to_file('killall_command.log')
@@ -126,7 +126,7 @@ def scp_reboot(Settings):
             f.write("call shutdown -r now\n")  # shutdown -r now - on default linux its works
             f.write("exit\n")
             f.close()
-            scp_path(file_name, PATH_WINSCP)
+            scp_path(file_name, Settings.local.path_winscp)
             os.remove(file_name)
         if Settings.device.ftp_mode == '0':  # via paramiko
             paramiko.util.log_to_file('reboot_command.log')
@@ -152,7 +152,7 @@ def scp_poweroff(Settings):
             f.write("call poweroff\n")
             f.write("exit\n")
             f.close()
-            scp_path(file_name, PATH_WINSCP)
+            scp_path(file_name, Settings.local.path_winscp)
             os.remove(file_name)
         if Settings.device.ftp_mode == '0':  # via paramiko
             paramiko.util.log_to_file('poweroff_command.log')
@@ -179,7 +179,7 @@ def scp_ts_test(Settings):
             f.write("call TSLIB_TSDEVICE=/dev/input/event2 ts_test\n")
             f.write("exit\n")
             f.close()
-            scp_path(file_name, PATH_WINSCP)
+            scp_path(file_name, Settings.local.path_winscp)
             os.remove(file_name)
         if Settings.device.ftp_mode == '0':  # via paramiko
             paramiko.util.log_to_file('ts_test_command.log')
@@ -322,7 +322,10 @@ def scp_compile(Settings, build):
             if not Settings.server.compile_mode:
                 f.write("call make clean\n")
             if build == 'release':
-                f.write("call make %s -j7\n" % Settings.server.compiler)
+                if Settings.server.compiler == 'gcc8':
+                    f.write("call make gcc8 -j7\n")
+                else:
+                    f.write("call make -j7\n")
             elif build == 'debug':
                 f.write("call make %s debug -j7\n" % Settings.server.compiler)
             else:
@@ -343,33 +346,41 @@ def scp_compile(Settings, build):
                 print(result)
 
         if Settings.device.ftp_mode == '0':
-            transport = paramiko.Transport(global_build_server, 22)
+            transport = paramiko.Transport(Settings.server.ip, 22)
             transport.connect(username=Settings.server.user, password=Settings.server.password)
             sftp = core.MySFTPClient.from_transport(transport)
             if Settings.server.sync_files == '0':
                 sftp.mkdir(path_dest_win, ignore_existing=True)
-                sftp.put_dir(path_loc_win, path_dest_win)
+                sftp.mkdir(path_dest_win + '/Src', ignore_existing=True)
+                sftp.mkdir(path_dest_win + '/Build', ignore_existing=True)
+                sftp.put_dir(path_loc_win + '\\Src', path_dest_win + '/Src/')
             elif Settings.server.sync_files == '1':
                 pass
 
             paramiko.util.log_to_file('compile.log')
             client = paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            client.connect(global_build_server, 22, Settings.server.user, Settings.server.password)
+            client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
+
+            if Settings.server.compiler == 'gcc8':
+                compiler = ' gcc8'
+            else:
+                compiler = ''
+
             if Settings.server.sync_files == '0':
-                print("Join ", Settings.server.path_external + "/Src")
-                stdin, stdout, stderr = client.exec_command("cd " + Settings.server.path_external + "/Src;")
-                print("make begin")
-                stdin, stdout, stderr = client.exec_command("make clean; make %s" % Settings.server.compiler)
+                stdin, stdout, stderr = client.exec_command("cd /home/" + Settings.server.user + Settings.server.path_external + "/Src; make clean; make%s -j7" % compiler)
                 print("make end")
             # data = stdout.read() + stderr.read()
             elif Settings.server.sync_files == '1':
-                stdin, stdout, stderr = client.exec_command("cd " + Settings.server.path_external + "/Src; make %s" % Settings.server.compiler)
+                stdin, stdout, stderr = client.exec_command("cd /home/" + Settings.server.user + Settings.server.path_external + "/Src; make%s -j7" % compiler)
             # data = stdout.read() + stderr.read()
             client.close()
-            print("Getting file: " + Settings.server.path_external + "/Build/bin/" + Settings.project.name + ".bin")
-            sftp.get(remotepath="/home/" + Settings.server.user + "/" + Settings.server.path_external + "/Build/bin/" + Settings.project.name + ".bin",
-                     localpath=path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
+
+            path_loc_nix = "/home/%s%s/Build/bin/%s.bin" % (Settings.server.user, Settings.server.path_external, Settings.project.name)
+            path_loc_nix = core.fs.path_double_nix(path_loc_nix)
+            print("Getting file: ", path_loc_nix)
+            path_loc_win = core.fs.path_double_win(Settings.project.path_local)
+            sftp.get(remotepath=path_loc_nix, localpath=path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
             print("Saving to: " + path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
             sftp.close()
     else:
@@ -443,7 +454,7 @@ def scp_psplash_upload(Settings, self):
             f.write("call ln -sfn %s psplash\n" % path_dest_win)
             f.write("exit\n")
             f.close()
-            scp_path(file_name, PATH_WINSCP)
+            scp_path(file_name, Settings.local.path_winscp)
             os.remove(file_name)
         elif Settings.device.ftp_mode == '0':
             transport = paramiko.Transport((Settings.device.ip, 22))
@@ -470,7 +481,7 @@ def scp_clean(Settings):
                 f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.server.user, Settings.server.password, Settings.server.ip))
             elif Settings.device.file_protocol == 'scp':
                 f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (Settings.server.user, Settings.server.ip, Settings.server.password))
-            f.write("cd //home//" + global_bs_user + Settings.server.path_external + "//Src\n")
+            f.write("cd //home//" + Settings.server.user + Settings.server.path_external + "//Src\n")
             f.write("call make clean\n")
             f.write("exit\n")
             f.close()
@@ -484,7 +495,7 @@ def scp_clean(Settings):
                 print(result)
 
         if Settings.device.ftp_mode == '0':
-            transport = paramiko.Transport(global_build_server, 22)
+            transport = paramiko.Transport(Settings.server.ip, 22)
             transport.connect(username=Settings.server.user, password=Settings.server.password)
             sftp = core.MySFTPClient.from_transport(transport)
 
