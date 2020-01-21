@@ -26,12 +26,15 @@ def cache_save(HISTORY_FILE, SETTING_VALUE):
 def cache_read(self, HISTORY_FILE):
     if os.path.isfile(HISTORY_FILE):
         self.clear()
+        index: int = 0
         with open(HISTORY_FILE, "r") as f:
             while True:
                 line = f.readline()
                 if not line:
                     break
                 self.addItem(line)
+                index += 1
+        self.setCurrentIndex(index)
         f.close()
 
 

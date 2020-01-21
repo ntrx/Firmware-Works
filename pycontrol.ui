@@ -1180,6 +1180,9 @@
         <height>16</height>
        </rect>
       </property>
+      <property name="currentIndex">
+       <number>-1</number>
+      </property>
      </widget>
      <widget class="QLineEdit" name="lineEdit_11">
       <property name="enabled">
