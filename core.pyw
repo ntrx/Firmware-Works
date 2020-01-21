@@ -37,6 +37,11 @@ class Cache_file:
         for i in range(2, 8):
             self.list.append(listing[i])
 
+        for file in self.list:
+            if not os.path.exists(file):
+                fs.cache_create(self.list)
+
+
 
 class Settings:
     class device:               # Embedded device properties
@@ -83,7 +88,7 @@ class Settings:
             self.local.path_winscp = 'C:/example'
             self.local.path_putty = 'C:/example'
             self.project.path_psplash = 'C:/example'
-            self.save()
+            self.save(self)
 
         with open(SETTINGS_FILE) as fp:
             for line in fp:

@@ -1,22 +1,11 @@
 #!/usr/bin/env python
 # list of functions for scripts
 import os
-import settings
 import core
 import paramiko
 import subprocess
 from scp import SCPClient
 from core import Settings
-
-global_build_server = settings.global_build_server
-global_bs_user = settings.global_bs_user
-global_bs_secret = settings.global_bs_secret
-SETTINGS_FTP_MODE = settings.ftp_mode
-PATH_WINSCP = settings.path_scp
-PATH_PUTTY = settings.path_putty
-pb_overall = 0  # progress bar
-pb_total = 0
-pb_cur = 0
 
 
 def createSSHClient(server, port, user, secret):
