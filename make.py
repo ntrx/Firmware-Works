@@ -7,7 +7,7 @@ import shutil
 #  --onefile    - portable file
 #  --path *    - choose path
 
-MAIN_FILE = 'core.pyw'
+MAIN_FILE = 'core.py'
 win32_dll = "\"C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\ucrt\\DLLs\\x86\""
 pyinst_32 = "C:\python37-low\Scripts\pyinstaller.exe"
 QT_XML = 'pycontrol.ui'
