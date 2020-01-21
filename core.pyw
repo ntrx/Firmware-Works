@@ -191,92 +191,92 @@ class Settings:
             cache_files_size += os.path.getsize(file)
         gui.label_13.setText("%s b" % cache_files_size)
 
-        if len(MySettings.project.name) == 0:
+        if len(self.project.name) == 0:
             gui.lineEdit.setText(SETTINGS_EMPTY)
         else:
-            gui.lineEdit.setText(MySettings.project.name)
+            gui.lineEdit.setText(self.project.name)
 
-        if len(MySettings.device.ip) == 0:
+        if len(self.device.ip) == 0:
             gui.lineEdit_2.setText(SETTINGS_EMPTY)
         else:
-            gui.lineEdit_2.setText(MySettings.device.ip)
+            gui.lineEdit_2.setText(self.device.ip)
 
-        if len(MySettings.device.user) == 0:
+        if len(self.device.user) == 0:
             gui.lineEdit_3.setText(SETTINGS_EMPTY)
         else:
-            gui.lineEdit_3.setText(MySettings.device.user)
+            gui.lineEdit_3.setText(self.device.user)
 
-        if len(MySettings.device.password) == 0:
+        if len(self.device.password) == 0:
             gui.lineEdit_4.setText(SETTINGS_EMPTY)
         else:
-            gui.lineEdit_4.setText(MySettings.device.password)
+            gui.lineEdit_4.setText(self.device.password)
 
-        if len(MySettings.project.path_local) == 0:
+        if len(self.project.path_local) == 0:
             gui.lineEdit_5.setText(SETTINGS_EMPTY)
         else:
-            gui.lineEdit_5.setText(MySettings.project.path_local)
+            gui.lineEdit_5.setText(self.project.path_local)
 
-        if len(MySettings.server.ip) == 0:
+        if len(self.server.ip) == 0:
             gui.lineEdit_6.setText(SETTINGS_EMPTY)
         else:
-            gui.lineEdit_6.setText(MySettings.server.ip)
+            gui.lineEdit_6.setText(self.server.ip)
 
-        if len(MySettings.server.user) == 0:
+        if len(self.server.user) == 0:
             gui.lineEdit_7.setText(SETTINGS_EMPTY)
         else:
-            gui.lineEdit_7.setText(MySettings.server.user)
+            gui.lineEdit_7.setText(self.server.user)
 
-        if len(MySettings.server.password) == 0:
+        if len(self.server.password) == 0:
             gui.lineEdit_8.setText(SETTINGS_EMPTY)
         else:
-            gui.lineEdit_8.setText(MySettings.server.password)
+            gui.lineEdit_8.setText(self.server.password)
 
-        if len(MySettings.server.path_external) == 0:
+        if len(self.server.path_external) == 0:
             gui.lineEdit_12.setText(SETTINGS_EMPTY)
         else:
-            gui.lineEdit_12.setText(MySettings.server.path_external)
+            gui.lineEdit_12.setText(self.server.path_external)
 
-        if MySettings.device.ftp_mode == '1':
+        if self.device.ftp_mode == '1':
             gui.checkBox_3.setChecked(True)
             gui.radioButton.setEnabled(True)
             gui.radioButton_2.setEnabled(True)
-        elif MySettings.device.ftp_mode == '0':
+        elif self.device.ftp_mode == '0':
             gui.checkBox_3.setChecked(False)
             gui.radioButton.setEnabled(False)
             gui.radioButton_2.setEnabled(False)
-            MySettings.server.sync_files = '0'
+            self.server.sync_files = '0'
 
-        if MySettings.server.sync_files == '0':
+        if self.server.sync_files == '0':
             gui.radioButton.setChecked(True)
-        elif MySettings.server.sync_files == '1':
+        elif self.server.sync_files == '1':
             gui.radioButton_2.setChecked(True)
 
-        if len(MySettings.local.path_winscp) == 0:
+        if len(self.local.path_winscp) == 0:
             gui.lineEdit_9.setText(SETTINGS_EMPTY)
         else:
-            if not os.path.isfile(Settings.local.path_winscp):
+            if not os.path.isfile(self.local.path_winscp):
                 gui.lineEdit_9.setStyleSheet("background-color: red")
-                MySettings.local.winscp_ok = False
+                self.local.winscp_ok = False
             else:
-                MySettings.local.winscp_ok = True
-            gui.lineEdit_9.setText(Settings.local.path_winscp)
+                self.local.winscp_ok = True
+            gui.lineEdit_9.setText(self.local.path_winscp)
 
-        if len(MySettings.local.path_putty) == 0:
+        if len(self.local.path_putty) == 0:
             gui.lineEdit_10.setText(SETTINGS_EMPTY)
         else:
-            if not os.path.isfile(MySettings.local.path_putty):
+            if not os.path.isfile(self.local.path_putty):
                 gui.lineEdit_10.setStyleSheet("background-color: red")
-                MySettings.local.putty_ok = False
+                self.local.putty_ok = False
             else:
-                MySettings.local.putty_ok = True
-            gui.lineEdit_10.setText(MySettings.local.path_putty)
+                self.local.putty_ok = True
+            gui.lineEdit_10.setText(self.local.path_putty)
 
-        if len(MySettings.project.path_psplash) == 0:
+        if len(self.project.path_psplash) == 0:
             gui.lineEdit_11.setText(SETTINGS_EMPTY)
         else:
-            gui.lineEdit_11.setText(MySettings.project.path_psplash)
+            gui.lineEdit_11.setText(self.project.path_psplash)
 
-        firmware_path = MySettings.project.path_local + "\\Build\\bin\\" + MySettings.project.name + ".bin"
+        firmware_path = self.project.path_local + "\\Build\\bin\\" + self.project.name + ".bin"
         fs.path_get_firmware(firmware_path, gui.label_16)
 
 
