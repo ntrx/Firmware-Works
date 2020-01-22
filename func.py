@@ -307,8 +307,8 @@ def scp_compile(Settings, build):
         path_loc_win = Settings.project.path_local  # os.getcwd()
         path_dest_win = "//home//" + Settings.server.user + Settings.server.path_external
         file_name = 'compile' + Settings.project.name
-        if not os.path.isdir(path_loc_win + "\\Build\\bin\\"):
-            os.mkdir(path_loc_win + "\\Build\\bin\\")
+        if not os.path.exists(core.fs.path_double_win(path_loc_win + "\\Build\\bin\\")):
+            os.mkdir(path=core.fs.path_double_win(path_loc_win + "\\Build\\bin\\"))
         if Settings.device.ftp_mode == '1':
             f = open(file_name, 'w+')
             f.write("option confirm off\n")
@@ -356,24 +356,26 @@ def scp_compile(Settings, build):
                 sftp.put_dir(path_loc_win + '\\Src', path_dest_win + '/Src/')
             elif Settings.server.sync_files == '1':
                 pass
+            else:
+                pass
 
             paramiko.util.log_to_file('compile.log')
             client = paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
 
-            if Settings.server.compiler == 'gcc8':
-                compiler = ' gcc8'
-            else:
-                compiler = ''
-
             if Settings.server.sync_files == '0':
-                stdin, stdout, stderr = client.exec_command("cd /home/" + Settings.server.user + Settings.server.path_external + "/Src; make clean; make%s -j7" % compiler)
-                print("make end")
-            # data = stdout.read() + stderr.read()
+                stdin, stdout, stderr = client.exec_command("make -C /home/" + Settings.server.user + Settings.server.path_external + "/Src clean")
+                data = stdout.read() + stderr.read()
+                stdin, stdout, stderr = client.exec_command(" make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7 --makefile=Makefile")
+                data += stdout.read() + stderr.read()
             elif Settings.server.sync_files == '1':
-                stdin, stdout, stderr = client.exec_command("cd /home/" + Settings.server.user + Settings.server.path_external + "/Src; make%s -j7" % compiler)
-            # data = stdout.read() + stderr.read()
+                stdin, stdout, stderr = client.exec_command("make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7")
+                data = stdout.read() + stderr.read()
+            i = 0
+            while i < len(data):
+                print(chr(data[i]), end="")
+                i += 1
             client.close()
 
             path_loc_nix = "/home/%s%s/Build/bin/%s.bin" % (Settings.server.user, Settings.server.path_external, Settings.project.name)
