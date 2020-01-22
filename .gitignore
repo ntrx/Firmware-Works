@@ -1,0 +1,17 @@
+
+*.bak
+*.exe
+*.iml
+*.xml
+*.pyc
+*.zip
+*.toc
+*.manifest
+*.pkg
+*.pyz
+*.txt
+*.html
+*.log
+*.spec
+settings.py
+gui.py
