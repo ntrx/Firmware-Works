@@ -15,3 +15,8 @@
 *.spec
 settings.py
 gui.py
+*.7z
+*.ttf
+*.ppk
+.idea/.name
+key
