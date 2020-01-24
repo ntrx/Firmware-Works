@@ -8,7 +8,7 @@ import shutil
 #  --path *    - choose path
 
 MAIN_FILE = 'core.py'
-win32_dll = "\"C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\ucrt\\DLLs\\x86\""
+win32_dll = "\"C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.17763.0\\ucrt\\DLLs\\x86\""
 pyinst_32 = "C:\python37-low\Scripts\pyinstaller.exe"
 QT_XML = 'pycontrol.ui'
 PY_XML = 'gui.py'
