@@ -20,3 +20,15 @@ gui.py
 *.ppk
 .idea/.name
 key
+*.pyd
+*.dll
+*.rst
+dist/core/cryptography-2.7-py3.7.egg-info/INSTALLER
+dist/core/cryptography-2.7-py3.7.egg-info/LICENSE
+*.APACHE
+*.BSD
+*.PSF
+dist/core/cryptography-2.7-py3.7.egg-info/METADATA
+dist/core/cryptography-2.7-py3.7.egg-info/RECORD
+dist/core/cryptography-2.7-py3.7.egg-info/WHEEL
+*.qm
