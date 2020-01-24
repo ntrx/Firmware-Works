@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # list of functions for scripts
 import os
-import core
 import paramiko
 import subprocess
 from scp import SCPClient
-from core import Settings
+import fs
+from core import MySFTPClient
 
 
 def createSSHClient(server, port, user, secret):
@@ -78,7 +78,7 @@ def scp_upload(Settings):
             transport = paramiko.Transport((Settings.device.ip, 22))
             transport.connect()
             transport.auth_none(username=Settings.device.user)
-            sftp = core.MySFTPClient.from_transport(transport)
+            sftp = MySFTPClient.from_transport(transport)
             sftp.put(path_loc_win, path_dest_win)
             sftp.chmod(path_dest_win, 777)
             sftp.close()
@@ -307,8 +307,8 @@ def scp_compile(Settings, build):
         path_loc_win = Settings.project.path_local  # os.getcwd()
         path_dest_win = "//home//" + Settings.server.user + Settings.server.path_external
         file_name = 'compile' + Settings.project.name
-        if not os.path.exists(core.fs.path_double_win(path_loc_win + "\\Build\\bin\\")):
-            os.mkdir(path=core.fs.path_double_win(path_loc_win + "\\Build\\bin\\"))
+        if not os.path.exists(fs.path_double_win(path_loc_win + "\\Build\\bin\\")):
+            os.mkdir(path=fs.path_double_win(path_loc_win + "\\Build\\bin\\"))
         if Settings.device.ftp_mode == '1':
             f = open(file_name, 'w+')
             f.write("option confirm off\n")
@@ -348,7 +348,7 @@ def scp_compile(Settings, build):
         if Settings.device.ftp_mode == '0':
             transport = paramiko.Transport(Settings.server.ip, 22)
             transport.connect(username=Settings.server.user, password=Settings.server.password)
-            sftp = core.MySFTPClient.from_transport(transport)
+            sftp = MySFTPClient.from_transport(transport)
             if Settings.server.sync_files == '0':
                 sftp.mkdir(path_dest_win, ignore_existing=True)
                 sftp.mkdir(path_dest_win + '/Src', ignore_existing=True)
@@ -379,9 +379,9 @@ def scp_compile(Settings, build):
             client.close()
 
             path_loc_nix = "/home/%s%s/Build/bin/%s.bin" % (Settings.server.user, Settings.server.path_external, Settings.project.name)
-            path_loc_nix = core.fs.path_double_nix(path_loc_nix)
+            path_loc_nix = fs.path_double_nix(path_loc_nix)
             print("Getting file: ", path_loc_nix)
-            path_loc_win = core.fs.path_double_win(Settings.project.path_local)
+            path_loc_win = fs.path_double_win(Settings.project.path_local)
             sftp.get(remotepath=path_loc_nix, localpath=path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
             print("Saving to: " + path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
             sftp.close()
@@ -394,7 +394,7 @@ def scp_detect_project(Settings, self):
         transport = paramiko.Transport((Settings.device.ip, 22))
         transport.connect()
         transport.auth_none(username=Settings.device.user)
-        sftp = core.MySFTPClient.from_transport(transport)
+        sftp = MySFTPClient.from_transport(transport)
         result = sftp.listdir("/home/root/")
         for obj in result:
             if obj[0] != '.':
@@ -417,7 +417,7 @@ def scp_detect_outdated_firmware(Settings, self):
         transport = paramiko.Transport((Settings.device.ip, 22))
         transport.connect()
         transport.auth_none(username=Settings.device.user)
-        sftp = core.MySFTPClient.from_transport(transport)
+        sftp = MySFTPClient.from_transport(transport)
         device_firmware = sftp.lstat('/home/root/%s/bin/%s.bin' % (Settings.project.name, Settings.project.name))
         sftp.close()
     elif Settings.device.file_protocol == 'scp':
@@ -440,7 +440,7 @@ def scp_detect_outdated_firmware(Settings, self):
 
 def scp_psplash_upload(Settings, self):
     if os.name == 'nt':
-        file_name = core.fs.path_get_filename(Settings.project.path_psplash)
+        file_name = fs.path_get_filename(Settings.project.path_psplash)
         path_loc_win = Settings.project.path_psplash
         path_dest_win = "//usr//bin//" + file_name
         if Settings.device.ftp_mode == '1':
@@ -462,7 +462,7 @@ def scp_psplash_upload(Settings, self):
             transport = paramiko.Transport((Settings.device.ip, 22))
             transport.connect()
             transport.auth_none(username=Settings.device.user)
-            sftp = core.MySFTPClient.from_transport(transport)
+            sftp = MySFTPClient.from_transport(transport)
             sftp.put(path_loc_win, path_dest_win)
             sftp.chmod(path_dest_win, 777)
             sftp.close()
@@ -499,7 +499,7 @@ def scp_clean(Settings):
         if Settings.device.ftp_mode == '0':
             transport = paramiko.Transport(Settings.server.ip, 22)
             transport.connect(username=Settings.server.user, password=Settings.server.password)
-            sftp = core.MySFTPClient.from_transport(transport)
+            sftp = MySFTPClient.from_transport(transport)
 
             paramiko.util.log_to_file('clean.log')
             client = paramiko.SSHClient()
