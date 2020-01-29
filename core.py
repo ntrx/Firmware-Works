@@ -311,7 +311,10 @@ class EProgBar(QThread):
 
     def run(self):
         self.working_status.emit(1)
-        func.scp_compile(MySettings, 'release')
+        if os.path.exists(Settings.project.path_local):
+            func.scp_compile(MySettings, 'release')
+        else:
+            print('Project PATH not found.')
         self.working_status.emit(0)
 
 
@@ -320,7 +323,10 @@ class EProgBar_debug(QThread):
 
     def run(self):
         self.working_status_debug.emit(1)
-        func.scp_compile(MySettings, 'debug')
+        if os.path.exists(Settings.project.path_local):
+            func.scp_compile(MySettings, 'debug')
+        else:
+            print('Project PATH not found.')
         self.working_status_debug.emit(0)
 
 
@@ -801,7 +807,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
                 MySettings.server.compiler = 'gcc8'
             else:
                 MySettings.server.compiler = ''
-            func.scp_compile(MySettings, 'release')
+            if os.path.exists(Settings.project.path_local):
+                func.scp_compile(MySettings, 'release')
+            else:
+                self.label_9.setText("Project PATH not found. Exiting.")
+                print('Project PATH not found. Exiting.')
+                return
 
         MySettings.device.file_protocol = protocol_get(self)
 
