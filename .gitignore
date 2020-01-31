@@ -32,3 +32,5 @@ dist/core/cryptography-2.7-py3.7.egg-info/METADATA
 dist/core/cryptography-2.7-py3.7.egg-info/RECORD
 dist/core/cryptography-2.7-py3.7.egg-info/WHEEL
 *.qm
+*.fhq0ac85
+*.ini
