@@ -7,22 +7,23 @@ import shutil
 #  --onefile    - portable file
 #  --path *    - choose path
 
-MAIN_FILE = 'core.py'
-win32_dll = "\"C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.17763.0\\ucrt\\DLLs\\x86\""
-pyinst_32 = "C:\python37-low\Scripts\pyinstaller.exe"
-QT_XML = 'pycontrol.ui'
-PY_XML = 'gui.py'
+MAIN_FILE = "" # 'core.py'
+win32_dll = "" #"\"C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.17763.0\\ucrt\\DLLs\\x86\""
+pyinst_32 = "" #"C:\python37-low\Scripts\pyinstaller.exe"
+QT_XML = "" #'pycontrol.ui'
+PY_XML = "" #'gui.py'
+PY_ICON = "" # icon file
 
 
 def make_64(arguments):
-    os.system('pyinstaller --icon=pycontrol.ico %s %s' % (arguments, MAIN_FILE))
+    os.system('pyinstaller --icon=%s %s %s' % (PY_ICON, arguments, MAIN_FILE))
 
 
 def make_32(arguments):
-    os.system('%s --path %s --icon=pycontrol.ico %s %s' % (pyinst_32, win32_dll, arguments, MAIN_FILE))
+    os.system('%s --path %s --icon=%s %s %s' % (pyinst_32, win32_dll, PY_ICON, arguments, MAIN_FILE))
 
 def make(arguments):
-    os.system('pyinstaller --icon=pycontrol.ico %s %s' % (arguments, MAIN_FILE))
+    os.system('pyinstaller --icon=%s %s %s' % (PY_ICON, arguments, MAIN_FILE))
 
 def clear_64():
     os.chdir("dist/core")
@@ -102,6 +103,31 @@ def translate():
 
 
 def main():
+    global MAIN_FILE
+    global win32_dll
+    global QT_XML
+    global PY_XML
+    global pyinst_32
+    global PY_ICON
+    if not os.path.exists('make.ini'):
+        print('Config file not found! Please create it file by yourself manually.')
+        return
+    with open('make.ini', 'rt+') as fp:
+        for line in fp:            
+            if line.find('main-file') == 0:
+                MAIN_FILE = get_value(line, len('main-file'))
+            if line.find('win32_dll') == 0:
+                win32_dll = get_value(line, len('win32_dll'))
+            if line.find('qt-xml-file') == 0:
+                QT_XML = get_value(line, len('qt-xml-file'))
+            if line.find('py-xml-file') == 0:
+                PY_XML = get_value(line, len('py-xml-file'))
+            if line.find('win32_pyinst') == 0:
+                pyinst_32 = get_value(line, len('win32_pyinst'))
+            if line.find('icon-file') == 0:
+                PY_ICON = get_value(line, len('icon-file'))
+
+    fp.close()
     if len(sys.argv) <= 1:
         print("Not enough arguments. Type %s help" % sys.argv[0])
     else:
@@ -155,6 +181,15 @@ def main():
             translate()
             make("--noconsole --onefile")
 
-
+def get_value(line, start):
+    value = ""
+    for i in range(start, len(line)):
+        if line[i] == " " and line[i+1] == "'":
+            j = i+2
+            while line[j] != "'":
+                value += line[j]
+                j += 1
+    return value
+	
 if __name__ == '__main__':
     main()
