@@ -13,6 +13,7 @@ pyinst_32 = "" #"C:\python37-low\Scripts\pyinstaller.exe"
 QT_XML = "" #'pycontrol.ui'
 PY_XML = "" #'gui.py'
 PY_ICON = "" # icon file
+PY_MODULES = [] # list of required mofules for running 
 
 
 def make_64(arguments):
@@ -89,11 +90,8 @@ def clear_32():
 
 
 def install_modules():
-    os.system("pip install pyqt5")
-    os.system("pip install paramiko")
-    os.system("pip install pyinstaller")
-    os.system("pip install scp")
-
+    for module in range(2, len(PY_MODULES)):
+        os.system("pip install %s" % PY_MODULES[module])
 
 def translate():
     if os.name == 'nt':
@@ -109,6 +107,7 @@ def main():
     global PY_XML
     global pyinst_32
     global PY_ICON
+    global PY_MODULES
     if not os.path.exists('make.ini'):
         print('Config file not found! Please create it file by yourself manually.')
         return
@@ -126,6 +125,9 @@ def main():
                 pyinst_32 = get_value(line, len('win32_pyinst'))
             if line.find('icon-file') == 0:
                 PY_ICON = get_value(line, len('icon-file'))
+            if line.find('depends') == 0:
+                PY_MODULES = get_depends(line)
+
 
     fp.close()
     if len(sys.argv) <= 1:
@@ -191,5 +193,15 @@ def get_value(line, start):
                 j += 1
     return value
 	
+def get_depends(line):
+    '''
+    Returning string splited by space as string array
+    Usefull data is from 2 index
+    '''
+    depends_modules = []
+    for word in line.split():
+        depends_modules.append(word)
+    return depends_modules
+
 if __name__ == '__main__':
     main()
