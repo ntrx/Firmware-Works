@@ -518,7 +518,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_open_putty(self):
         if os.name == "nt":
             if MySettings.local.putty_ok:
-                func.putty_path(MySettings.device.user, MySettings.device.ip, MySettings.local.path_putty)
+                func.putty_path(MySettings.device.ip, MySettings.device.user, MySettings.local.path_putty)
             else:
                 self.label_9.setText("Putty not found!")
         else:
