@@ -522,10 +522,7 @@ def scp_clean(Settings):
         if Settings.device.ftp_mode == '1':
             f = open(file_name, 'w+')
             f.write("option confirm off\n")
-            #if Settings.device.file_protocol == 'sftp':
             f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.server.user, Settings.server.password, Settings.server.ip))
-            #elif Settings.device.file_protocol == 'scp':
-            #    f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (Settings.server.user, Settings.server.ip, Settings.server.password))
             f.write("cd //home//" + Settings.server.user + Settings.server.path_external + "//Src\n")
             f.write("call make clean\n")
             f.write("exit\n")
