@@ -68,6 +68,7 @@ def scp_upload(Settings):
                 f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
             elif Settings.device.file_protocol == 'scp':
                 f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.ip, Settings.device.password))
+            f.write("cp %s %s_backup\n" % (path_dest_win, path_dest_win))
             f.write("put %s %s\n" % (path_loc_win, path_dest_win))
             f.write("chmod 777 \"%s\"\n" % path_dest_win)
             f.write("exit\n")
@@ -79,6 +80,7 @@ def scp_upload(Settings):
             transport.connect()
             transport.auth_none(username=Settings.device.user)
             sftp = MySFTPClient.from_transport(transport)
+            sftp.rename(path_dest_win, path_dest_win + "_backup")
             sftp.put(path_loc_win, path_dest_win)
             sftp.chmod(path_dest_win, 777)
             sftp.close()
