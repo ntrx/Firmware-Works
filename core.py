@@ -57,6 +57,7 @@ class Settings:
         sync_files: str = ""     # sync or upload sources
         compiler: str = ""           # Type of compiler gcc or gcc8
         compile_mode: bool = False   # If true then clean object files before compiling (recompiling)
+        using: bool = True           # Linux only: compiling on external build-server or (false) using built-in gcc compiler
 
     class project:              # Project settings
         name: str = ""               # Name of project which has been applied to output binary file
@@ -338,6 +339,27 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.calc = EProgBar()
         self.setupUi(self)
         self.setWindowTitle("%s %s %s" % (PROG_NAME, VERSION, RELEASE))
+
+        if os.name == 'nt': # for windows
+            # Compiler type field
+            self.label_18.setVisible(False)
+            self.comboBox_9.setVisible(False)
+            pass
+        else: # for linux
+            # Tab: External
+            self.tabWidget.setTabEnabled(2, False)
+            # Compiler type field
+            self.label_18.setVisible(True)
+            self.comboBox_9.setVisible(True)
+            # Button: open with winSCP
+            self.pushButton_25.setVisible(False)
+            # Button: open with Putty
+            self.pushButton_26.setText("open with xterm")
+            # Button: putty
+            self.pushButton_17.setText("xterm")
+            # Button: winSCP
+            self.pushButton_24.setVisible(False)
+
         # self.label_9.setStyleSheet('background-color: red') for future
         MySettings.load(MySettings)
         MyCache.init(MyCache)
@@ -391,6 +413,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.comboBox_4.currentIndexChanged.connect(self.on_winscp_change)
         self.comboBox_5.currentIndexChanged.connect(self.on_putty_change)
         self.comboBox_6.currentIndexChanged.connect(self.on_psplash_change)
+        self.comboBox_9.currentIndexChanged.connect(self.on_bs_using_change)
 
         # action menu
         self.actionOpen_2.triggered.connect(self.on_button_open)
@@ -409,7 +432,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             else:
                 self.label_9.setText("Putty not found!")
         else:
-            pass
+            os.system("xterm -hold -e 'ssh %s@%s'" % (MySettings.server.user, MySettings.server.ip))
 
     @pyqtSlot(name='on_button_bs_winscp')
     def on_button_bs_winscp(self):
@@ -443,7 +466,11 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_button_clean(self):
         MySettings.device.file_protocol = protocol_get(self)
         func.scp_clean(MySettings)
-        self.label_9.setText("Cleaned firmware on remote server command.")
+        if Settings.server.using:
+            self.label_9.setText("Cleaned firmware on remote server command.")
+        else:
+            self.label_9.setText("Firmware clean command.")
+                
 
     @pyqtSlot(name='on_radioButton_sync_mode')
     def on_radioButton_sync_mode(self):
@@ -513,6 +540,17 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_project_change')
     def on_project_change(self):
         self.lineEdit.setText(self.comboBox.currentText())
+        
+    @pyqtSlot(name='on_bs_using_change')
+    def on_bs_using_change(self):
+        # Tab: Build-Server
+        if self.comboBox_9.currentIndex() == 1:  # Build-in compiler
+            Settings.server.using = False              
+            self.comboBox_9.setCurrentIndex(1)
+        elif self.comboBox_9.currentIndex() == 0: # Build-server compiler
+            Settings.server.using = True
+            self.comboBox_9.setCurrentIndex(0)
+        self.tabWidget.setTabEnabled(1, Settings.server.using)
 
     @pyqtSlot(name='on_open_putty')
     def on_open_putty(self):

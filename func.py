@@ -386,50 +386,57 @@ def scp_compile(Settings, build):
             print("Saving to: " + path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
             sftp.close()
     else:
-        path_loc_nix = Settings.project.path_local
-        path_dest_nix = "//home//" + Settings.server.user + Settings.server.path_external
-        if not os.path.exists(fs.path_double_nix(path_loc_nix + "//Build//bin//")):
-            os.mkdir(path=fs.path_double_nix(path_loc_nix + "//Build//bin//"))
-        if True:
-            transport = paramiko.Transport(Settings.server.ip, 22)
-            transport.connect(username=Settings.server.user, password=Settings.server.password)
-            sftp = MySFTPClient.from_transport(transport)
-            if Settings.server.sync_files == '0':
-                sftp.mkdir(path_dest_nix, ignore_existing=True)
-                sftp.mkdir(path_dest_nix + '/Src', ignore_existing=True)
-                sftp.mkdir(path_dest_nix + '/Build', ignore_existing=True)
-                sftp.put_dir(path_loc_nix + '//Src', path_dest_nix + '/Src/')
-            elif Settings.server.sync_files == '1':
-                pass
-            else:
-                pass
+        if Settings.server.using: # Build-server
+            path_loc_nix = Settings.project.path_local
+            path_dest_nix = "//home//" + Settings.server.user + Settings.server.path_external
+            if not os.path.exists(fs.path_double_nix(path_loc_nix + "//Build//bin//")):
+                os.mkdir(path=fs.path_double_nix(path_loc_nix + "//Build//bin//"))
+            if True:
+                transport = paramiko.Transport(Settings.server.ip, 22)
+                transport.connect(username=Settings.server.user, password=Settings.server.password)
+                sftp = MySFTPClient.from_transport(transport)
+                if Settings.server.sync_files == '0':
+                    sftp.mkdir(path_dest_nix, ignore_existing=True)
+                    sftp.mkdir(path_dest_nix + '/Src', ignore_existing=True)
+                    sftp.mkdir(path_dest_nix + '/Build', ignore_existing=True)
+                    sftp.put_dir(path_loc_nix + '//Src', path_dest_nix + '/Src/')
+                elif Settings.server.sync_files == '1':
+                    pass
+                else:
+                    pass
 
-            paramiko.util.log_to_file('compile.log')
-            client = paramiko.SSHClient()
-            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
+                paramiko.util.log_to_file('compile.log')
+                client = paramiko.SSHClient()
+                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
 
-            if Settings.server.sync_files == '0':
-                stdin, stdout, stderr = client.exec_command("make -C /home/" + Settings.server.user + Settings.server.path_external + "/Src clean")
-                data = stdout.read() + stderr.read()
-                stdin, stdout, stderr = client.exec_command(" make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7 --makefile=Makefile")
-                data += stdout.read() + stderr.read()
-            elif Settings.server.sync_files == '1':
-                stdin, stdout, stderr = client.exec_command("make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7")
-                data = stdout.read() + stderr.read()
-            i = 0
-            while i < len(data):
-                print(chr(data[i]), end="")
-                i += 1
-            client.close()
+                if Settings.server.sync_files == '0':
+                    stdin, stdout, stderr = client.exec_command("make -C /home/" + Settings.server.user + Settings.server.path_external + "/Src clean")
+                    data = stdout.read() + stderr.read()
+                    stdin, stdout, stderr = client.exec_command(" make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7 --makefile=Makefile")
+                    data += stdout.read() + stderr.read()
+                elif Settings.server.sync_files == '1':
+                    stdin, stdout, stderr = client.exec_command("make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7")
+                    data = stdout.read() + stderr.read()
+                i = 0
+                while i < len(data):
+                    print(chr(data[i]), end="")
+                    i += 1
+                client.close()
 
-            path_loc_dest = '/home/%s%s/Build/bin/%s.bin' % (Settings.server.user, Settings.server.path_external, Settings.project.name)
-            path_loc_dest = fs.path_double_nix(path_loc_dest)
-            print("Getting file:", path_loc_dest)
+                path_loc_dest = '/home/%s%s/Build/bin/%s.bin' % (Settings.server.user, Settings.server.path_external, Settings.project.name)
+                path_loc_dest = fs.path_double_nix(path_loc_dest)
+                print("Getting file:", path_loc_dest)
+                path_loc_nix = fs.path_double_nix(Settings.project.path_local)
+                sftp.get(remotepath=path_loc_dest, localpath=path_loc_nix + "/Build/bin/" + Settings.project.name + '.bin')
+                print('Saving file to:' + path_loc_nix + '/Build/bin/' + Settings.project.name + '.bin')
+                sftp.close()
+        else: # built-in compiler
             path_loc_nix = fs.path_double_nix(Settings.project.path_local)
-            sftp.get(remotepath=path_loc_dest, localpath=path_loc_nix + "/Build/bin/" + Settings.project.name + '.bin')
-            print('Saving file to:' + path_loc_nix + '/Build/bin/' + Settings.project.name + '.bin')
-            sftp.close()
+            if not os.path.exists(path_loc_nix):
+                print("MAKE: local unix path NOT FOUND!")
+                return
+            os.system("make -C %s/Src --makefile=Makefile" % path_loc_nix)
 
 
 def scp_detect_project(Settings, self):
@@ -551,8 +558,32 @@ def scp_clean(Settings):
             client.close()
             sftp.close()
     else:
-        pass  # in process
+        if Settings.server.using: # Build-server
+            path_loc_nix = Settings.project.path_local
+            if not os.path.exists(fs.path_double_nix(path_loc_nix + "//Build//bin//")):
+                return
+            if True:
+                paramiko.util.log_to_file('clean.log')
+                client = paramiko.SSHClient()
+                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
 
+                stdin, stdout, stderr = client.exec_command("make -C /home/" + Settings.server.user + Settings.server.path_external + "/Src clean")
+                data = stdout.read() + stderr.read()
+
+                i = 0
+                while i < len(data):
+                    print(chr(data[i]), end="")
+                    i += 1
+                client.close()
+        else: # Built-in compiler
+            path_loc_nix = fs.path_double_nix(Settings.project.path_local + "//Build//bin//")
+            if not os.path.exists(path_loc_nix):
+                print("CLEAN: local unix path NOT FOUND!")
+                return
+            
+            os.system("make -C %s clean" % path_loc_nix)
+            
 
 def sftp_callback(transferred, toBeTransferred):
     print("Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred))
