@@ -83,7 +83,10 @@ class Settings:
             self.server.user = 'root'
             self.server.password = '1111'
             self.server.sync_files = '0'
-            self.device.ftp_mode = '1'
+            if os.name == 'nt':
+                self.device.ftp_mode = '1'
+            else:
+                self.device.ftp_mode = '0'
             self.local.path_winscp = 'C:/example'
             self.local.path_putty = 'C:/example'
             self.project.path_psplash = 'C:/example'
@@ -134,7 +137,14 @@ class Settings:
 
                 if line.find('ftp_mode') == 0:
                     index = 8
-                    self.device.ftp_mode = get_value(line, index)
+
+                    if os.name == 'nt':
+                        self.device.ftp_mode = get_value(line, index)
+                    else:
+                        ftp_mode = get_value(line, index)
+                        if (ftp_mode == '1'):
+                            self.device.ftp_mode = '0'
+
 
                 if line.find('path_scp') == 0:
                     index = 8
