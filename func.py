@@ -84,9 +84,13 @@ def scp_upload(Settings):
             sftp.put(path_loc_win, path_dest_win)
             sftp.chmod(path_dest_win, 777)
             sftp.close()
-    else:
-        pass
-        # linux
+    else: # linux
+        path_loc_nix = Settings.project.path_local + "//Build//bin//" + Settings.project.name + ".bin"
+        path_dest_nix = "//home//" + Settings.device.user + "//" + Settings.project.name + "//bin//"
+        if Settings.device.file_protocol == '1': # sftp
+            pass
+        elif Settings.device.file_protocol == '0': # scp
+            os.system("scp %s %s@%s:%s" % (path_loc_nix, Settings.device.user, Settings.device.ip, path_dest_nix))
 
 
 def scp_killall(Settings):
@@ -460,7 +464,19 @@ def scp_detect_project(Settings, self):
         if os.name == "nt":
             self.setText('Cannot get directory list via SCP.')
         else:
-            pass
+            transport = paramiko.Transport((Settings.device.ip, 22))
+            transport.connect()
+            transport.auth_none(username=Settings.device.user)
+            sftp = MySFTPClient.from_transport(transport)
+            result = sftp.listdir("/home/root/")
+            for obj in result:
+                if obj[0] != '.':
+                    result = obj
+                    break
+                else:
+                    result = 'None'
+            sftp.close()
+            self.setText("Detected firmware: %s" % result)
 
 
 def scp_detect_outdated_firmware(Settings, self):
@@ -519,9 +535,11 @@ def scp_psplash_upload(Settings, self):
             sftp.chmod(path_dest_win, 777)
             sftp.close()
         self.setText("psplash command sent")
-    else:
-        pass
-        # linux
+    else: # linux
+        if Settings.device.ftp_mode == '1':
+            pass
+        elif Settings.device.ftp_mode == '0':
+            pass
 
 
 def scp_clean(Settings):
