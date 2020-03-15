@@ -142,9 +142,8 @@ class Settings:
                         self.device.ftp_mode = get_value(line, index)
                     else:
                         ftp_mode = get_value(line, index)
-                        if (ftp_mode == '1'):
+                        if ftp_mode == '1':
                             self.device.ftp_mode = '0'
-
 
                 if line.find('path_scp') == 0:
                     index = 8
