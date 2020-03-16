@@ -617,7 +617,6 @@ def scp_clean(Settings):
             if not os.path.exists(path_loc_nix):
                 print("CLEAN: local unix path NOT FOUND!")
                 return
-            
             os.system("make -C %s clean" % path_loc_nix)
             
 
