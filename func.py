@@ -87,7 +87,7 @@ def scp_upload(Settings):
     else: # linux
         path_loc_nix = Settings.project.path_local + "//Build//bin//" + Settings.project.name + ".bin"
         path_dest_nix = "//home//" + Settings.device.user + "//" + Settings.project.name + "//bin//"
-        if Settings.device.file_protocol == '1': # sftp, not tested
+        if Settings.device.file_protocol == 'sftp': # sftp, not tested
             f = open(file_name, "w+")
             f.write("sftp %s@%s << EOF\n" % (Settings.device.user, Settings.device.ip))
             f.write("rename %s %s_backup\n" % (path_loc_nix, path_dest_nix))
@@ -96,7 +96,8 @@ def scp_upload(Settings):
             f.close()
             os.system("chmod 777 %s" % file_name)
             os.system("%s" % file_name)
-        elif Settings.device.file_protocol == '0': # scp
+            os.remove(file_name)
+        elif Settings.device.file_protocol == 'scp': # scp
             os.system("scp %s %s@%s:%s" % (path_loc_nix, Settings.device.user, Settings.device.ip, path_dest_nix))
 
 
@@ -514,39 +515,47 @@ def scp_detect_outdated_firmware(Settings, self):
 
 
 def scp_psplash_upload(Settings, self):
+    file_name = fs.path_get_filename(Settings.project.path_psplash)
+    path_dest = "//usr//bin//" + file_name
+    script_file = 'psplash' + Settings.device.ip
     if os.name == 'nt':
-        file_name = fs.path_get_filename(Settings.project.path_psplash)
         path_loc_win = Settings.project.path_psplash
-        path_dest_win = "//usr//bin//" + file_name
         if Settings.device.ftp_mode == '1':
-            file_name = 'psplash' + Settings.device.ip
-            f = open(file_name, "w+")
+            f = open(script_file, "w+")
             f.write("option confirm off\n")
             if Settings.device.file_protocol == 'sftp':
                 f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
             elif Settings.device.file_protocol == 'scp':
                 f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.ip, Settings.device.password))
-            f.write("put %s %s\n" % (path_loc_win, path_dest_win))
-            f.write("chmod 777 %s\n" % path_dest_win)
-            f.write("call ln -sfn %s psplash\n" % path_dest_win)
+            f.write("put %s %s\n" % (path_loc_win, path_dest))
+            f.write("chmod 777 %s\n" % path_dest)
+            f.write("call ln -sfn %s psplash\n" % path_dest)
             f.write("exit\n")
             f.close()
-            scp_path(file_name, Settings.local.path_winscp)
-            os.remove(file_name)
+            scp_path(script_file, Settings.local.path_winscp)
+            os.remove(script_file)
         elif Settings.device.ftp_mode == '0':
             transport = paramiko.Transport((Settings.device.ip, 22))
             transport.connect()
             transport.auth_none(username=Settings.device.user)
             sftp = MySFTPClient.from_transport(transport)
-            sftp.put(path_loc_win, path_dest_win)
-            sftp.chmod(path_dest_win, 777)
+            sftp.put(path_loc_win, path_dest)
+            sftp.chmod(path_dest, 777)
             sftp.close()
         self.setText("psplash command sent")
     else: # linux
-        if Settings.device.ftp_mode == '1':
-            pass
-        elif Settings.device.ftp_mode == '0':
-            pass
+        path_loc_nix = Settings.project.path_psplash
+        if Settings.device.file_protocol == 'sftp':
+            f = open(script_file, "w+")
+            f.write("sftp %s@%s << EOF\n" % (Settings.device.user, Settings.device.ip))
+            f.write("rename %s %s_backup\n" % (path_loc_nix, path_dest))
+            f.write("put %s %s\n" % (path_loc_nix, path_dest))
+            f.write("EOF\n")
+            f.close()
+            os.system("chmod 777 %s" % script_file)
+            os.system("%s" % script_file)
+        elif Settings.device.file_protocol == 'scp':
+            os.system("scp %s %s@%s:%s" % (path_loc_nix, Settings.device.user, Settings.device.ip, path_dest))
 
 
 def scp_clean(Settings):
