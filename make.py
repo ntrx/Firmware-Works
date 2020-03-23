@@ -6,6 +6,7 @@ import shutil
 #  --noconsole - hide console
 #  --onefile    - portable file
 #  --path *    - choose path
+#  --uac-admin - admin rights (usefull for Windows 7)
 
 MAIN_FILE = "" # 'core.py'
 win32_dll = "" #"\"C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.17763.0\\ucrt\\DLLs\\x86\""
@@ -154,16 +155,16 @@ def main():
                 if sys.argv[2] == '32':
                     if args > 3:
                         arg_command = ""
-                        for argc in sys.argv:
-                            arg_command += argc + " "
+                        for i in range(3, args):
+                            arg_command += sys.argv[i] + " "
                         make_32(arg_command)
                     else:
                         make_32("")
                 elif sys.argv[2] == '64':
                     if args > 3:
                         arg_command = ""
-                        for argc in sys.argv:
-                            arg_command += argc + " "
+                        for i in range(3, args):
+                            arg_command += sys.argv[i] + " "
                         make_64(arg_command)
                     else:
                         make_64("")
