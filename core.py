@@ -408,6 +408,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.pushButton_24.clicked.connect(self.on_button_winscp)
         self.pushButton_25.clicked.connect(self.on_button_bs_winscp)
         self.pushButton_26.clicked.connect(self.on_button_bs_putty)
+        self.pushButton_27.clicked.connect(self.on_button_rmdir)
 
         # tool buttons
         self.toolButton_2.clicked.connect(self.on_path_project)
@@ -436,6 +437,11 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.actionReload.triggered.connect(self.on_button_reload)
         self.actionSave.triggered.connect(self.on_button_save)
         self.actionRemove.triggered.connect(self.on_act_remove)
+
+    @pyqtSlot(name='on_button_rmdir')
+    def on_button_rmdir(self):
+        func.scp_rmdir(Settings)
+        self.label_9.setText("Remove external source directory storage.")
 
     @pyqtSlot(name='on_button_bs_putty')
     def on_button_bs_putty(self):
