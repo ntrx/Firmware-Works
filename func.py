@@ -316,104 +316,86 @@ def is_online(host, times=1):
             return 0
 
 
-def scp_compile(Settings, build):
-    if os.name == 'nt':
-        path_loc_win = Settings.project.path_local  # os.getcwd()
+def scp_rmdir(Settings):
+    if os.name == 'nt': # Windows
         path_dest_win = "//home//" + Settings.server.user + Settings.server.path_external
-        file_name = 'compile' + Settings.project.name
-        if not os.path.exists(fs.path_double_win(path_loc_win + "\\Build\\bin\\")):
-            os.mkdir(path=fs.path_double_win(path_loc_win + "\\Build\\bin\\"))
+        file_name = 'rmdir' + Settings.project.name
         if Settings.device.ftp_mode == '1':
             f = open(file_name, 'w+')
             f.write("option confirm off\n")
             f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.server.user, Settings.server.password, Settings.server.ip))
-            if Settings.server.sync_files == '0':
-                f.write("mkdir //home//%s//%s\n" % (Settings.server.user, Settings.server.path_external))
-                f.write("put -filemask=*|%s/Src/Windows/device/ %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
-            elif Settings.server.sync_files == '1':
-                f.write("synchronize -filemask=*|%s/Src/Windows/device/ remote %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
-            f.write("cd //home//" + Settings.server.user + Settings.server.path_external + "//Src\n")
-            if not Settings.server.compile_mode:
-                f.write("call make clean\n")
-            if build == 'release':
-                if Settings.server.compiler == 'gcc8':
-                    f.write("call make gcc8 -j7\n")
-                else:
-                    f.write("call make -j7\n")
-            elif build == 'debug':
-                f.write("call make %s debug -j7\n" % Settings.server.compiler)
-            else:
-                print("Error while exclude code, exiting.")
-                return
-            f.write("cd ..\n")
-            f.write("cd Build//bin//\n")
-            f.write("get %s %s\n" % (Settings.project.name + ".bin", path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin\n"))
+            f.write("rmdir %s\n" % path_dest_win)
             f.write("exit\n")
             f.close()
-
-            result = scp_path(file_name, Settings.local.path_winscp)
-            # replace /script with /command
-            os.remove(file_name)
-
-            if result >= 1:
-                print("error while executing code")
-                print(result)
-
-        if Settings.device.ftp_mode == '0':
-            transport = paramiko.Transport(Settings.server.ip, 22)
-            transport.connect(username=Settings.server.user, password=Settings.server.password)
-            sftp = MySFTPClient.from_transport(transport)
-            if Settings.server.sync_files == '0':
-                sftp.mkdir(path_dest_win, ignore_existing=True)
-                sftp.mkdir(path_dest_win + '/Src', ignore_existing=True)
-                sftp.mkdir(path_dest_win + '/Build', ignore_existing=True)
-                sftp.put_dir(path_loc_win + '\\Src', path_dest_win + '/Src/')
-            elif Settings.server.sync_files == '1':
-                pass
-            else:
-                pass
-
-            paramiko.util.log_to_file('compile.log')
+        elif Settings.device.ftp_mode == '0':
+            paramiko.util.log_to_file('rmdir.log')
             client = paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
-
-            if Settings.server.sync_files == '0':
-                stdin, stdout, stderr = client.exec_command("make -C /home/" + Settings.server.user + Settings.server.path_external + "/Src clean")
-                data = stdout.read() + stderr.read()
-                stdin, stdout, stderr = client.exec_command(" make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7 --makefile=Makefile")
-                data += stdout.read() + stderr.read()
-            elif Settings.server.sync_files == '1':
-                stdin, stdout, stderr = client.exec_command("make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7")
-                data = stdout.read() + stderr.read()
+            stdin, stdout, stderr = client.exec_command("rmdir " + path_dest_win)
+            data = stdout.read() + stderr.read()
             i = 0
             while i < len(data):
                 print(chr(data[i]), end="")
                 i += 1
             client.close()
+    else: # Linux
+        pass
 
-            path_loc_nix = "/home/%s%s/Build/bin/%s.bin" % (Settings.server.user, Settings.server.path_external, Settings.project.name)
-            path_loc_nix = fs.path_double_nix(path_loc_nix)
-            print("Getting file: ", path_loc_nix)
-            path_loc_win = fs.path_double_win(Settings.project.path_local)
-            sftp.get(remotepath=path_loc_nix, localpath=path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
-            print("Saving to: " + path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
-            sftp.close()
-    else:
-        if Settings.server.using: # Build-server
-            path_loc_nix = Settings.project.path_local
-            path_dest_nix = "//home//" + Settings.server.user + Settings.server.path_external
-            if not os.path.exists(fs.path_double_nix(path_loc_nix + "//Build//bin//")):
-                os.mkdir(path=fs.path_double_nix(path_loc_nix + "//Build//bin//"))
-            if True:
+
+def scp_compile(Settings, build):
+    if os.name == 'nt':
+        if Settings.device.system == 0: # NXP iMX6
+            path_loc_win = Settings.project.path_local  # os.getcwd()
+            path_dest_win = "//home//" + Settings.server.user + Settings.server.path_external
+            file_name = 'compile' + Settings.project.name
+            if not os.path.exists(fs.path_double_win(path_loc_win + "\\Build\\bin\\")):
+                os.mkdir(path=fs.path_double_win(path_loc_win + "\\Build\\bin\\"))
+            if Settings.device.ftp_mode == '1':
+                f = open(file_name, 'w+')
+                f.write("option confirm off\n")
+                f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.server.user, Settings.server.password, Settings.server.ip))
+                if Settings.server.sync_files == '0':
+                    f.write("mkdir //home//%s//%s\n" % (Settings.server.user, Settings.server.path_external))
+                    f.write("put -filemask=*|%s/Src/Windows/device/ %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
+                elif Settings.server.sync_files == '1':
+                    f.write("synchronize -filemask=*|%s/Src/Windows/device/ remote %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
+                f.write("cd //home//" + Settings.server.user + Settings.server.path_external + "//Src\n")
+                if not Settings.server.compile_mode:
+                    f.write("call make clean\n")
+                if build == 'release':
+                    if Settings.server.compiler == 'gcc8':
+                        f.write("call make gcc8 -j7\n")
+                    else:
+                        f.write("call make -j7\n")
+                elif build == 'debug':
+                    f.write("call make %s debug -j7\n" % Settings.server.compiler)
+                else:
+                    print("Error while exclude code, exiting.")
+                    return
+                f.write("cd ..\n")
+                f.write("cd Build//bin//\n")
+                f.write("get %s %s\n" % (Settings.project.name + ".bin", path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin\n"))
+                f.write("exit\n")
+                f.close()
+
+                result = scp_path(file_name, Settings.local.path_winscp)
+                # replace /script with /command
+                os.remove(file_name)
+
+                if result >= 1:
+                    print("error while executing code")
+                    print(result)
+
+            if Settings.device.ftp_mode == '0':
                 transport = paramiko.Transport(Settings.server.ip, 22)
                 transport.connect(username=Settings.server.user, password=Settings.server.password)
                 sftp = MySFTPClient.from_transport(transport)
                 if Settings.server.sync_files == '0':
-                    sftp.mkdir(path_dest_nix, ignore_existing=True)
-                    sftp.mkdir(path_dest_nix + '/Src', ignore_existing=True)
-                    sftp.mkdir(path_dest_nix + '/Build', ignore_existing=True)
-                    sftp.put_dir(path_loc_nix + '//Src', path_dest_nix + '/Src/')
+                    sftp.mkdir(path_dest_win, ignore_existing=True)
+                    sftp.mkdir(path_dest_win + '/Src', ignore_existing=True)
+                    sftp.mkdir(path_dest_win + '/Build', ignore_existing=True)
+                    sftp.put_dir(path_loc_win + '\\Src', path_dest_win + '/Src/')
                 elif Settings.server.sync_files == '1':
                     pass
                 else:
@@ -438,13 +420,64 @@ def scp_compile(Settings, build):
                     i += 1
                 client.close()
 
-                path_loc_dest = '/home/%s%s/Build/bin/%s.bin' % (Settings.server.user, Settings.server.path_external, Settings.project.name)
-                path_loc_dest = fs.path_double_nix(path_loc_dest)
-                print("Getting file:", path_loc_dest)
-                path_loc_nix = fs.path_double_nix(Settings.project.path_local)
-                sftp.get(remotepath=path_loc_dest, localpath=path_loc_nix + "/Build/bin/" + Settings.project.name + '.bin')
-                print('Saving file to:' + path_loc_nix + '/Build/bin/' + Settings.project.name + '.bin')
+                path_loc_nix = "/home/%s%s/Build/bin/%s.bin" % (Settings.server.user, Settings.server.path_external, Settings.project.name)
+                path_loc_nix = fs.path_double_nix(path_loc_nix)
+                print("Getting file: ", path_loc_nix)
+                path_loc_win = fs.path_double_win(Settings.project.path_local)
+                sftp.get(remotepath=path_loc_nix, localpath=path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
+                print("Saving to: " + path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
                 sftp.close()
+            elif Settings.device.system == 1: # Intel Atom
+                pass
+    else:
+        if Settings.device.system == 0: # NXP iMX6
+            if Settings.server.using: # Build-server
+                path_loc_nix = Settings.project.path_local
+                path_dest_nix = "//home//" + Settings.server.user + Settings.server.path_external
+                if not os.path.exists(fs.path_double_nix(path_loc_nix + "//Build//bin//")):
+                    os.mkdir(path=fs.path_double_nix(path_loc_nix + "//Build//bin//"))
+                if True:
+                    transport = paramiko.Transport(Settings.server.ip, 22)
+                    transport.connect(username=Settings.server.user, password=Settings.server.password)
+                    sftp = MySFTPClient.from_transport(transport)
+                    if Settings.server.sync_files == '0':
+                        sftp.mkdir(path_dest_nix, ignore_existing=True)
+                        sftp.mkdir(path_dest_nix + '/Src', ignore_existing=True)
+                        sftp.mkdir(path_dest_nix + '/Build', ignore_existing=True)
+                        sftp.put_dir(path_loc_nix + '//Src', path_dest_nix + '/Src/')
+                    elif Settings.server.sync_files == '1':
+                        pass
+                    else:
+                        pass
+
+                    paramiko.util.log_to_file('compile.log')
+                    client = paramiko.SSHClient()
+                    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                    client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
+
+                    if Settings.server.sync_files == '0':
+                        stdin, stdout, stderr = client.exec_command("make -C /home/" + Settings.server.user + Settings.server.path_external + "/Src clean")
+                        data = stdout.read() + stderr.read()
+                        stdin, stdout, stderr = client.exec_command(" make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7 --makefile=Makefile")
+                        data += stdout.read() + stderr.read()
+                    elif Settings.server.sync_files == '1':
+                        stdin, stdout, stderr = client.exec_command("make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7")
+                        data = stdout.read() + stderr.read()
+                    i = 0
+                    while i < len(data):
+                        print(chr(data[i]), end="")
+                        i += 1
+                    client.close()
+
+                    path_loc_dest = '/home/%s%s/Build/bin/%s.bin' % (Settings.server.user, Settings.server.path_external, Settings.project.name)
+                    path_loc_dest = fs.path_double_nix(path_loc_dest)
+                    print("Getting file:", path_loc_dest)
+                    path_loc_nix = fs.path_double_nix(Settings.project.path_local)
+                    sftp.get(remotepath=path_loc_dest, localpath=path_loc_nix + "/Build/bin/" + Settings.project.name + '.bin')
+                    print('Saving file to:' + path_loc_nix + '/Build/bin/' + Settings.project.name + '.bin')
+                    sftp.close()
+        elif Settings.device.system == 1: # Intel Atom
+            pass
         else: # built-in compiler
             path_loc_nix = fs.path_double_nix(Settings.project.path_local)
             if not os.path.exists(path_loc_nix):

@@ -48,6 +48,7 @@ class Settings:
         ip: str = ""                 # IP address
         file_protocol: str = ""      # Type of file protocol SFTP or SCP
         ftp_mode: str = ""           # 0 - use paramiko and other build-in pythonic modules, 1 - user WinSCP
+        system: int = 0              # 0 - using NXP processors, 1 - using Intem Atom processors
 
     class server:               # Build-server properties
         user: str = ""               # Username to login
@@ -270,6 +271,7 @@ class Settings:
         else:
             if not os.path.isfile(self.local.path_winscp):
                 gui.lineEdit_9.setStyleSheet("background-color: red")
+                gui.label_9.setText("Some errors found during initialization settings.")
                 self.local.winscp_ok = False
             else:
                 self.local.winscp_ok = True
@@ -280,6 +282,7 @@ class Settings:
         else:
             if not os.path.isfile(self.local.path_putty):
                 gui.lineEdit_10.setStyleSheet("background-color: red")
+                gui.label_9.setText("Some errors found during initialization settings.")
                 self.local.putty_ok = False
             else:
                 self.local.putty_ok = True
@@ -423,6 +426,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.comboBox_5.currentIndexChanged.connect(self.on_putty_change)
         self.comboBox_6.currentIndexChanged.connect(self.on_psplash_change)
         self.comboBox_9.currentIndexChanged.connect(self.on_bs_using_change)
+        self.comboBox_10.currentIndexChanged.connect(self.on_system_change)
 
         # action menu
         self.actionOpen_2.triggered.connect(self.on_button_open)
@@ -560,6 +564,45 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             Settings.server.using = True
             self.comboBox_9.setCurrentIndex(0)
         self.tabWidget.setTabEnabled(1, Settings.server.using)
+
+    @pyqtSlot(name='on_system_change')
+    def on_system_change(self):
+        if self.comboBox_10.currentIndex() == 0: # NXP iMX6(QP)
+            Settings.device.system = 0
+            self.comboBox_10.setCurrentIndex(0)
+            self.comboBox_7.setEnabled(True)
+            # Disabling autorun.sh scripts and project detecting
+            self.pushButton_12.setEnabled(True)
+            self.pushButton_11.setEnabled(True)
+            self.pushButton_2.setEnabled(True)
+            self.pushButton_5.setEnabled(True)
+            # Disabling sensor functions and upload firmware/psplash
+            self.pushButton_14.setEnabled(True)
+            self.pushButton_13.setEnabled(True)
+            self.pushButton_22.setEnabled(True)
+            self.pushButton_4.setEnabled(True)
+            self.pushButton.setEnabled(True)
+            self.checkBox.setEnabled(True)
+            self.checkBox_2.setEnabled(True)
+        elif self.comboBox_10.currentIndex() == 1: # Intel Atom
+            Settings.device.system = 1
+            self.comboBox_10.setCurrentIndex(1)
+            # Only gcc there
+            self.comboBox_7.setCurrentIndex(0)
+            self.comboBox_7.setEnabled(False)
+            # Disabling autorun.sh scripts and project detecting
+            self.pushButton_12.setEnabled(False)
+            self.pushButton_11.setEnabled(False)
+            self.pushButton_2.setEnabled(False)
+            self.pushButton_5.setEnabled(False)
+            # Disabling sensor functions and upload firmware/psplash
+            self.pushButton_14.setEnabled(False)
+            self.pushButton_13.setEnabled(False)
+            self.pushButton_22.setEnabled(False)
+            self.pushButton_4.setEnabled(False)
+            self.pushButton.setEnabled(False)
+            self.checkBox.setEnabled(False)
+            self.checkBox_2.setEnabled(False)
 
     @pyqtSlot(name='on_open_putty')
     def on_open_putty(self):
