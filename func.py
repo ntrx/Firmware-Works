@@ -317,7 +317,7 @@ def is_online(host, times=1):
 
 
 def scp_rmdir(Settings):
-    if os.name == 'nt': # Windows
+    if os.name == 'nt':  # Windows
         path_dest_win = "//home//" + Settings.server.user + Settings.server.path_external
         file_name = 'rmdir' + Settings.project.name
         if Settings.device.ftp_mode == '1':
@@ -327,6 +327,8 @@ def scp_rmdir(Settings):
             f.write("rmdir %s\n" % path_dest_win)
             f.write("exit\n")
             f.close()
+            scp_path(file_name, Settings.local.path_winscp)
+            os.remove(file_name)
         elif Settings.device.ftp_mode == '0':
             paramiko.util.log_to_file('rmdir.log')
             client = paramiko.SSHClient()
@@ -339,13 +341,25 @@ def scp_rmdir(Settings):
                 print(chr(data[i]), end="")
                 i += 1
             client.close()
-    else: # Linux
-        pass
+    else:  # Linux
+        path_dest_nix = "//home//" + Settings.server.user + Settings.server.path_external
+        paramiko.util.log_to_file('compile.log')
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
+
+        stdin, stdout, stderr = client.exec_command("rmdir " + path_dest_nix)
+        data = stdout.read() + stderr.read()
+        i = 0
+        while i < len(data):
+            print(chr(data[i]), end="")
+            i += 1
+        client.close()
 
 
 def scp_compile(Settings, build):
     if os.name == 'nt':
-        if Settings.device.system == 0: # NXP iMX6
+        if Settings.device.system == 0:  # NXP iMX6
             path_loc_win = Settings.project.path_local  # os.getcwd()
             path_dest_win = "//home//" + Settings.server.user + Settings.server.path_external
             file_name = 'compile' + Settings.project.name
@@ -427,11 +441,11 @@ def scp_compile(Settings, build):
                 sftp.get(remotepath=path_loc_nix, localpath=path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
                 print("Saving to: " + path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
                 sftp.close()
-            elif Settings.device.system == 1: # Intel Atom
+            elif Settings.device.system == 1:  # Intel Atom
                 pass
     else:
-        if Settings.device.system == 0: # NXP iMX6
-            if Settings.server.using: # Build-server
+        if Settings.device.system == 0:  # NXP iMX6
+            if Settings.server.using:  # Build-server
                 path_loc_nix = Settings.project.path_local
                 path_dest_nix = "//home//" + Settings.server.user + Settings.server.path_external
                 if not os.path.exists(fs.path_double_nix(path_loc_nix + "//Build//bin//")):
@@ -476,9 +490,9 @@ def scp_compile(Settings, build):
                     sftp.get(remotepath=path_loc_dest, localpath=path_loc_nix + "/Build/bin/" + Settings.project.name + '.bin')
                     print('Saving file to:' + path_loc_nix + '/Build/bin/' + Settings.project.name + '.bin')
                     sftp.close()
-        elif Settings.device.system == 1: # Intel Atom
+        elif Settings.device.system == 1:  # Intel Atom
             pass
-        else: # built-in compiler
+        else:  # built-in compiler
             path_loc_nix = fs.path_double_nix(Settings.project.path_local)
             if not os.path.exists(path_loc_nix):
                 print("MAKE: local unix path NOT FOUND!")
