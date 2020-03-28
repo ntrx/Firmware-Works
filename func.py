@@ -491,7 +491,8 @@ def scp_compile(Settings, build):
                     print('Saving file to:' + path_loc_nix + '/Build/bin/' + Settings.project.name + '.bin')
                     sftp.close()
         elif Settings.device.system == 1:  # Intel Atom
-            pass
+            path_loc_nix = Settings.project.path_local
+            #path_dest_nix = "//home//root//" + Settings.device.
         else:  # built-in compiler
             path_loc_nix = fs.path_double_nix(Settings.project.path_local)
             if not os.path.exists(path_loc_nix):

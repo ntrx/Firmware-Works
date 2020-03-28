@@ -55,7 +55,8 @@ class Settings:
         password: str = ""           # Password to login
         ip: str = ""                 # Server IP
         path_external: str = ""      # PATH to upload sources
-        sync_files: str = ""     # sync or upload sources
+        path_executable: str = ""    # PATH with executable binary
+        sync_files: str = ""         # sync or upload sources
         compiler: str = ""           # Type of compiler gcc or gcc8
         compile_mode: bool = False   # If true then clean object files before compiling (recompiling)
         using: bool = True           # Linux only: compiling on external build-server or (false) using built-in gcc compiler
@@ -80,6 +81,7 @@ class Settings:
             self.project.name = 'example_proj'
             self.project.path_local = 'C:/example_proj'
             self.server.path_external = '/home/root/'
+            self.server.path_executable = '/home/root/bin/'
             self.server.ip = '192.168.10.2'
             self.server.user = 'root'
             self.server.password = '1111'
@@ -132,6 +134,10 @@ class Settings:
                     index = 13
                     self.server.path_external = get_value(line, index)
 
+                if line.find('path_executable') == 0:
+                    index = len('path_executable')
+                    self.server.path_executable = get_value(line, index)
+
                 if line.find('update') == 0:
                     index = 6
                     self.server.sync_files = get_value(line, index)
@@ -180,6 +186,8 @@ class Settings:
         fp.write("global_bs_secret = '%s' # Pass\n" % check)
         check = check_value(self.server.path_external)
         fp.write("global_bs_dir = '%s' # uploading directory on build-server\n" % check)
+        check = check_value(self.server.path_executable)
+        fp.write("path_executable = '%s' # executable directory on build-server (if BS built-in to device)\n" % check)
         check = check_value(self.server.sync_files)
         fp.write("update = '%s' #  0 - update, 1 - sync \n" % check)
         check = check_value(self.device.ftp_mode)
@@ -250,6 +258,11 @@ class Settings:
             gui.lineEdit_12.setText(SETTINGS_EMPTY)
         else:
             gui.lineEdit_12.setText(self.server.path_external)
+
+        if len(self.server.path_executable) == 0:
+            gui.lineEdit_13.setText(SETTINGS_EMPTY)
+        else:
+            gui.lineEdit_13.setText(self.server.path_executable)
 
         if self.device.ftp_mode == '1':
             gui.checkBox_3.setChecked(True)
@@ -489,7 +502,6 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.label_9.setText("Cleaned firmware on remote server command.")
         else:
             self.label_9.setText("Firmware clean command.")
-                
 
     @pyqtSlot(name='on_radioButton_sync_mode')
     def on_radioButton_sync_mode(self):
@@ -577,12 +589,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             Settings.device.system = 0
             self.comboBox_10.setCurrentIndex(0)
             self.comboBox_7.setEnabled(True)
-            # Disabling autorun.sh scripts and project detecting
+            # Enabling autorun.sh scripts and project detecting
             self.pushButton_12.setEnabled(True)
             self.pushButton_11.setEnabled(True)
             self.pushButton_2.setEnabled(True)
             self.pushButton_5.setEnabled(True)
-            # Disabling sensor functions and upload firmware/psplash
+            # Enabling sensor functions and upload firmware/psplash
             self.pushButton_14.setEnabled(True)
             self.pushButton_13.setEnabled(True)
             self.pushButton_22.setEnabled(True)
@@ -590,6 +602,9 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.pushButton.setEnabled(True)
             self.checkBox.setEnabled(True)
             self.checkBox_2.setEnabled(True)
+            # Enabling executable path line
+            self.lineEdit_13.setEnabled(True)
+            self.label_20.setEnabled(True)
         elif self.comboBox_10.currentIndex() == 1: # Intel Atom
             Settings.device.system = 1
             self.comboBox_10.setCurrentIndex(1)
@@ -609,6 +624,9 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.pushButton.setEnabled(False)
             self.checkBox.setEnabled(False)
             self.checkBox_2.setEnabled(False)
+            # Disabling executable path line
+            self.lineEdit_13.setEnabled(False)
+            self.label_20.setEnabled(False)
 
     @pyqtSlot(name='on_open_putty')
     def on_open_putty(self):
