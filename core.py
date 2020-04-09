@@ -589,10 +589,11 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             Settings.device.system = 0
             self.comboBox_10.setCurrentIndex(0)
             self.comboBox_7.setEnabled(True)
+            self.comboBox_8.setEnabled(True)
             # Enabling autorun.sh scripts and project detecting
             self.pushButton_12.setEnabled(True)
             self.pushButton_11.setEnabled(True)
-            self.pushButton_2.setEnabled(True)
+            self.pushButton_2.setText("restart")
             self.pushButton_5.setEnabled(True)
             # Enabling sensor functions and upload firmware/psplash
             self.pushButton_14.setEnabled(True)
@@ -608,13 +609,16 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         elif self.comboBox_10.currentIndex() == 1: # Intel Atom
             Settings.device.system = 1
             self.comboBox_10.setCurrentIndex(1)
+            # Only SFTP protocol there
+            self.comboBox_8.setCurrentIndex(1)
+            self.comboBox_8.setEnabled(False)
             # Only gcc there
             self.comboBox_7.setCurrentIndex(0)
             self.comboBox_7.setEnabled(False)
             # Disabling autorun.sh scripts and project detecting
             self.pushButton_12.setEnabled(False)
             self.pushButton_11.setEnabled(False)
-            self.pushButton_2.setEnabled(False)
+            self.pushButton_2.setText("run")
             self.pushButton_5.setEnabled(False)
             # Disabling sensor functions and upload firmware/psplash
             self.pushButton_14.setEnabled(False)
