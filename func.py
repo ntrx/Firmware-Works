@@ -358,7 +358,7 @@ def scp_rmdir(Settings):
 
 
 def scp_compile(Settings, build):
-    if os.name == 'nt':
+    if os.name == 'nt': #if Windows
         if Settings.device.system == 0:  # NXP iMX6
             path_loc_win = Settings.project.path_local  # os.getcwd()
             path_dest_win = "//home//" + Settings.server.user + Settings.server.path_external
@@ -441,9 +441,45 @@ def scp_compile(Settings, build):
                 sftp.get(remotepath=path_loc_nix, localpath=path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
                 print("Saving to: " + path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
                 sftp.close()
-            elif Settings.device.system == 1:  # Intel Atom
-                pass
-    else:
+        elif Settings.device.system == 1:  # Intel Atom
+            path_loc_win = Settings.project.path_local  # os.getcwd()
+            path_dest_win = Settings.server.path_external
+            file_name = 'compile' + Settings.project.name
+
+            if Settings.device.ftp_mode == '1': # if WinSCP
+                f = open(file_name, 'w+')
+                f.write("option confirm off\n")
+                f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
+                if Settings.server.sync_files == '0':
+                    f.write("mkdir %s\n" % (Settings.server.path_external))
+                    f.write("put -filemask=*|%s/Src/Windows/device/ %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
+                elif Settings.server.sync_files == '1':
+                    f.write("synchronize -filemask=*|%s/Src/Windows/device/ remote %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
+                f.write("cd " + Settings.server.path_external + "//Src\n")
+                if not Settings.server.compile_mode:
+                    f.write("call make clean\n")
+                if build == 'release':
+                    f.write("call make\n")
+                elif build == 'debug':
+                    f.write("call make %s debug\n" % Settings.server.compiler)
+                else:
+                    print("Error while exclude code, exiting.")
+                    return
+                # TODO: Change hard-links to Settings parameter
+                f.write("mv //root//navigation//bin//%s.bin //root//navigation//bin//%s.bin-backup\n")
+                f.write("mv //root//%s//Build//bin//%s.bin\n" % (path_dest_win, Settings.project.name))
+                f.write("exit\n")
+                f.close()
+
+                result = scp_path(file_name, Settings.local.path_winscp)
+                # replace /script with /command
+                os.remove(file_name)
+
+                if result >= 1:
+                    print("error while executing code")
+                    print(result)
+            # end of Windows
+    else: # if Linux
         if Settings.device.system == 0:  # NXP iMX6
             if Settings.server.using:  # Build-server
                 path_loc_nix = Settings.project.path_local
