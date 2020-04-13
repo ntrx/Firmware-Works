@@ -4,7 +4,7 @@ import os
 import fs
 
 
-def linux_upload(Settings):
+def upload(Settings):
     """
     Upload firmware binary file to device by SFTP or SCP, added 777 rights to file if using sFTP.
 
@@ -28,7 +28,7 @@ def linux_upload(Settings):
         os.system("scp %s %s@%s:%s" % (path_loc_nix, Settings.device.user, Settings.device.ip, path_dest_nix))
 
 
-def linux_killall(Settings):
+def killall(Settings):
     """
     Using autorun.sh on device by ssh to launch killall command
 
@@ -38,7 +38,7 @@ def linux_killall(Settings):
     os.system("ssh %s@%s 'killall sn4215_respawn.sh %s.bin | exit'" % (Settings.device.user, Settings.device.ip, Settings.project.name))
 
 
-def linux_reboot(Settings):
+def reboot(Settings):
     """
     Perform reboot command on device by SSH
 
@@ -48,7 +48,7 @@ def linux_reboot(Settings):
     os.system("ssh %s@%s 'sudo reboot | exit'" % (Settings.device.user, Settings.device.ip))
 
 
-def linux_poweroff(Settings):
+def poweroff(Settings):
     """
     Perform shutdown command on device by SSH
 
@@ -58,7 +58,7 @@ def linux_poweroff(Settings):
     os.system("ssh %s@%s 'poweroff | exit'" % (Settings.device.user, Settings.device.ip))
 
 
-def linux_ts_test(Settings):
+def ts_test(Settings):
     """
     Using autorun.sh to launch test app after calibration (SSH)
 
@@ -68,7 +68,7 @@ def linux_ts_test(Settings):
     os.system("ssh %s@%s '/etc/init.d/autorun.sh stop | TSLIB_TSDEVICE=/dev/input/event2 ts_test | exit'" % (Settings.device.user, Settings.device.ip))
 
 
-def linux_ts_calibrate(Settings):
+def ts_calibrate(Settings):
     """
     Using autorun.sh to launch touchscreen calibration app (SSH)
 
@@ -78,7 +78,7 @@ def linux_ts_calibrate(Settings):
     os.system("ssh %s@%s '/etc/init.d/autorun.sh stop | TSLIB_TSDEVICE=/dev/input/event2 ts_calibrate | exit'" % (Settings.device.user, Settings.device.ip))
 
 
-def linux_stop(Settings):
+def stop(Settings):
     """
     Using autorun.sh to stop firmware process on device (SSH)
 
@@ -88,7 +88,7 @@ def linux_stop(Settings):
     os.system("ssh %s@%s '/etc/init.d/autorun.sh stop | exit'" % (Settings.device.user, Settings.device.ip))
 
 
-def linux_restart(Settings):
+def restart(Settings):
     """
     Using autorun.sh to restart firmware on device (SSH)
 
@@ -98,17 +98,17 @@ def linux_restart(Settings):
     os.system("ssh %s@%s '/etc/init.d/autorun.sh restart | exit'" % (Settings.device.user, Settings.device.ip))
 
 
-def linux_rmdir(Settings):
+def rmdir(Settings):
     # see para_rmdir
     return
 
 
-def linux_compile(Settings, build):
+def compile(Settings, build):
     # see para_compile
     return
 
 
-def linux_psplash_upload(Settings, self):
+def psplash_upload(Settings, self):
     """
     Upload psplash file with preset location to device by sFTP
 
@@ -133,6 +133,6 @@ def linux_psplash_upload(Settings, self):
         os.system("scp %s %s@%s:%s" % (path_loc_nix, Settings.device.user, Settings.device.ip, path_dest))
 
 
-def linux_clean(Settings):
+def clean(Settings):
  # see para_clean
     return

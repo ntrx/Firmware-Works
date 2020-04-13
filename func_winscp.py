@@ -18,18 +18,18 @@ def winscp_path(file_name, path):
     return os.system("\"%s\" /ini=nul /script=%s" % (path, file_name))
 
 
-def winscp_command(command, path):
+def command(arguments, path):
     """
     Launches not attached WinSCP script
 
-    :param command: command
-    :type command: str
+    :param arguments: commands list
+    :type arguments: str
     :param path: Path to WinSCP
     :type path: str
     :return: None
     """
     CREATE_NO_WINDOW = 0x08000000
-    return subprocess.Popen("\"%s\" %s" % (path, command), creationflags=CREATE_NO_WINDOW)
+    return subprocess.Popen("\"%s\" %s" % (path, arguments), creationflags=CREATE_NO_WINDOW)
 
 
 def putty_path(host, user, path):
@@ -48,7 +48,7 @@ def putty_path(host, user, path):
     return subprocess.Popen("\"%s\" -ssh %s@%s" % (path, user, host), creationflags=CREATE_NO_WINDOW)
 
 
-def winscp_upload(Settings):
+def upload(Settings):
     """
     Upload firmware binary file to device by sFTP or SCP protocols, added 777 rights to file.
 
@@ -73,7 +73,7 @@ def winscp_upload(Settings):
     os.remove(file_name)
     
 
-def winscp_killall(Settings):
+def killall(Settings):
     """
     Using autorun.sh on device by sFTP/SCP protocol to launch killall command.
 
@@ -94,7 +94,7 @@ def winscp_killall(Settings):
     os.remove(file_name)
       
 
-def winscp_reboot(Settings):
+def reboot(Settings):
     """
     Perform reboot command on device (SCP/sFTP protocol)
 
@@ -115,7 +115,7 @@ def winscp_reboot(Settings):
     os.remove(file_name)
 
 
-def winscp_poweroff(Settings):
+def poweroff(Settings):
     """
     Perform shutdown command on device (SCP/sFTP)
 
@@ -136,7 +136,7 @@ def winscp_poweroff(Settings):
     os.remove(file_name)
 
 
-def winscp_ts_test(Settings):
+def ts_test(Settings):
     """
     Using autorun.sh to launch test app after calibration (SCP/sFTP)
 
@@ -158,7 +158,7 @@ def winscp_ts_test(Settings):
     os.remove(file_name)
        
 
-def winscp_ts_calibrate(Settings):
+def ts_calibrate(Settings):
     """
     Using autorun.sh to launch touchscreen calibration app (SCP/sFTP)
 
@@ -180,7 +180,7 @@ def winscp_ts_calibrate(Settings):
     os.remove(file_name)
 
 
-def winscp_stop(Settings):
+def stop(Settings):
     """
     Using autorun.sh to stop firmware process on device (SCP/sFTP)
 
@@ -201,7 +201,7 @@ def winscp_stop(Settings):
     os.remove(file_name)
 
 
-def winscp_restart(Settings):
+def restart(Settings):
     """
     Using autorun.sh to restart firmware on device (SCP/sFTP)
 
@@ -222,7 +222,7 @@ def winscp_restart(Settings):
     os.remove(file_name)
 
 
-def winscp_rmdir(Settings):
+def rmdir(Settings):
     """
     Removing DIR on external server (SFTP)
 
@@ -241,7 +241,7 @@ def winscp_rmdir(Settings):
     os.remove(file_name)
 
 
-def winscp_compile(Settings, build):
+def compile(Settings, build):
     """
     Upload/sync sources with local dir and compiling firmware on server or device builtin compiler
 
@@ -300,7 +300,7 @@ def winscp_compile(Settings, build):
         f.write("option confirm off\n")
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
         if Settings.server.sync_files == '0':
-            f.write("mkdir %s\n" % (Settings.server.path_external))
+            f.write("mkdir %s\n" % Settings.server.path_external)
             f.write("put -filemask=*|%s/Src/Windows/device/ %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
         elif Settings.server.sync_files == '1':
             f.write("synchronize -filemask=*|%s/Src/Windows/device/ remote %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
@@ -329,7 +329,7 @@ def winscp_compile(Settings, build):
             print(result)
 
 
-def winscp_psplash_upload(Settings, self):
+def psplash_upload(Settings, self):
     """
     Upload psplash file with preset location to device (sFTP/SCP)
 
@@ -354,9 +354,10 @@ def winscp_psplash_upload(Settings, self):
     f.close()
     winscp_path(script_file, Settings.local.path_winscp)
     os.remove(script_file)
+    self.setText("Psplash upload command has been sent.")
        
 
-def winscp_clean(Settings):
+def clean(Settings):
     """
     Perform 'make clean' to sources on build-server (SFTP)
 

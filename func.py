@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 # list of functions for scripts
 import os
-import paramiko
+#import paramiko
 import subprocess
-from scp import SCPClient
-import fs
-from core import MySFTPClient
+#from scp import SCPClient
+#import fs
+#from core import MySFTPClient
 
-
+'''
 def createSSHClient(server, port, user, secret):
     client = paramiko.SSHClient()
     client.load_system_host_keys()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname=server, port=port, username=user, password=secret)
     return client
-
-
+'''
+'''
 class MySCPClient(SCPClient):
     def put_dir(self, source, target):
         for item in os.listdir(source):
@@ -23,8 +23,8 @@ class MySCPClient(SCPClient):
                 self.put(os.path.join(source, item), '%s/%s' % (target, item))
             else:
                 self.put_dir(os.path.join(source, item), '%s/%s' % (target, item))
-
-
+'''
+'''
 def scp_path(file_name, winscp_path):
     """
     :param file_name: script file name, auto-fill value
@@ -34,14 +34,14 @@ def scp_path(file_name, winscp_path):
     :return:
     """
     return os.system("\"%s\" /ini=nul /script=%s" % (winscp_path, file_name))
-
-
+'''
+'''
 def scp_command(command, winscp_path):
     # return os.system("\"%s\" %s" % (winscp_path, command))
     CREATE_NO_WINDOW = 0x08000000
     return subprocess.Popen("\"%s\" %s" % (winscp_path, command), creationflags=CREATE_NO_WINDOW)
-
-
+'''
+'''
 def putty_path(host, user, path_putty):
     """
     :param host: IP
@@ -54,8 +54,8 @@ def putty_path(host, user, path_putty):
     """
     CREATE_NO_WINDOW = 0x08000000
     return subprocess.Popen("\"%s\" -ssh %s@%s" % (path_putty, user, host), creationflags=CREATE_NO_WINDOW)
-
-
+'''
+'''
 def scp_upload(Settings):
     file_name = 'upload' + Settings.device.ip
     if os.name == 'nt':
@@ -99,8 +99,8 @@ def scp_upload(Settings):
             os.remove(file_name)
         elif Settings.device.file_protocol == 'scp': # scp
             os.system("scp %s %s@%s:%s" % (path_loc_nix, Settings.device.user, Settings.device.ip, path_dest_nix))
-
-
+'''
+'''
 def scp_killall(Settings):
     if os.name == 'nt':
         if Settings.device.ftp_mode == '1':  # via winSCP
@@ -125,8 +125,8 @@ def scp_killall(Settings):
             client.close()
     else:
         os.system("ssh %s@%s 'killall sn4215_respawn.sh %s.bin | exit'" % (Settings.device.user, Settings.device.ip, Settings.project.name))
-
-
+'''
+'''
 def scp_reboot(Settings):
     if os.name == 'nt':
         if Settings.device.ftp_mode == '1':  # via winSCP
@@ -151,8 +151,8 @@ def scp_reboot(Settings):
             client.close()
     else:
         os.system("ssh %s@%s 'sudo reboot | exit'" % (Settings.device.user, Settings.device.ip))
-
-
+'''
+'''
 def scp_poweroff(Settings):
     if os.name == 'nt':
         if Settings.device.ftp_mode == '1':  # via winSCP
@@ -177,8 +177,8 @@ def scp_poweroff(Settings):
             client.close()
     else:
         os.system("ssh %s@%s 'poweroff | exit'" % (Settings.device.user, Settings.device.ip))
-
-
+'''
+'''
 def scp_ts_test(Settings):
     if os.name == 'nt':
         if Settings.device.ftp_mode == '1':  # via winSCP
@@ -205,8 +205,8 @@ def scp_ts_test(Settings):
             client.close()
     else:
         os.system("ssh %s@%s '/etc/init.d/autorun.sh stop | TSLIB_TSDEVICE=/dev/input/event2 ts_test | exit'" % (Settings.device.user, Settings.device.ip))
-
-
+'''
+'''
 def scp_ts_calibrate(Settings):
     if os.name == 'nt':
         if Settings.device.ftp_mode == '1':  # via winSCP
@@ -233,8 +233,8 @@ def scp_ts_calibrate(Settings):
             client.close()
     else:
         os.system("ssh %s@%s '/etc/init.d/autorun.sh stop | TSLIB_TSDEVICE=/dev/input/event2 ts_calibrate | exit'" % (Settings.device.user, Settings.device.ip))
-
-
+'''
+'''
 def scp_stop(Settings):
     if os.name == 'nt':
         if Settings.device.ftp_mode == '1':  # via winSCP
@@ -259,8 +259,8 @@ def scp_stop(Settings):
             client.close()
     else:
         os.system("ssh %s@%s '/etc/init.d/autorun.sh stop | exit'" % (Settings.device.user, Settings.device.ip))
-
-
+'''
+'''
 def scp_restart(Settings):
     if os.name == 'nt':
         file_name = 'restart' + Settings.device.ip
@@ -291,7 +291,7 @@ def scp_restart(Settings):
             client.close()
     else:
         os.system("ssh %s@%s '/etc/init.d/autorun.sh restart | exit'" % (Settings.device.user, Settings.device.ip))
-
+'''
 
 # return 1 if online
 def is_online(host, times=1):
@@ -314,7 +314,7 @@ def is_online(host, times=1):
             return 1
         else:
             return 0
-
+'''
 
 def scp_rmdir(Settings):
     if os.name == 'nt':  # Windows
@@ -355,8 +355,8 @@ def scp_rmdir(Settings):
             print(chr(data[i]), end="")
             i += 1
         client.close()
-
-
+'''
+'''
 def scp_compile(Settings, build):
     if os.name == 'nt': #if Windows
         if Settings.device.system == 0:  # NXP iMX6
@@ -535,8 +535,8 @@ def scp_compile(Settings, build):
                 print("MAKE: local unix path NOT FOUND!")
                 return
             os.system("make -C %s/Src --makefile=Makefile" % path_loc_nix)
-
-
+'''
+'''
 def scp_detect_project(Settings, self):
     if Settings.device.file_protocol == 'sftp':
         transport = paramiko.Transport((Settings.device.ip, 22))
@@ -569,8 +569,8 @@ def scp_detect_project(Settings, self):
                     result = 'None'
             sftp.close()
             self.setText("Detected firmware: %s" % result)
-
-
+'''
+'''
 def scp_detect_outdated_firmware(Settings, self):
     local_firmware = os.stat('%s/Build/bin/%s.bin' % (Settings.project.path_local, Settings.project.name))
     if Settings.device.file_protocol == 'sftp':
@@ -596,8 +596,8 @@ def scp_detect_outdated_firmware(Settings, self):
         self.setText("Firmware is similar to local!")
     else:
         self.setText("Unavailable to compare firmwares!")
-
-
+'''
+'''
 def scp_psplash_upload(Settings, self):
     file_name = fs.path_get_filename(Settings.project.path_psplash)
     path_dest = "//usr//bin//" + file_name
@@ -640,8 +640,8 @@ def scp_psplash_upload(Settings, self):
             os.system("%s" % script_file)
         elif Settings.device.file_protocol == 'scp':
             os.system("scp %s %s@%s:%s" % (path_loc_nix, Settings.device.user, Settings.device.ip, path_dest))
-
-
+'''
+'''
 def scp_clean(Settings):
     if os.name == 'nt':
         # path_dest_win = "//home//" + Settings.server.user + Settings.server.path_external
@@ -702,7 +702,8 @@ def scp_clean(Settings):
                 print("CLEAN: local unix path NOT FOUND!")
                 return
             os.system("make -C %s clean" % path_loc_nix)
-            
-
+     '''
+'''
 def sftp_callback(transferred, toBeTransferred):
     print("Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred))
+'''

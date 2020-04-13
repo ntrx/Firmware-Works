@@ -38,7 +38,7 @@ class MySCPClient(SCPClient):
                 self.put_dir(os.path.join(source, item), '%s/%s' % (target, item))
 
 
-def para_upload(Settings):
+def upload(Settings):
     """
     Upload firmware binary file to device by sFTP, added 777 rights to file.
 
@@ -57,7 +57,7 @@ def para_upload(Settings):
     sftp.close()
 
 
-def para_killall(Settings):
+def killall(Settings):
     """
     Using autorun.sh on device by SSH to launch killall command
 
@@ -72,7 +72,7 @@ def para_killall(Settings):
     client.close()
 
 
-def para_reboot(Settings):
+def reboot(Settings):
     """
     Perform reboot command on device (SSH)
 
@@ -87,7 +87,7 @@ def para_reboot(Settings):
     client.close()
 
 
-def para_poweroff(Settings):
+def poweroff(Settings):
     """
     Perform shutdown command on device (SSH)
 
@@ -102,7 +102,7 @@ def para_poweroff(Settings):
     client.close()
 
 
-def para_ts_test(Settings):
+def ts_test(Settings):
     """
     Using autorun.sh to launch test app after calibration (SSH)
 
@@ -118,7 +118,7 @@ def para_ts_test(Settings):
     client.close()
 
 
-def scp_ts_calibrate(Settings):
+def ts_calibrate(Settings):
     """
     Using autorun.sh to launch touchscreen calibration app (SSH)
 
@@ -134,7 +134,7 @@ def scp_ts_calibrate(Settings):
     client.close()
 
 
-def para_stop(Settings):
+def stop(Settings):
     """
     Using autorun.sh to stop firmware process on device (SSH)
 
@@ -149,7 +149,7 @@ def para_stop(Settings):
     client.close()
 
 
-def para_restart(Settings):
+def restart(Settings):
     """
     Using autorun.sh to restart firmware on device (SSH)
 
@@ -170,7 +170,7 @@ def para_restart(Settings):
     client.close()
 
 
-def para_rmdir(Settings):
+def rmdir(Settings):
     """
     Removing DIR on external server (SSH)
 
@@ -191,7 +191,7 @@ def para_rmdir(Settings):
     client.close()
 
 
-def para_compile(Settings, build):
+def compile(Settings, build):
     """
     Upload sources from local dir and compiling firmware on server or device builtin compiler
 
@@ -200,7 +200,7 @@ def para_compile(Settings, build):
     :type build: str
     :return: None
     """
-    if os.name == 'nt': # if Windows
+    if os.name == 'nt':  # if Windows
         if Settings.device.system == 0:  # NXP iMX6
             path_loc_win = Settings.project.path_local  # os.getcwd()
             path_dest_win = "//home//" + Settings.server.user + Settings.server.path_external
@@ -298,7 +298,7 @@ def para_compile(Settings, build):
                     sftp.close()
 
 
-def para_detect_project(Settings, self):
+def detect_project(Settings, self):
     """
     Detect project available on device (correctly work only if on device available one project)
 
@@ -339,7 +339,7 @@ def para_detect_project(Settings, self):
             self.setText("Detected firmware: %s" % result)
 
 
-def para_detect_outdated_firmware(Settings, self):
+def detect_outdated_firmware(Settings, self):
     """
     Getting firmware from device and checking it with last compiled firmware
 
@@ -373,7 +373,7 @@ def para_detect_outdated_firmware(Settings, self):
         self.setText("Unavailable to compare firmwares!")
 
 
-def para_psplash_upload(Settings, self):
+def psplash_upload(Settings, self):
     """
     Upload psplash file with preset location to device by sFTP
 
@@ -394,7 +394,7 @@ def para_psplash_upload(Settings, self):
     self.setText("psplash command sent")
 
 
-def para_clean(Settings):
+def clean(Settings):
     """
     Perform 'make clean' to sources on build-server (sFTP)
 
