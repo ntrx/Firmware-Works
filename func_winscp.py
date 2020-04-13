@@ -354,7 +354,7 @@ def psplash_upload(Settings, self):
     f.close()
     winscp_path(script_file, Settings.local.path_winscp)
     os.remove(script_file)
-    self.setText("Psplash upload command has been sent.")
+    self.setText("SENT: psplash upload command.")
        
 
 def clean(Settings):

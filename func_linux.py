@@ -131,6 +131,7 @@ def psplash_upload(Settings, self):
         os.system("%s" % script_file)
     elif Settings.device.file_protocol == 'scp':
         os.system("scp %s %s@%s:%s" % (path_loc_nix, Settings.device.user, Settings.device.ip, path_dest))
+    self.setText("SENT: psplash upload command.")
 
 
 def clean(Settings):

@@ -21,6 +21,29 @@ RELEASE = "beta"
 SETTINGS_EMPTY: str = ""
 SETTINGS_FILE: str = "settings.py"
 
+# *** Global constants and definitions
+# File protocols ( device.file_protocol )
+_SFTP_: int = 1
+_SCP_: int = 0
+# System arch ( device.system )
+_NXP_: int = 0
+_ATOM_: int = 1
+# Sync files ( server.sync_files )
+_UPLOAD_FILES_: bool = False
+_SYNC_FILES_: bool = True
+# Compiler version ( server.compiler )
+_GCC_: str = "gcc"
+_GCC8_: str = "gcc8"
+# Connection type ( local.connection_type )
+_WINSCP_PUTTY_: int = 0
+_PARAMIKO_: int = 1
+_SSH_SCP_SFTP_: int = 2
+_LINUX_BUILT_IN_: int = 3
+# OS ( local.os )
+_WINDOWS_: int = 0
+_LINUX_: int = 1
+# *** end of global constants and definitions
+
 
 class Cache_file:
     source: str = "source-history.log"
@@ -46,53 +69,51 @@ class Cache_file:
 
 class Settings:
     class device:               # Embedded device properties
-        user: str = ""               # Username to login
-        password: str = ""           # Password to login
-        ip: str = ""                 # IP address
-        file_protocol: str = ""      # Type of file protocol SFTP or SCP
-        ftp_mode: str = ""           # 0 - use paramiko and other build-in pythonic modules, 1 - user WinSCP
-        system: int = 0              # 0 - using NXP processors, 1 - using Intem Atom processors
+        user: str = ""                              # Username to login
+        password: str = ""                          # Password to login
+        ip: str = ""                                # IP address
+        file_protocol: int = _SCP_                  # Type of file protocol 1-SFTP or 0-SCP
+        system: int = _NXP_                         # 0 - using NXP processors, 1 - using Intem Atom processors
 
     class server:               # Build-server properties
-        user: str = ""               # Username to login
-        password: str = ""           # Password to login
-        ip: str = ""                 # Server IP
-        path_external: str = ""      # PATH to upload sources
-        path_executable: str = ""    # PATH with executable binary
-        sync_files: str = ""         # sync or upload sources
-        compiler: str = ""           # Type of compiler gcc or gcc8
-        compile_mode: bool = False   # If true then clean object files before compiling (recompiling)
-        using: bool = True           # Linux only: compiling on external build-server or (false) using built-in gcc compiler
+        user: str = ""                              # Username to login
+        password: str = ""                          # Password to login
+        ip: str = ""                                # Server IP
+        path_external: str = ""                     # PATH to upload sources
+        path_executable: str = ""                   # PATH with executable binary
+        sync_files: bool = _UPLOAD_FILES_           # Upload files (true), sync files (false)
+        compiler: str = _GCC_                       # Type of compiler gcc or gcc8
+        compile_mode: bool = False                  # If true then clean object files before compiling (recompiling)
+        using: bool = True                          # Linux only: compiling on external build-server or (false) using built-in gcc compiler
 
     class project:              # Project settings
-        name: str = ""               # Name of project which has been applied to output binary file
-        path_local: str = ""         # Local PATH of sources
-        path_psplash: str = ""       # Local PATH of psplash file
+        name: str = ""                              # Name of project which has been applied to output binary file
+        path_local: str = ""                        # Local PATH of sources
+        path_psplash: str = ""                      # Local PATH of psplash file
 
     class local:                # Some miscellaneous properties
-        path_winscp: str = ""        # WinSCP local PATH
-        path_putty: str = ""         # PuTTy local PATH
-        winscp_ok: bool = False      # is WinSCP found
-        putty_ok: bool = False       # is PuTTy found
+        path_winscp: str = ""                       # WinSCP local PATH
+        path_putty: str = ""                        # PuTTy local PATH
+        winscp_ok: bool = False                     # is WinSCP found
+        putty_ok: bool = False                      # is PuTTy found
+        connection_type: int = _WINSCP_PUTTY_       # by 0 - winscp+putty / 1 - paramiko / 2 - ssh+scp+sftp / 3 - builtin (linux) apps
+        os: int = _WINDOWS_                         # 0 - Windows / 1 - Linux
 
     def load(self):
-        if not os.path.exists(SETTINGS_FILE):
+        if not os.path.exists(SETTINGS_FILE):  # Create default configuration file
             print("User settings not found, creating preset file.")
             self.device.user = 'example_user'
-            self.device.ip = '192.168.10.1'
+            self.device.ip = '127.0.0.1'
             self.device.password = '1111'
-            self.project.name = 'example_proj'
+            self.project.name = 'sn1111'
             self.project.path_local = 'C:/example_proj'
             self.server.path_external = '/home/root/'
             self.server.path_executable = '/home/root/bin/'
-            self.server.ip = '192.168.10.2'
+            self.server.ip = '127.0.0.0'
             self.server.user = 'root'
             self.server.password = '1111'
-            self.server.sync_files = '0'
-            if os.name == 'nt':
-                self.device.ftp_mode = '1'
-            else:
-                self.device.ftp_mode = '0'
+            self.server.sync_files = _UPLOAD_FILES_
+            self.local.connection_type = _PARAMIKO_
             self.local.path_winscp = 'C:/example'
             self.local.path_putty = 'C:/example'
             self.project.path_psplash = 'C:/example'
@@ -103,103 +124,103 @@ class Settings:
             for line in fp:
                 if line.find('user') == 0:
                     index = 4
-                    self.device.user = get_value(line, index)
+                    self.device.user = func.get_value(line, index)
 
                 if line.find('host') == 0:
                     index = 4
-                    self.device.ip = get_value(line, index)
+                    self.device.ip = func.get_value(line, index)
 
                 if line.find('secret') == 0:
                     index = 6
-                    self.device.password = get_value(line, index)
+                    self.device.password = func.get_value(line, index)
 
                 if line.find('project') == 0:
                     index = 7
-                    self.project.name = get_value(line, index)
+                    self.project.name = func.get_value(line, index)
 
                 if line.find('source') == 0:
                     index = 6
-                    self.project.path_local = get_value(line, index)
+                    self.project.path_local = func.get_value(line, index)
 
                 if line.find('global_build_server') == 0:
                     index = 19
-                    self.server.ip = get_value(line, index)
+                    self.server.ip = func.get_value(line, index)
 
                 if line.find('global_bs_user') == 0:
                     index = 14
-                    self.server.user = get_value(line, index)
+                    self.server.user = func.get_value(line, index)
 
                 if line.find('global_bs_secret') == 0:
                     index = 16
-                    self.server.password = get_value(line, index)
+                    self.server.password = func.get_value(line, index)
 
                 if line.find('global_bs_dir') == 0:
                     index = 13
-                    self.server.path_external = get_value(line, index)
+                    self.server.path_external = func.get_value(line, index)
 
                 if line.find('path_executable') == 0:
                     index = len('path_executable')
-                    self.server.path_executable = get_value(line, index)
+                    self.server.path_executable = func.get_value(line, index)
 
                 if line.find('update') == 0:
                     index = 6
-                    self.server.sync_files = get_value(line, index)
-
-                if line.find('ftp_mode') == 0:
-                    index = 8
-
-                    if os.name == 'nt':
-                        self.device.ftp_mode = get_value(line, index)
+                    tmp_value = func.get_value(line, index)
+                    if tmp_value == 0:
+                        self.server.sync_files = _UPLOAD_FILES_
                     else:
-                        ftp_mode = get_value(line, index)
-                        if ftp_mode == '1':
-                            self.device.ftp_mode = '0'
+                        self.server.sync_files = _SYNC_FILES_
+
+                if line.find('connection_type') == 0:
+                    index = 8
+                    self.device.connection_type = func.get_value(line, index)
 
                 if line.find('path_scp') == 0:
                     index = 8
-                    self.local.path_winscp = get_value(line, index)
+                    self.local.path_winscp = func.get_value(line, index)
 
                 if line.find('path_putty') == 0:
                     index = 10
-                    self.local.path_putty = get_value(line, index)
+                    self.local.path_putty = func.get_value(line, index)
 
                 if line.find('path_psplash') == 0:
                     index = 12
-                    self.project.path_psplash = get_value(line, index)
+                    self.project.path_psplash = func.get_value(line, index)
             fp.close()
 
     def save(self):
         fp = open(SETTINGS_FILE, 'w')
         fp.write("# Auto created settings file. Remember that value is framed by '' \n")
-        check = check_value(self.device.user)
+        check = func.check_value(self.device.user)
         fp.write("user = '%s' # user login to device (default: root) \n" % check)
-        check = check_value(self.device.ip)
+        check = func.check_value(self.device.ip)
         fp.write("host = '%s' # device IP \n" % check)
-        check = check_value(self.device.password)
+        check = func.check_value(self.device.password)
         fp.write("secret = '%s' # user pass to device (default: empty) \n" % check)
-        check = check_value(self.project.name)
+        check = func.check_value(self.project.name)
         fp.write("project = '%s' # project name (sn4215, sn3307) \n" % check)
-        check = check_value(self.project.path_local)
+        check = func.check_value(self.project.path_local)
         fp.write("source = '%s' # path to project (must contain: Build, Src) \n" % check)
-        check = check_value(self.server.ip)
+        check = func.check_value(self.server.ip)
         fp.write("global_build_server = '%s' # Build-Server IP  \n" % check)
-        check = check_value(self.server.user)
+        check = func.check_value(self.server.user)
         fp.write("global_bs_user = '%s' # Your login to build-server \n" % check)
-        check = check_value(self.server.password)
+        check = func.check_value(self.server.password)
         fp.write("global_bs_secret = '%s' # Pass\n" % check)
-        check = check_value(self.server.path_external)
+        check = func.check_value(self.server.path_external)
         fp.write("global_bs_dir = '%s' # uploading directory on build-server\n" % check)
-        check = check_value(self.server.path_executable)
+        check = func.check_value(self.server.path_executable)
         fp.write("path_executable = '%s' # executable directory on build-server (if BS built-in to device)\n" % check)
-        check = check_value(self.server.sync_files)
-        fp.write("update = '%s' #  0 - update, 1 - sync \n" % check)
-        check = check_value(self.device.ftp_mode)
-        fp.write("ftp_mode = '%s' # - 1 - use winSCP, 0 - paramiko  \n" % check)
-        check = check_value(self.local.path_winscp)
+        if self.server.sync_files == _SYNC_FILES_:
+            check = 1
+        elif self.server.sync_files == _UPLOAD_FILES_:
+            check = 0
+        fp.write("update = '%d' #  0 - update, 1 - sync \n" % check)
+        fp.write("connection_type = '%d' # - 0 - use winSCP+putty, 1 - paramiko, 2 - ssh+scp+sftp, 3 - linux onboard\n" % self.local.connection_type)
+        check = func.check_value(self.local.path_winscp)
         fp.write("path_scp = '%s' # - path to WinSCP .com file \n" % check)
-        check = check_value(self.local.path_putty)
+        check = func.check_value(self.local.path_putty)
         fp.write("path_putty = '%s' # - path to Putty exe file \n" % check)
-        check = check_value(self.project.path_psplash)
+        check = func.check_value(self.project.path_psplash)
         fp.write("path_psplash = '%s' # - path to pslpash file\n" % check)
         fp.close()
 
@@ -267,19 +288,23 @@ class Settings:
         else:
             gui.lineEdit_13.setText(self.server.path_executable)
 
-        if self.device.ftp_mode == '1':
+        if self.local.connection_type == _WINSCP_PUTTY_:  # If selected 'winscp + putty'
             gui.checkBox_3.setChecked(True)
             gui.radioButton.setEnabled(True)
             gui.radioButton_2.setEnabled(True)
-        elif self.device.ftp_mode == '0':
+        elif self.local.connection_type == _PARAMIKO_:  # If selected 'paramiko'
             gui.checkBox_3.setChecked(False)
             gui.radioButton.setEnabled(False)
             gui.radioButton_2.setEnabled(False)
-            self.server.sync_files = '0'
+            self.server.sync_files = False
+        elif self.local.connection_type == _SSH_SCP_SFTP_:
+            pass
+        elif self.local.connection_type == _LINUX_BUILT_IN_:
+            pass
 
-        if self.server.sync_files == '0':
+        if self.server.sync_files == _SYNC_FILES_:
             gui.radioButton.setChecked(True)
-        elif self.server.sync_files == '1':
+        elif self.server.sync_files == _UPLOAD_FILES_:
             gui.radioButton_2.setChecked(True)
 
         if len(self.local.path_winscp) == 0:
@@ -312,6 +337,11 @@ class Settings:
         firmware_path = self.project.path_local + "\\Build\\bin\\" + self.project.name + ".bin"
         fs.path_get_firmware(firmware_path, gui.label_16)
 
+        if os.name == "nt":
+            self.local.os = _WINDOWS_
+        else:
+            self.local.os = _LINUX_
+
 
 class MySFTPClient(paramiko.SFTPClient):
     def put_dir(self, source, target):
@@ -341,12 +371,13 @@ class EProgBar(QThread):
     def run(self):
         self.working_status.emit(1)
         if os.path.exists(Settings.project.path_local):
-            if os.name == "nt":  # Windows
-                if MySettings.device.ftp_mode == '1':  # winSCP
-                    func_winscp.compile(MySettings, 'release')
-                elif MySettings.device.ftp_mode == '0':  # Paramiko
-                    pass
-            else:  # Linux
+            if MySettings.local.connection_type == _WINSCP_PUTTY_:  # Windows/winSCP
+                func_winscp.compile(MySettings, 'release')
+            elif MySettings.local.connection_type == _PARAMIKO_:  # Paramiko
+                func_paramiko.compile(MySettings, 'release')
+            elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+                pass
+            elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
                 pass
         else:
             print('Project PATH not found.')
@@ -359,12 +390,13 @@ class EProgBar_debug(QThread):
     def run(self):
         self.working_status_debug.emit(1)
         if os.path.exists(Settings.project.path_local):
-            if os.name == "nt":  # Windows
-                if MySettings.device.ftp_mode == '1':  # winSCP
-                    func_winscp.compile(MySettings, 'debug')
-                elif MySettings.device.ftp_mode == '0':  # Paramiko
-                    pass
-            else:  # Linux
+            if MySettings.local.connection_type == _WINSCP_PUTTY_:  # Windows/winSCP
+                func_winscp.compile(MySettings, 'debug')
+            elif MySettings.local.connection_type == _PARAMIKO_:  # Paramiko
+                func_paramiko.compile(MySettings, 'debug')
+            elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+                pass
+            elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
                 pass
         else:
             print('Project PATH not found.')
@@ -380,12 +412,18 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle("%s %s %s" % (PROG_NAME, VERSION, RELEASE))
 
-        if os.name == 'nt': # for windows
+        # self.label_9.setStyleSheet('background-color: red') for future
+        MySettings.load(MySettings)
+        MyCache.init(MyCache)
+        # init text labels and 'end' panel
+        MySettings.init(MySettings, self)
+
+        if MySettings.local.os == _WINDOWS_:
             # Compiler type field
             self.label_18.setVisible(False)
             self.comboBox_9.setVisible(False)
             pass
-        else: # for linux
+        elif MySettings.local.os == _LINUX_:
             # Tab: External
             self.tabWidget.setTabEnabled(2, False)
             # Compiler type field
@@ -400,11 +438,6 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             # Button: winSCP
             self.pushButton_24.setVisible(False)
 
-        # self.label_9.setStyleSheet('background-color: red') for future
-        MySettings.load(MySettings)
-        MyCache.init(MyCache)
-        # init text labels and 'end' panel
-        MySettings.init(MySettings, self)
         # radioButtons
         self.radioButton_2.clicked.connect(self.on_radioButton_sync_mode)
         self.radioButton.clicked.connect(self.on_radioButton_upload_mode)
@@ -468,44 +501,63 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_rmdir')
     def on_button_rmdir(self):
-        if os.name == "nt":  # Windows
-            if MySettings.device.ftp_mode == '1':  # winSCP
-                func_winscp.rmdir(Settings)
-            elif MySettings.device.ftp_mode == '0':  # Paramiko
-                pass
-        else:  # Linux
+        if MySettings.local.connection_type == _WINSCP_PUTTY_:
+            func_winscp.rmdir(Settings)
+            self.label_9.setText("SENT: remove external source directory storage.")
+        elif MySettings.local.connection_type == _PARAMIKO_:
             pass
-        self.label_9.setText("Remove external source directory storage.")
+            self.label_9.setText("SENT: remove external source directory storage.")
+        elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+            pass
+            self.label_9.setText("SENT: remove external source directory storage.")
+        elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
+            pass
+            self.label_9.setText("Remove local source directory storage.")
 
+    # Opening Build Server in Putty or Xterm
     @pyqtSlot(name='on_button_bs_putty')
     def on_button_bs_putty(self):
-        if os.name == "nt":
+        if MySettings.local.connection_type == _WINSCP_PUTTY_:
             if MySettings.local.putty_ok:
                 func_winscp.putty_path(MySettings.server.ip, MySettings.server.user, MySettings.local.path_putty)
             else:
                 self.label_9.setText("Putty not found!")
-        else:
+        elif MySettings.local.connection_type == _PARAMIKO_ and MySettings.local.os == _WINDOWS_:
+            if MySettings.local.putty_ok:
+                func_winscp.putty_path(MySettings.server.ip, MySettings.server.user, MySettings.local.path_putty)
+            else:
+                self.label_9.setText("Putty not found!")
+        elif MySettings.local.connection_type == _SSH_SCP_SFTP_ and MySettings.local.os == _LINUX_:
             os.system("xterm -hold -e 'ssh %s@%s'" % (MySettings.server.user, MySettings.server.ip))
+        else:
+            self.label_9.setText("Not compatible setup, try install Putty or Xterm!")
 
+    # Opening Build Server in WinSCP
     @pyqtSlot(name='on_button_bs_winscp')
     def on_button_bs_winscp(self):
-        winscp_exe = MySettings.local.path_winscp.replace("com", "exe")
-        MySettings.device.file_protocol = protocol_get(self)
-        command = ("sftp://%s:%s@%s/" % (MySettings.server.user, MySettings.server.password, MySettings.server.ip))
-        func_winscp.command(command, winscp_exe)
+        if MySettings.local.os == _WINDOWS_:
+            winscp_exe = MySettings.local.path_winscp.replace("com", "exe")
+            MySettings.device.file_protocol = func.protocol_get(self)
+            command = ("sftp://%s:%s@%s/" % (MySettings.server.user, MySettings.server.password, MySettings.server.ip))
+            func_winscp.command(command, winscp_exe)
+        elif MySettings.local.os == _LINUX_:
+            self.label_9.setText("Not supported!")
 
+    # Opening device in WinSCP by SCP or SFTP protocol
     @pyqtSlot(name='on_button_winscp')
     def on_button_winscp(self):
-        winscp_exe = MySettings.local.path_winscp.replace("com", "exe")
-        MySettings.device.file_protocol = protocol_get(self)
-        if MySettings.device.file_protocol == 'sftp':
-            command = ("sftp://%s:%s@%s/" % (MySettings.device.user, MySettings.device.password, MySettings.device.ip))
-        elif MySettings.device.file_protocol == 'scp':
-            command = ("scp://%s@%s:%s/" % (MySettings.device.user, MySettings.device.ip, MySettings.device.password))
+        if MySettings.local.os == _WINDOWS_:
+            winscp_exe = MySettings.local.path_winscp.replace("com", "exe")
+            MySettings.device.file_protocol = func.protocol_get(self)
+            if MySettings.device.file_protocol == _SFTP_:
+                command = ("sftp://%s:%s@%s/" % (MySettings.device.user, MySettings.device.password, MySettings.device.ip))
+            elif MySettings.device.file_protocol == _SCP_:
+                command = ("scp://%s@%s:%s/" % (MySettings.device.user, MySettings.device.ip, MySettings.device.password))
+            func_winscp.command(command, winscp_exe)
         else:
-            return
-        func_winscp.command(command, winscp_exe)
+            self.label_9.setText("Not supported!")
 
+    # Delete firmware binary file on local storage
     @pyqtSlot(name='on_act_remove')
     def on_act_remove(self):
         dest_path = MySettings.project.path_local + "/Build/bin/" + MySettings.project.name + ".bin"
@@ -515,109 +567,129 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         else:
             self.label_9.setText("Nothing to remove, firmware not found.")
 
+    # Performs make clean
     @pyqtSlot(name='on_button_clean')
     def on_button_clean(self):
-        MySettings.device.file_protocol = protocol_get(self)
-        if os.name == "nt":  # Windows
-            if MySettings.device.ftp_mode == '1':  # winSCP
-                func_winscp.clean(Settings)
-                self.label_9.setText("Cleaned firmware on remote server command.")
-            elif MySettings.device.ftp_mode == '0':  # Paramiko
-                pass
-        else:  # Linux
+        MySettings.device.file_protocol = func.protocol_get(self)
+        if MySettings.local.connection_type == _WINSCP_PUTTY_:
+            func_winscp.clean(MySettings)
+            self.label_9.setText("SENT: clean firmware on remote server.")
+        elif MySettings.local.connection_type == _PARAMIKO_:
+            func_paramiko.clean(MySettings)
+            self.label_9.setText("SENT: clean firmware on remote server.")
+        elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+            self.label_9.setText("SENT: clean firmware on remote server.")
+            pass
+        elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
+            self.label_9.setText("Localy clean firmware.")
             pass
 
+    # Toggle sync files
     @pyqtSlot(name='on_radioButton_sync_mode')
     def on_radioButton_sync_mode(self):
-        MySettings.server.sync_files = '1'
+        MySettings.server.sync_files = _SYNC_FILES_
 
+    # Toggle upload files
     @pyqtSlot(name='on_radioButton_upload_mode')
     def on_radioButton_upload_mode(self):
-        MySettings.server.sync_files = '0'
+        MySettings.server.sync_files = _UPLOAD_FILES_
 
+    # Uploading psplash file to device
     @pyqtSlot(name='on_button_psplash')
     def on_button_psplash(self):
         if func.is_online(MySettings.device.ip):
-            MySettings.device.file_protocol = protocol_get(self)
-            if os.name == "nt":  # Windows
-                if MySettings.device.ftp_mode == '1':  # winSCP
-                    func_winscp.psplash_upload(MySettings, self.label_9)
-                elif MySettings.device.ftp_mode == '0':  # Paramiko
-                    func_paramiko.detect_outdated_firmware(MySettings, self.label_9)
-            else:  # Linux
+            MySettings.device.file_protocol = func.protocol_get(self)
+            if MySettings.local.connection_type == _WINSCP_PUTTY_:
+                func_winscp.psplash_upload(MySettings, self.label_9)
+            elif MySettings.local.connection_type == _PARAMIKO_:
+                pass
+            elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+                func_linux.psplash_upload(MySettings, self.label_9)
+            elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
                 pass
         else:
             self.label_9.setText("Host is unreachable")
-        pass
 
+    # If psplash path has been changed
     @pyqtSlot(name='on_psplash_change')
     def on_psplash_change(self):
         self.lineEdit_11.setText(self.comboBox_6.currentText())
 
+    # Checking firmware outdate
     @pyqtSlot(name='on_button_outdated')
     def on_button_outdated(self):
         if func.is_online(MySettings.device.ip):
-            MySettings.device.file_protocol = protocol_get(self)
-            if os.name == "nt":  # Windows
-                if MySettings.device.ftp_mode == '1':  # winSCP
-                    pass
-                elif MySettings.device.ftp_mode == '0':  # Paramiko
-                    func_paramiko.detect_outdated_firmware(MySettings, self.label_9)
-            else:  # Linux
+            MySettings.device.file_protocol = func.protocol_get(self)
+            if MySettings.local.connection_type == _WINSCP_PUTTY_:
+                pass
+            elif MySettings.local.connection_type == _PARAMIKO_:
+                func_paramiko.detect_outdated_firmware(MySettings, self.label_9)
+            elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+                pass
+            elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
                 pass
         else:
             self.label_9.setText('Host is unreachable')
-        pass
 
+    # Detect firmware outdate
     @pyqtSlot(name='on_button_detect')
     def on_button_detect(self):
         if func.is_online(MySettings.device.ip):
-            MySettings.device.file_protocol = protocol_get(self)
-            if os.name == "nt":  # Windows
-                if MySettings.device.ftp_mode == '1':  # winSCP
-                    pass
-                elif MySettings.device.ftp_mode == '0':  # Paramiko
-                    func_paramiko.detect_project(MySettings, self.label_9)
-            else:  # Linux
+            MySettings.device.file_protocol = func.protocol_get(self)
+            if MySettings.local.connection_type == _WINSCP_PUTTY_:
+                pass
+            elif MySettings.local.connection_type == _PARAMIKO_:
+                func_paramiko.detect_project(MySettings, self.label_9)
+            elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+                pass
+            elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
                 pass
         else:
             self.label_9.setText('Host is unreachable')
-        pass
 
+    # OPTIONS: Clear cache (history files)
     @pyqtSlot(name='on_button_clear_cache')
     def on_button_clear_cache(self):
         fs.cache_create(MyCache.list)
         self.on_button_apply()
         self.label_9.setText("Cached information has been clear.")
 
+    # OPTIONS: edit settings
     @pyqtSlot(name='on_button_edit')
     def on_button_edit(self):
-        if os.name == "nt":
+        if MySettings.local.os == _WINDOWS_:
             CREATE_NO_WINDOW = 0x08000000
             return subprocess.Popen("notepad %s" % SETTINGS_FILE, creationflags=CREATE_NO_WINDOW)
-        else:
+        elif MySettings.local.os == _LINUX_:
             os.system("xdg-open %s" % SETTINGS_FILE)
 
+    # OPTIONS: winscp path changed
     @pyqtSlot(name='on_winscp_change')
     def on_winscp_change(self):
         self.lineEdit_9.setText(self.comboBox_4.currentText())
 
+    # OPTIONS: device ip changed
     @pyqtSlot(name='on_device_ip_change')
     def on_device_ip_change(self):
-        self.lineEdit_2.setText(check_value(self.comboBox_2.currentText()))
-        
+        self.lineEdit_2.setText(func.check_value(self.comboBox_2.currentText()))
+
+    # OPTIONS: putty path changed
     @pyqtSlot(name='on_putty_change')
     def on_putty_change(self):
         self.lineEdit_10.setText(self.comboBox_5.currentText())
-        
+
+    # OPTIONS: sources path changed
     @pyqtSlot(name='on_source_change')
     def on_source_change(self):
         self.lineEdit_5.setText(self.comboBox_3.currentText())
 
+    # OPTIONS: project name changed
     @pyqtSlot(name='on_project_change')
     def on_project_change(self):
         self.lineEdit.setText(self.comboBox.currentText())
-        
+
+    # OPTIONS: build server type changed (local / external)
+    # TODO: need bind this option to local.connection_type
     @pyqtSlot(name='on_bs_using_change')
     def on_bs_using_change(self):
         # Tab: Build-Server
@@ -629,10 +701,11 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.comboBox_9.setCurrentIndex(0)
         self.tabWidget.setTabEnabled(1, Settings.server.using)
 
+    # OPTIONS: arch changed
     @pyqtSlot(name='on_system_change')
     def on_system_change(self):
         if self.comboBox_10.currentIndex() == 0:  # NXP iMX6(QP)
-            Settings.device.system = 0
+            Settings.device.system = _NXP_
             self.comboBox_10.setCurrentIndex(0)
             self.comboBox_7.setEnabled(True)
             self.comboBox_8.setEnabled(True)
@@ -653,7 +726,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.lineEdit_13.setEnabled(True)
             self.label_20.setEnabled(True)
         elif self.comboBox_10.currentIndex() == 1:  # Intel Atom
-            Settings.device.system = 1
+            Settings.device.system = _ATOM_
             self.comboBox_10.setCurrentIndex(1)
             # Only SFTP protocol there
             self.comboBox_8.setCurrentIndex(1)
@@ -678,20 +751,30 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.lineEdit_13.setEnabled(False)
             self.label_20.setEnabled(False)
 
+    # Opening device in putty
     @pyqtSlot(name='on_open_putty')
     def on_open_putty(self):
-        if os.name == "nt":
+        if MySettings.local.connection_type == _WINSCP_PUTTY_:
+            if MySettings.local.putty_ok:
+                func_winscp.putty_path(MySettings.server.ip, MySettings.server.user, MySettings.local.path_putty)
+            else:
+                self.label_9.setText("Putty not found!")
+        elif MySettings.local.connection_type == _PARAMIKO_ and MySettings.local.os == _WINDOWS_:
             if MySettings.local.putty_ok:
                 func_winscp.putty_path(MySettings.device.ip, MySettings.device.user, MySettings.local.path_putty)
             else:
                 self.label_9.setText("Putty not found!")
-        else:
+        elif MySettings.local.connection_type == _SSH_SCP_SFTP_ and MySettings.local.os == _LINUX_:
             os.system("xterm -hold -e 'ssh %s@%s'" % (MySettings.device.user, MySettings.device.ip))
+        else:
+            self.label_9.setText("Not compatible setup, try install Putty or Xterm!")
 
+    # OPTION: set putty path
     @pyqtSlot(name='on_path_putty')
     def on_path_putty(self):
         self.set_putty()
 
+    # HANDLER: set putty path
     @pyqtSlot(name='set_putty')
     def set_putty(self):
         conf_file = QFileDialog.getOpenFileName()
@@ -701,10 +784,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         MySettings.local.path_putty = conf_file[0]
         self.lineEdit_10.setText(MySettings.local.path_putty)
 
+    # OPTION: set psplash path
     @pyqtSlot(name='on_path_psplash')
     def on_path_psplash(self):
         self.set_psplash()
 
+    # HANDLER: set psplash path
     @pyqtSlot(name='set_psplash')
     def set_psplash(self):
         psplash_file = QFileDialog.getOpenFileName()
@@ -713,10 +798,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         MySettings.project.path_psplash = psplash_file[0]
         self.lineEdit_11.setText(MySettings.project.path_psplash)
 
+    # OPTION: set winscp path
     @pyqtSlot(name='on_path_winscp')
     def on_path_winscp(self):
         self.set_winscp()
 
+    # HANDLER: set winscp path
     @pyqtSlot(name='set_winscp')
     def set_winscp(self):
         conf_file = QFileDialog.getOpenFileName()
@@ -726,9 +813,10 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         MySettings.local.path_winscp = conf_file[0]
         self.lineEdit_9.setText(MySettings.local.path_winscp)
 
+    # Reboot device
     @pyqtSlot(name='on_button_reboot')
     def on_button_reboot(self):
-        MySettings.device.file_protocol = protocol_get(self)
+        MySettings.device.file_protocol = func.protocol_get(self)
         if os.name == "nt":  # Windows
             if MySettings.device.ftp_mode == '1':  # winSCP
                 func_winscp.reboot(Settings)
@@ -740,7 +828,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_poweroff')
     def on_button_poweroff(self):
-        MySettings.device.file_protocol = protocol_get(self)
+        MySettings.device.file_protocol = func.protocol_get(self)
         if os.name == "nt":  # Windows
             if MySettings.device.ftp_mode == '1':  # winSCP
                 func_winscp.poweroff(Settings)
@@ -752,7 +840,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_ts_test')
     def on_button_ts_test(self):
-        MySettings.device.file_protocol = protocol_get(self)
+        MySettings.device.file_protocol = func.protocol_get(self)
         if os.name == "nt":  # Windows
             if MySettings.device.ftp_mode == '1':  # winSCP
                 func_winscp.ts_test(Settings)
@@ -764,7 +852,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_ts_calibrate')
     def on_button_ts_calibrate(self):
-        MySettings.device.file_protocol = protocol_get(self)
+        MySettings.device.file_protocol = func.protocol_get(self)
         if os.name == "nt":  # Windows
             if MySettings.device.ftp_mode == '1':  # winSCP
                 func_winscp.ts_calibrate(Settings)
@@ -776,7 +864,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_killall')
     def on_button_killall(self):
-        MySettings.device.file_protocol = protocol_get(self)
+        MySettings.device.file_protocol = func.protocol_get(self)
         if os.name == "nt":  # Windows
             if MySettings.device.ftp_mode == '1':  # winSCP
                 func_winscp.killall(Settings)
@@ -920,7 +1008,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_stop')
     def on_button_stop(self):
-        MySettings.device.file_protocol = protocol_get(self)
+        MySettings.device.file_protocol = func.protocol_get(self)
         if os.name == "nt":  # Windows
             if MySettings.device.ftp_mode == '1':  # winSCP
                 func_winscp.stop(Settings)
@@ -932,7 +1020,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_restart')
     def on_button_restart(self):
-        MySettings.device.file_protocol = protocol_get(self)
+        MySettings.device.file_protocol = func.protocol_get(self)
         if os.name == "nt":  # Windows
             if MySettings.device.ftp_mode == '1':  # winSCP
                 func_winscp.restart(Settings)
@@ -1033,7 +1121,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
                 print('Project PATH not found. Exiting.')
                 return
 
-        MySettings.device.file_protocol = protocol_get(self)
+        MySettings.device.file_protocol = func.protocol_get(self)
 
         if self.checkBox.isChecked():
             is_online = func.is_online(MySettings.device.ip, 9999)
@@ -1067,32 +1155,6 @@ def main():
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())
-
-
-def get_value(line, start):
-    value = ""
-    for i in range(start, len(line)):
-        if line[i] == " " and line[i+1] == "'":
-            j = i+2
-            while line[j] != "'":
-                value += line[j]
-                j += 1
-    return value
-
-
-def check_value(line):
-    new_value = ""
-    for i in range(0, len(line)):
-        if line[i] != '\n':
-            new_value += line[i]
-    return new_value
-
-
-def protocol_get(self):
-    if self.comboBox_8.currentText() == 'SCP':
-        return str('scp')
-    elif self.comboBox_8.currentText() == 'SFTP':
-        return str('sftp')
 
 
 if __name__ == '__main__':

@@ -707,3 +707,52 @@ def scp_clean(Settings):
 def sftp_callback(transferred, toBeTransferred):
     print("Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred))
 '''
+
+
+def get_value(line, start):
+    """
+    Getting parameter value from string. Begin from 'start'
+
+    :param line: line with parameter value
+    :type line: str
+    :param start: first byte
+    :type start: int
+    :return: value of parameter
+    """
+    value = ""
+    for i in range(start, len(line)):
+        if line[i] == " " and line[i+1] == "'":
+            j = i+2
+            while line[j] != "'":
+                value += line[j]
+                j += 1
+    return value
+
+
+def check_value(line):
+    """
+    Clearing new line symbol from str
+
+    :param line: input string
+    :type line: str
+    :return: cleared string
+    """
+    new_value = ""
+    for i in range(0, len(line)):
+        if line[i] != '\n':
+            new_value += line[i]
+    return new_value
+
+
+def protocol_get(self):
+    """
+    Returning selected protocol (str) in combobox
+
+    :param self:
+    :return: selected protocol
+    """
+    if self.comboBox_8.currentText() == 'SCP':
+        return str('scp')
+    elif self.comboBox_8.currentText() == 'SFTP':
+        return str('sftp')
+
