@@ -1657,28 +1657,6 @@
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QCheckBox" name="checkBox_3">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>40</y>
-        <width>81</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remember! Built-in SSH client not support no password auth!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="text">
-       <string>use winSCP</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
      <widget class="QLineEdit" name="lineEdit_10">
       <property name="enabled">
        <bool>true</bool>
@@ -1686,7 +1664,7 @@
       <property name="geometry">
        <rect>
         <x>100</x>
-        <y>70</y>
+        <y>30</y>
         <width>113</width>
         <height>20</height>
        </rect>
@@ -1699,7 +1677,7 @@
       <property name="geometry">
        <rect>
         <x>250</x>
-        <y>70</y>
+        <y>30</y>
         <width>21</width>
         <height>16</height>
        </rect>
@@ -1721,7 +1699,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>70</y>
+        <y>30</y>
         <width>101</width>
         <height>16</height>
        </rect>
@@ -1750,7 +1728,7 @@
       <property name="geometry">
        <rect>
         <x>220</x>
-        <y>70</y>
+        <y>30</y>
         <width>21</width>
         <height>16</height>
        </rect>
@@ -1803,44 +1781,54 @@
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="label_18">
+     <widget class="QComboBox" name="comboBox_11">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>71</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type of compiler. External on server on built-in on current system.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="text">
-       <string>Compiler:</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="comboBox_9">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>70</x>
-        <y>40</y>
+        <x>110</x>
+        <y>50</y>
         <width>111</width>
         <height>22</height>
        </rect>
       </property>
       <item>
        <property name="text">
-        <string>Build-Server</string>
+        <string>WinSCP+PuTTy</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Built-in</string>
+        <string>Paramiko</string>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>ssh+scp/sftp</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>built-in (linux)</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="label_21">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>50</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set of software for handle operations&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string>Software Kit:</string>
+      </property>
+      <property name="buddy">
+       <cstring>lineEdit_5</cstring>
+      </property>
      </widget>
     </widget>
    </widget>
