@@ -40,7 +40,7 @@ class MySFTPClient(paramiko.SFTPClient):
     def put_dir(self, source, target):
         for item in os.listdir(source):
             if os.path.isfile(os.path.join(source, item)):
-                if item.find('.ipch') >= 0:
+                if item.find('.ipch') >= 0 or item.find('.obj') >= 0 or item.find('.exe') >= 0:
                     continue
                 print("Proceed: %s\\%s [%d]" % (source, item, os.path.getsize(os.path.join(source, item))))
                 self.put(os.path.join(source, item), '%s/%s' % (target, item), )
@@ -188,13 +188,7 @@ def restart(Settings):
     paramiko.util.log_to_file('restart_command.log')
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    if Settings.device.password == '':
-        print('using no password')
-        client.connect(hostname=Settings.device.ip, port=22, username=Settings.device.user)
-    else:
-        print('using password')
-        client.connect(Settings.device.ip, 22, Settings.device.user, Settings.device.password)
-    print('do')
+    client.connect(Settings.device.ip, 22, Settings.device.user, Settings.device.password)
     client.exec_command("/etc/init.d/autorun.sh restart")
     client.close()
 
