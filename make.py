@@ -8,24 +8,27 @@ import shutil
 #  --path *    - choose path
 #  --uac-admin - admin rights (usefull for Windows 7)
 
-MAIN_FILE = "" # 'core.py'
-win32_dll = "" #"\"C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.17763.0\\ucrt\\DLLs\\x86\""
-pyinst_32 = "" #"C:\python37-low\Scripts\pyinstaller.exe"
-QT_XML = "" #'pycontrol.ui'
-PY_XML = "" #'gui.py'
-PY_ICON = "" # icon file
-PY_MODULES = [] # list of required mofules for running 
+MAIN_FILE = ""  # 'core.py'
+win32_dll = ""  # "\"C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\10.0.17763.0\\ucrt\\DLLs\\x86\""
+pyinst_32 = ""  # "C:\python37-low\Scripts\pyinstaller.exe"
+QT_XML = ""  # 'pycontrol.ui'
+PY_XML = ""  # 'gui.py'
+PY_ICON = ""  # icon file
+PY_MODULES = []  # list of required mofules for running
 
 
 def make_64(arguments):
-    os.system('pyinstaller --icon=%s %s %s' % (PY_ICON, arguments, MAIN_FILE))
+    os.system('pyinstaller --noconfirm --clean --icon=%s %s %s' % (PY_ICON, arguments, MAIN_FILE))
 
 
 def make_32(arguments):
-    os.system('%s --path %s --icon=%s %s %s' % (pyinst_32, win32_dll, PY_ICON, arguments, MAIN_FILE))
+    print('%s --path %s --icon=%s %s %s' % (pyinst_32, win32_dll, PY_ICON, arguments, MAIN_FILE))
+    os.system('%s --noconfirm --clean --path=%s %s --icon=%s %s' % (pyinst_32, win32_dll, arguments, PY_ICON, MAIN_FILE))
+
 
 def make(arguments):
     os.system('pyinstaller --icon=%s %s %s' % (PY_ICON, arguments, MAIN_FILE))
+
 
 def clear_64():
     os.chdir("dist/core")
@@ -94,6 +97,7 @@ def install_modules():
     for module in range(2, len(PY_MODULES)):
         os.system("pip install %s" % PY_MODULES[module])
 
+
 def translate():
     if os.name == 'nt':
         os.system("python -m PyQt5.uic.pyuic %s -o %s" % (QT_XML, PY_XML))
@@ -128,8 +132,6 @@ def main():
                 PY_ICON = get_value(line, len('icon-file'))
             if line.find('depends') == 0:
                 PY_MODULES = get_depends(line)
-
-
     fp.close()
     if len(sys.argv) <= 1:
         print("Not enough arguments. Type %s help" % sys.argv[0])
@@ -184,6 +186,7 @@ def main():
             translate()
             make("--noconsole --onefile")
 
+
 def get_value(line, start):
     value = ""
     for i in range(start, len(line)):
@@ -193,16 +196,18 @@ def get_value(line, start):
                 value += line[j]
                 j += 1
     return value
-	
+
+
 def get_depends(line):
-    '''
+    """
     Returning string splited by space as string array
     Usefull data is from 2 index
-    '''
+    """
     depends_modules = []
     for word in line.split():
         depends_modules.append(word)
     return depends_modules
+
 
 if __name__ == '__main__':
     main()
