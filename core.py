@@ -181,8 +181,8 @@ class Settings:
                         self.server.sync_files = _SYNC_FILES_
 
                 if line.find('connection_type') == 0:
-                    index = 8
-                    self.device.connection_type = func.get_value(line, index)
+                    index = 15
+                    self.local.connection_type = int(func.get_value(line, index))
 
                 if line.find('path_scp') == 0:
                     index = 8
@@ -302,13 +302,34 @@ class Settings:
 
         if self.local.connection_type == _WINSCP_PUTTY_:  # If selected 'winscp + putty'
             gui.comboBox_11.setCurrentIndex(_WINSCP_PUTTY_)
+            # Enabling upload or sync radiobutton
             gui.radioButton.setEnabled(True)
             gui.radioButton_2.setEnabled(True)
+            # Enabling autorun.sh commands by ssh protocol
+            gui.pushButton_11.setEnabled(True)  # killall
+            gui.pushButton_2.setEnabled(True)  # restart
+            gui.pushButton_5.setEnabled(True)  # stop
+            gui.pushButton_4.setEnabled(True)  # only upload
+            gui.pushButton.setEnabled(True)  # UPLOAD
+            gui.pushButton_13.setEnabled(True)  # calibrate sensor
+            gui.pushButton_14.setEnabled(True)  # test sensor
+            gui.pushButton_22.setEnabled(True)  # psplash upload
         elif self.local.connection_type == _PARAMIKO_:  # If selected 'paramiko'
             gui.comboBox_11.setCurrentIndex(_PARAMIKO_)
+            # Disabling upload or sync radiobutton
             gui.radioButton.setEnabled(False)
             gui.radioButton_2.setEnabled(False)
+            # Only upload mode to build-server
             self.server.sync_files = False
+            # Disabling autorun.sh commands by ssh protocol
+            gui.pushButton_11.setEnabled(False)  # killall
+            gui.pushButton_2.setEnabled(False)  # restart
+            gui.pushButton_5.setEnabled(False)  # stop
+            gui.pushButton_4.setEnabled(False)  # only upload
+            gui.pushButton.setEnabled(False)  # UPLOAD
+            gui.pushButton_13.setEnabled(False)  # calibrate sensor
+            gui.pushButton_14.setEnabled(False)   # test sensor
+            gui.pushButton_22.setEnabled(False)  # psplash upload
         elif self.local.connection_type == _SSH_SCP_SFTP_:
             gui.comboBox_11.setCurrentIndex(_SSH_SCP_SFTP_)
         elif self.local.connection_type == _LINUX_BUILT_IN_:
