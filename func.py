@@ -3,6 +3,9 @@
 import os
 import subprocess
 
+from core import _SCP_
+from core import _SFTP_
+
 
 def is_online(host, times=1):
     """
@@ -78,6 +81,19 @@ def protocol_get(self):
     :return: selected protocol
     """
     if self.comboBox_8.currentText() == 'SCP':
-        return str('scp')
+        return _SCP_
     elif self.comboBox_8.currentText() == 'SFTP':
-        return str('sftp')
+        return _SFTP_
+
+
+def prompt_print(data):
+    """
+    Display data to console from output result after exec_command
+
+    :param data:
+    :return: display
+    """
+    i = 0
+    while i < len(data):
+        print(chr(data[i]), end="")
+        i += 1
