@@ -4,15 +4,8 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
 from gui import Ui_MainWindow
-import func
-import func_winscp
-import func_linux
-import func_paramiko
-import paramiko
 import os
 import subprocess
-import fs
-
 
 PROG_NAME = "Firmware Works"
 VERSION = "1.0.4"
@@ -43,6 +36,12 @@ _LINUX_BUILT_IN_: int = 3
 _WINDOWS_: int = 0
 _LINUX_: int = 1
 # *** end of global constants and definitions
+
+import fs
+import func
+import func_winscp
+import func_linux
+import func_paramiko
 
 
 class Cache_file:
@@ -77,7 +76,7 @@ class Settings:
     """ Application configuration  """
     class device:
         """ Embedded device properties """
-        user: str = ""                              #: Username to login
+        user: str = ""                              # Username to login
         password: str = ""                          # Password to login
         ip: str = ""                                # IP address
         file_protocol: int = _SCP_                  # Type of file protocol 1-SFTP or 0-SCP
@@ -90,7 +89,7 @@ class Settings:
         ip: str = ""                                # Server IP
         path_external: str = ""                     # PATH to upload sources
         path_executable: str = ""                   # PATH with executable binary
-        sync_files: bool = _UPLOAD_FILES_           # Upload files (true), sync files (false)
+        sync_files: bool = _UPLOAD_FILES_           # Upload files (false), sync files (true)
         compiler: str = _GCC_                       # Type of compiler gcc or gcc8
         compile_mode: bool = False                  # If true then clean object files before compiling (recompiling)
 
@@ -175,10 +174,10 @@ class Settings:
 
                 if line.find('update') == 0:
                     index = 6
-                    tmp_value = func.get_value(line, index)
+                    tmp_value = int(func.get_value(line, index))
                     if tmp_value == 0:
                         self.server.sync_files = _UPLOAD_FILES_
-                    else:
+                    elif tmp_value == 1:
                         self.server.sync_files = _SYNC_FILES_
 
                 if line.find('connection_type') == 0:
@@ -315,9 +314,9 @@ class Settings:
         elif self.local.connection_type == _LINUX_BUILT_IN_:
             gui.comboBox_11.setCurrentIndex(_LINUX_BUILT_IN_)
 
-        if self.server.sync_files == _SYNC_FILES_:
+        if self.server.sync_files == _UPLOAD_FILES_:
             gui.radioButton.setChecked(True)
-        elif self.server.sync_files == _UPLOAD_FILES_:
+        elif self.server.sync_files == _SYNC_FILES_:
             gui.radioButton_2.setChecked(True)
 
         if len(self.local.path_winscp) == 0:
@@ -356,28 +355,6 @@ class Settings:
             self.local.os = _LINUX_
 
 
-class MySFTPClient(paramiko.SFTPClient):
-    def put_dir(self, source, target):
-        for item in os.listdir(source):
-            if os.path.isfile(os.path.join(source, item)):
-                if item.find('.ipch') >= 0:
-                    continue
-                print("Proceed: %s\\%s [%d]" % (source, item, os.path.getsize(os.path.join(source, item))))
-                self.put(os.path.join(source, item), '%s/%s' % (target, item), )
-            else:
-                self.mkdir('%s/%s' % (target, item), ignore_existing=True)
-                self.put_dir(os.path.join(source, item), '%s/%s' % (target, item))
-
-    def mkdir(self, path, mode=511, ignore_existing=False):
-        try:
-            super(MySFTPClient, self).mkdir(path, mode)
-        except IOError:
-            if ignore_existing:
-                pass
-            else:
-                raise
-
-
 class EProgBar(QThread):
     working_status = pyqtSignal(int)
 
@@ -385,9 +362,9 @@ class EProgBar(QThread):
         self.working_status.emit(1)
         if os.path.exists(Settings.project.path_local):
             if MySettings.local.connection_type == _WINSCP_PUTTY_:  # Windows/winSCP
-                func_winscp.compile(MySettings, 'release')
+                func_winscp.make(MySettings, 'release')
             elif MySettings.local.connection_type == _PARAMIKO_:  # Paramiko
-                func_paramiko.compile(MySettings, 'release')
+                func_paramiko.make(MySettings, 'release')
             elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
                 pass
             elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
@@ -404,9 +381,9 @@ class EProgBar_debug(QThread):
         self.working_status_debug.emit(1)
         if os.path.exists(Settings.project.path_local):
             if MySettings.local.connection_type == _WINSCP_PUTTY_:  # Windows/winSCP
-                func_winscp.compile(MySettings, 'debug')
+                func_winscp.make(MySettings, 'debug')
             elif MySettings.local.connection_type == _PARAMIKO_:  # Paramiko
-                func_paramiko.compile(MySettings, 'debug')
+                func_paramiko.make(MySettings, 'debug')
             elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
                 pass
             elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
@@ -509,10 +486,10 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_button_rmdir')
     def on_button_rmdir(self):
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
-            func_winscp.rmdir(Settings)
+            func_winscp.rmdir(MySettings)
             self.label_9.setText("SENT: remove external source directory storage.")
         elif MySettings.local.connection_type == _PARAMIKO_:
-            pass
+            func_paramiko.rmdir(MySettings)
             self.label_9.setText("SENT: remove external source directory storage.")
         elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
             pass
@@ -553,6 +530,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     # Opening device in WinSCP by SCP or SFTP protocol
     @pyqtSlot(name='on_button_winscp')
     def on_button_winscp(self):
+        command = ""
         if MySettings.local.os == _WINDOWS_:
             winscp_exe = MySettings.local.path_winscp.replace("com", "exe")
             MySettings.device.file_protocol = func.protocol_get(self)
@@ -903,7 +881,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_button_open')
     def on_button_open(self):
         global SETTINGS_FILE
-        conf_file = QFileDialog.getOpenFileName(filter=SETTINGS_FILE)
+        conf_file = QFileDialog.getOpenFileName(filter=SETTINGS_FILE, options="Any")
         if conf_file[0] == "":
             return
 
@@ -954,6 +932,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # HANDLER: opening sources path
     def open_file_dialog(self):
+        path_tmp = ""
         path_project = QFileDialog.getExistingDirectory()
         if path_project == "":
             return
@@ -1063,6 +1042,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.label_9.setText("Working...")
         elif value == 0:
             self.label_9.setText("Firmware debug is compiled.")
+            fs.path_get_firmware(MySettings.project.path_local + "\\Build\\bin\\" + MySettings.project.name + ".bin",  self.label_16)
         else:
             self.label_9.setText("Unknown operation.")
 
@@ -1123,18 +1103,19 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(name='on_button_auto')
     def on_button_auto(self):
+        MySettings.device.file_protocol = func.protocol_get(self)
         if self.checkBox_2.isChecked():
-            if self.comboBox_7.currentText().find('gcc8') == 0:
-                MySettings.server.compiler = _GCC8_
-            else:
+            if self.comboBox_7.currentIndex() == 0:
                 MySettings.server.compiler = _GCC_
+            elif self.comboBox_7.currentIndex() == 1:
+                MySettings.server.compiler = _GCC8_
             if os.path.exists(Settings.project.path_local):
                 if MySettings.local.connection_type == _WINSCP_PUTTY_:
-                    func_winscp.compile(MySettings)
+                    func_winscp.make(MySettings, 'release')
                 elif MySettings.local.connection_type == _PARAMIKO_:
-                    func_paramiko.compile(MySettings)
+                    func_paramiko.make(MySettings, 'release')
                 elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
-                    func_linux.compile(MySettings)
+                    func_linux.make(MySettings, 'release')
                 elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
                     pass
             else:
@@ -1142,10 +1123,8 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
                 print('Project PATH not found. Exiting.')
                 return
 
-        MySettings.device.file_protocol = func.protocol_get(self)
-
         if self.checkBox.isChecked():
-            is_online = func.is_online(MySettings.device.ip, 9999)
+            is_online = func.is_online(MySettings.device.ip, 1)
             self.label_9.setText("Trying to connect...")
             self.label_9.setText("Connect established.")
             if is_online:
@@ -1199,4 +1178,3 @@ if __name__ == '__main__':
     MySettings = Settings
     MyCache = Cache_file
     main()
-
