@@ -2048,13 +2048,65 @@
   </action>
  </widget>
  <tabstops>
+  <tabstop>pushButton_14</tabstop>
+  <tabstop>pushButton_13</tabstop>
+  <tabstop>pushButton_7</tabstop>
+  <tabstop>pushButton_22</tabstop>
   <tabstop>pushButton_4</tabstop>
   <tabstop>pushButton</tabstop>
   <tabstop>checkBox</tabstop>
   <tabstop>checkBox_2</tabstop>
   <tabstop>pushButton_3</tabstop>
-  <tabstop>pushButton_5</tabstop>
+  <tabstop>pushButton_15</tabstop>
+  <tabstop>pushButton_18</tabstop>
+  <tabstop>pushButton_16</tabstop>
+  <tabstop>pushButton_23</tabstop>
+  <tabstop>comboBox_7</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>lineEdit</tabstop>
+  <tabstop>comboBox</tabstop>
+  <tabstop>lineEdit_2</tabstop>
+  <tabstop>comboBox_2</tabstop>
+  <tabstop>lineEdit_3</tabstop>
+  <tabstop>lineEdit_4</tabstop>
+  <tabstop>lineEdit_5</tabstop>
+  <tabstop>comboBox_3</tabstop>
+  <tabstop>toolButton_2</tabstop>
+  <tabstop>lineEdit_11</tabstop>
+  <tabstop>comboBox_6</tabstop>
+  <tabstop>toolButton_5</tabstop>
+  <tabstop>comboBox_8</tabstop>
+  <tabstop>comboBox_10</tabstop>
+  <tabstop>pushButton_6</tabstop>
+  <tabstop>pushButton_9</tabstop>
+  <tabstop>pushButton_10</tabstop>
+  <tabstop>pushButton_8</tabstop>
+  <tabstop>pushButton_19</tabstop>
+  <tabstop>pushButton_11</tabstop>
   <tabstop>pushButton_2</tabstop>
+  <tabstop>pushButton_17</tabstop>
+  <tabstop>pushButton_21</tabstop>
+  <tabstop>pushButton_5</tabstop>
+  <tabstop>pushButton_24</tabstop>
+  <tabstop>pushButton_12</tabstop>
+  <tabstop>lineEdit_6</tabstop>
+  <tabstop>lineEdit_7</tabstop>
+  <tabstop>lineEdit_8</tabstop>
+  <tabstop>lineEdit_12</tabstop>
+  <tabstop>pushButton_27</tabstop>
+  <tabstop>lineEdit_13</tabstop>
+  <tabstop>radioButton_2</tabstop>
+  <tabstop>radioButton</tabstop>
+  <tabstop>pushButton_25</tabstop>
+  <tabstop>pushButton_26</tabstop>
+  <tabstop>lineEdit_9</tabstop>
+  <tabstop>comboBox_4</tabstop>
+  <tabstop>toolButton_3</tabstop>
+  <tabstop>lineEdit_10</tabstop>
+  <tabstop>comboBox_5</tabstop>
+  <tabstop>toolButton_4</tabstop>
+  <tabstop>pushButton_20</tabstop>
+  <tabstop>comboBox_11</tabstop>
  </tabstops>
  <resources/>
  <connections/>
