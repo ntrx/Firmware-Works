@@ -4,6 +4,15 @@ import time
 
 
 def cache_save(HISTORY_FILE, SETTING_VALUE):
+    """
+    Cache saving source history
+
+    :param HISTORY_FILE: name of log file
+    :type HISTORY_FILE: str
+    :param SETTING_VALUE: line for saving
+    :type SETTING_VALUE: str
+    :return: None
+    """
     # cache saving source history
     already_exist: bool = False
 
@@ -24,6 +33,14 @@ def cache_save(HISTORY_FILE, SETTING_VALUE):
 
 
 def cache_read(self, HISTORY_FILE):
+    """
+    Reading cache from history file
+
+    :param self: object for saving history
+    :param HISTORY_FILE: file name
+    :type HISTORY_FILE: str
+    :return: History has been writed to self
+    """
     if os.path.isfile(HISTORY_FILE):
         self.clear()
         index: int = 0
@@ -39,6 +56,12 @@ def cache_read(self, HISTORY_FILE):
 
 
 def cache_create(file_list):
+    """
+    Creation cache files (if not found before)
+
+    :param file_list: list of files which need to create
+    :return: None
+    """
     for file in file_list:
         if not os.path.isfile(file):
             f = open(file, "w")
@@ -48,9 +71,11 @@ def cache_create(file_list):
 
 def path_double_win(path):
     """
+    Redirect slashes in string for Windows
+
     :param path: PATH string without doubled slashes
     :type path: str
-    :return:
+    :return: new string
     """
     result = ""
     for symbol in range(0, len(path)):
@@ -63,9 +88,11 @@ def path_double_win(path):
 
 def path_double_nix(path):
     """
+    Doubles slashes in string for Linux
+
     :param path: PATH string without doubled slashes
     :type path: str
-    :return:
+    :return: new string
     """
     result = ""
     for symbol in range(0, len(path)):
@@ -78,6 +105,8 @@ def path_double_nix(path):
 
 def path_get_filename(path):
     """
+    Getting filename in PATH string
+
     :param path: PATH string with doubled slashes and file name at end
     :type path: str
     :return: only file name
@@ -97,6 +126,14 @@ def path_get_filename(path):
 
 
 def path_get_firmware(path, self):
+    """
+    Getting size and time creation of file (specified for firmwares)
+
+    :param path: PATH to firmware
+    :type path: str
+    :param self: activity
+    :return: Text to self about firmware status
+    """
     firmware_path = path
     if os.path.exists(firmware_path):
         firmware_size = os.path.getsize(firmware_path)
