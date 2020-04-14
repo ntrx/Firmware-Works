@@ -353,6 +353,9 @@
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>110</x>
@@ -366,6 +369,9 @@
      </property>
      <property name="text">
       <string>upload when available</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButton">
