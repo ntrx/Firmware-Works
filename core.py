@@ -8,7 +8,7 @@ import os
 import subprocess
 
 PROG_NAME = "Firmware Works"
-VERSION = "1.0.4"
+VERSION = "1.0.5"
 RELEASE = "beta"
 
 SETTINGS_EMPTY: str = ""
@@ -127,7 +127,7 @@ class Settings:
             self.local.path_winscp = 'C:/example'
             self.local.path_putty = 'C:/example'
             self.project.path_psplash = 'C:/example'
-            self.save()
+            self.save(self)
 
         # If find == 0 its our parameter (because all they is starting from 0)
         with open(SETTINGS_FILE) as fp:
