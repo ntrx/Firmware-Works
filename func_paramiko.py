@@ -1,11 +1,18 @@
 #!/usr/bin/env python
 # Using module paramiko for perform scp/sftp actions
+
+from core import _SYNC_FILES_
+from core import _UPLOAD_FILES_
+from core import _SFTP_
+from core import _SCP_
+from core import _NXP_
+from core import _ATOM_
+
 import os
 import paramiko
-import subprocess
 from scp import SCPClient
 import fs
-from core import MySFTPClient
+import func
 
 
 def createSSHClient(server, port, user, secret):
@@ -27,6 +34,28 @@ def createSSHClient(server, port, user, secret):
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname=server, port=port, username=user, password=secret)
     return client
+
+
+class MySFTPClient(paramiko.SFTPClient):
+    def put_dir(self, source, target):
+        for item in os.listdir(source):
+            if os.path.isfile(os.path.join(source, item)):
+                if item.find('.ipch') >= 0:
+                    continue
+                print("Proceed: %s\\%s [%d]" % (source, item, os.path.getsize(os.path.join(source, item))))
+                self.put(os.path.join(source, item), '%s/%s' % (target, item), )
+            else:
+                self.mkdir('%s/%s' % (target, item), ignore_existing=True)
+                self.put_dir(os.path.join(source, item), '%s/%s' % (target, item))
+
+    def mkdir(self, path, mode=511, ignore_existing=False):
+        try:
+            super(MySFTPClient, self).mkdir(path, mode)
+        except IOError:
+            if ignore_existing:
+                pass
+            else:
+                raise
 
 
 class MySCPClient(SCPClient):
@@ -184,14 +213,11 @@ def rmdir(Settings):
     client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
     stdin, stdout, stderr = client.exec_command("rmdir " + path_dest_win)
     data = stdout.read() + stderr.read()
-    i = 0
-    while i < len(data):
-        print(chr(data[i]), end="")
-        i += 1
+    func.prompt_print(data)
     client.close()
 
 
-def compile(Settings, build):
+def make(Settings, build):
     """
     Upload sources from local dir and compiling firmware on server or device builtin compiler
 
@@ -200,102 +226,94 @@ def compile(Settings, build):
     :type build: str
     :return: None
     """
-    if os.name == 'nt':  # if Windows
-        if Settings.device.system == 0:  # NXP iMX6
-            path_loc_win = Settings.project.path_local  # os.getcwd()
-            path_dest_win = "//home//" + Settings.server.user + Settings.server.path_external
-            if not os.path.exists(fs.path_double_win(path_loc_win + "\\Build\\bin\\")):
-                os.mkdir(path=fs.path_double_win(path_loc_win + "\\Build\\bin\\"))
-            transport = paramiko.Transport(Settings.server.ip, 22)
-            transport.connect(username=Settings.server.user, password=Settings.server.password)
-            sftp = MySFTPClient.from_transport(transport)
-            if Settings.server.sync_files == '0':
-                sftp.mkdir(path_dest_win, ignore_existing=True)
-                sftp.mkdir(path_dest_win + '/Src', ignore_existing=True)
-                sftp.mkdir(path_dest_win + '/Build', ignore_existing=True)
-                sftp.put_dir(path_loc_win + '\\Src', path_dest_win + '/Src/')
-            elif Settings.server.sync_files == '1':
-                pass
-            else:
-                pass
+    if Settings.device.system == _NXP_:  # NXP iMX6
+        path_loc_win = Settings.project.path_local  # os.getcwd()
+        path_dest_win = "//home//" + Settings.server.user + Settings.server.path_external
+        if not os.path.exists(fs.path_double_win(path_loc_win + "\\Build\\bin\\")):
+            os.mkdir(path=fs.path_double_win(path_loc_win + "\\Build\\bin\\"))
+        transport = paramiko.Transport(Settings.server.ip, 22)
+        transport.connect(username=Settings.server.user, password=Settings.server.password)
+        sftp = MySFTPClient.from_transport(transport)
+        if Settings.server.sync_files == _UPLOAD_FILES_:
+            sftp.mkdir(path_dest_win, ignore_existing=True)
+            sftp.mkdir(path_dest_win + '/Src', ignore_existing=True)
+            sftp.mkdir(path_dest_win + '/Build', ignore_existing=True)
+            sftp.put_dir(path_loc_win + '\\Src', path_dest_win + '/Src/')
+        elif Settings.server.sync_files == _SYNC_FILES_:
+            pass
 
-            paramiko.util.log_to_file('compile.log')
-            client = paramiko.SSHClient()
-            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
+        paramiko.util.log_to_file('compile.log')
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
 
-            if Settings.server.sync_files == '0':
-                stdin, stdout, stderr = client.exec_command("make -C /home/" + Settings.server.user + Settings.server.path_external + "/Src clean")
-                data = stdout.read() + stderr.read()
+        if Settings.server.sync_files == _UPLOAD_FILES_:
+            stdin, stdout, stderr = client.exec_command("make -C /home/" + Settings.server.user + Settings.server.path_external + "/Src clean")
+            data = stdout.read() + stderr.read()
+            if build == 'release':
                 stdin, stdout, stderr = client.exec_command(" make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7 --makefile=Makefile")
                 data += stdout.read() + stderr.read()
-            elif Settings.server.sync_files == '1':
+            elif build == 'debug':
+                stdin, stdout, stderr = client.exec_command(" make " + Settings.server.compiler + " debug -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7 --makefile=Makefile")
+                data += stdout.read() + stderr.read()
+        elif Settings.server.sync_files == _SYNC_FILES_:
+            if build == 'release':
                 stdin, stdout, stderr = client.exec_command("make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7")
-                data = stdout.read() + stderr.read()
-            i = 0
-            while i < len(data):
-                print(chr(data[i]), end="")
-                i += 1
-            client.close()
+            elif build == 'debug':
+                stdin, stdout, stderr = client.exec_command("make debug" + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7")
+            data = stdout.read() + stderr.read()
+        func.prompt_print(data)
+        client.close()
 
-            path_loc_nix = "/home/%s%s/Build/bin/%s.bin" % (Settings.server.user, Settings.server.path_external, Settings.project.name)
-            path_loc_nix = fs.path_double_nix(path_loc_nix)
-            print("Getting file: ", path_loc_nix)
-            path_loc_win = fs.path_double_win(Settings.project.path_local)
-            sftp.get(remotepath=path_loc_nix, localpath=path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
-            print("Saving to: " + path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
-            sftp.close()
-        elif Settings.device.system == 1:  # Intel Atom
-            path_loc_win = Settings.project.path_local  # os.getcwd()
-            path_dest_win = Settings.server.path_external
-            file_name = 'compile' + Settings.project.name
-    else: # if Linux
-        if Settings.device.system == 0:  # NXP iMX6
-            if Settings.server.using:  # Build-server
-                path_loc_nix = Settings.project.path_local
-                path_dest_nix = "//home//" + Settings.server.user + Settings.server.path_external
-                if not os.path.exists(fs.path_double_nix(path_loc_nix + "//Build//bin//")):
-                    os.mkdir(path=fs.path_double_nix(path_loc_nix + "//Build//bin//"))
-                if True:
-                    transport = paramiko.Transport(Settings.server.ip, 22)
-                    transport.connect(username=Settings.server.user, password=Settings.server.password)
-                    sftp = MySFTPClient.from_transport(transport)
-                    if Settings.server.sync_files == '0':
-                        sftp.mkdir(path_dest_nix, ignore_existing=True)
-                        sftp.mkdir(path_dest_nix + '/Src', ignore_existing=True)
-                        sftp.mkdir(path_dest_nix + '/Build', ignore_existing=True)
-                        sftp.put_dir(path_loc_nix + '//Src', path_dest_nix + '/Src/')
-                    elif Settings.server.sync_files == '1':
-                        pass
-                    else:
-                        pass
+        path_loc_nix = "/home/%s%s/Build/bin/%s.bin" % (Settings.server.user, Settings.server.path_external, Settings.project.name)
+        path_loc_nix = fs.path_double_nix(path_loc_nix)
+        print("Getting file: ", path_loc_nix)
+        path_loc_win = fs.path_double_win(Settings.project.path_local)
+        sftp.get(remotepath=path_loc_nix, localpath=path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
+        print("Saving to: " + path_loc_win + "\\Build\\bin\\" + Settings.project.name + ".bin")
+        sftp.close()
+    elif Settings.device.system == _ATOM_:  # Intel Atom
+        path_loc_win = Settings.project.path_local  # os.getcwd()
+        path_dest_win = Settings.server.path_external
 
-                    paramiko.util.log_to_file('compile.log')
-                    client = paramiko.SSHClient()
-                    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                    client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
+        transport = paramiko.Transport(Settings.device.ip, 22)
+        transport.connect(username=Settings.device.user, password=Settings.device.password)
+        sftp = MySFTPClient.from_transport(transport)
+        if Settings.server.sync_files == _UPLOAD_FILES_:
+            sftp.mkdir(Settings.server.path_external)
+            sftp.put_dir(path_loc_win + '\\Src', path_dest_win + '/Src/')
+        elif Settings.server.sync_files == _SYNC_FILES_:
+            pass
 
-                    if Settings.server.sync_files == '0':
-                        stdin, stdout, stderr = client.exec_command("make -C /home/" + Settings.server.user + Settings.server.path_external + "/Src clean")
-                        data = stdout.read() + stderr.read()
-                        stdin, stdout, stderr = client.exec_command(" make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7 --makefile=Makefile")
-                        data += stdout.read() + stderr.read()
-                    elif Settings.server.sync_files == '1':
-                        stdin, stdout, stderr = client.exec_command("make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7")
-                        data = stdout.read() + stderr.read()
-                    i = 0
-                    while i < len(data):
-                        print(chr(data[i]), end="")
-                        i += 1
-                    client.close()
+        paramiko.util.log_to_file('compile.log')
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect(Settings.device.ip, 22, Settings.device.user, Settings.device.password)
 
-                    path_loc_dest = '/home/%s%s/Build/bin/%s.bin' % (Settings.server.user, Settings.server.path_external, Settings.project.name)
-                    path_loc_dest = fs.path_double_nix(path_loc_dest)
-                    print("Getting file:", path_loc_dest)
-                    path_loc_nix = fs.path_double_nix(Settings.project.path_local)
-                    sftp.get(remotepath=path_loc_dest, localpath=path_loc_nix + "/Build/bin/" + Settings.project.name + '.bin')
-                    print('Saving file to:' + path_loc_nix + '/Build/bin/' + Settings.project.name + '.bin')
-                    sftp.close()
+        if Settings.server.sync_files == _UPLOAD_FILES_:
+            stdin, stdout, stderr = client.exec_command("make -C /" + Settings.server.path_external + "/Src clean")
+            data = stdout.read() + stderr.read()
+            if build == 'release':
+                stdin, stdout, stderr = client.exec_command("make " + Settings.server.compiler + " -C /" + Settings.server.path_external + "/Src --makefile=Makefile")
+            elif build == 'debug':
+                stdin, stdout, stderr = client.exec_command("make " + Settings.server.compiler + " debug -C /" + Settings.server.path_external + "/Src --makefile=Makefile")
+            data += stdout.read() + stderr.read()
+        elif Settings.server.sync_files == _SYNC_FILES_:
+            if build == 'release':
+                stdin, stdout, stderr = client.exec_command("make " + Settings.server.compiler + " -C /" + Settings.server.path_external + "/Src ")
+            elif build == 'debug':
+                stdin, stdout, stderr = client.exec_command("make debug" + Settings.server.compiler + " -C /" + Settings.server.path_external + "/Src ")
+            data = stdout.read() + stderr.read()
+        func.prompt_print(data)
+
+        stdin, stdout, stderr = client.exec_command("mv //root//navigation//bin//%s.bin //root//navigation//bin//%s.bin-backup")
+        data = stdout.read() + stderr.read()
+        stdin, stdout, stderr = client.exec_command("mv //root//%s//Build//bin//%s.bin //root//navigation//bin//%s.bin" % (Settings.server.path_external, Settings.project.name, Settings.project.name))
+        data += stdout.read() + stderr.read()
+        func.prompt_print(data)
+
+        client.close()
+        sftp.close()
 
 
 def detect_project(Settings, self):
@@ -306,7 +324,7 @@ def detect_project(Settings, self):
     :param self: activity
     :return: None
     """
-    if Settings.device.file_protocol == 'sftp':
+    if Settings.device.file_protocol == _SFTP_:
         transport = paramiko.Transport((Settings.device.ip, 22))
         transport.connect()
         transport.auth_none(username=Settings.device.user)
@@ -320,23 +338,8 @@ def detect_project(Settings, self):
                 result = 'None'
         sftp.close()
         self.setText("Detected firmware: %s" % result)
-    elif Settings.device.file_protocol == 'scp':
-        if os.name == "nt":
-            self.setText('Cannot get directory list via SCP.')
-        else:
-            transport = paramiko.Transport((Settings.device.ip, 22))
-            transport.connect()
-            transport.auth_none(username=Settings.device.user)
-            sftp = MySFTPClient.from_transport(transport)
-            result = sftp.listdir("/home/root/")
-            for obj in result:
-                if obj[0] != '.':
-                    result = obj
-                    break
-                else:
-                    result = 'None'
-            sftp.close()
-            self.setText("Detected firmware: %s" % result)
+    elif Settings.device.file_protocol == _SCP_:
+        pass
 
 
 def detect_outdated_firmware(Settings, self):
@@ -348,14 +351,14 @@ def detect_outdated_firmware(Settings, self):
     :return: None
     """
     local_firmware = os.stat('%s/Build/bin/%s.bin' % (Settings.project.path_local, Settings.project.name))
-    if Settings.device.file_protocol == 'sftp':
+    if Settings.device.file_protocol == _SFTP_:
         transport = paramiko.Transport((Settings.device.ip, 22))
         transport.connect()
         transport.auth_none(username=Settings.device.user)
         sftp = MySFTPClient.from_transport(transport)
         device_firmware = sftp.lstat('/home/root/%s/bin/%s.bin' % (Settings.project.name, Settings.project.name))
         sftp.close()
-    elif Settings.device.file_protocol == 'scp':
+    elif Settings.device.file_protocol == _SCP_:
         transport = paramiko.Transport((Settings.device.ip, 22))
         transport.connect()
         transport.auth_none(username=Settings.device.user)
@@ -381,16 +384,19 @@ def psplash_upload(Settings, self):
     :param self: activity
     :return: None
     """
-    file_name = fs.path_get_filename(Settings.project.path_psplash)
-    path_dest = "//usr//bin//" + file_name
-    path_loc_win = Settings.project.path_psplash
-    transport = paramiko.Transport((Settings.device.ip, 22))
-    transport.connect()
-    transport.auth_none(username=Settings.device.user)
-    sftp = MySFTPClient.from_transport(transport)
-    sftp.put(path_loc_win, path_dest)
-    sftp.chmod(path_dest, 777)
-    sftp.close()
+    if Settings.device.file_protocol == _SFTP_:
+        file_name = fs.path_get_filename(Settings.project.path_psplash)
+        path_dest = "//usr//bin//" + file_name
+        path_loc_win = Settings.project.path_psplash
+        transport = paramiko.Transport((Settings.device.ip, 22))
+        transport.connect()
+        transport.auth_none(username=Settings.device.user)
+        sftp = MySFTPClient.from_transport(transport)
+        sftp.put(path_loc_win, path_dest)
+        sftp.chmod(path_dest, 777)
+        sftp.close()
+    elif Settings.device.file_protocol == _SCP_:
+        pass
     self.setText("psplash command sent")
 
 
@@ -401,39 +407,19 @@ def clean(Settings):
     :param Settings:
     :return:
     """
-    if os.name == 'nt':
-        transport = paramiko.Transport(Settings.server.ip, 22)
-        transport.connect(username=Settings.server.user, password=Settings.server.password)
-        sftp = MySFTPClient.from_transport(transport)
+    path_loc_nix = Settings.project.path_local
+    if not os.path.exists(fs.path_double_nix(path_loc_nix + "//Build//bin//")):
+        return
 
-        paramiko.util.log_to_file('clean.log')
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
-        stdin, stdout, stderr = client.exec_command("cd " + Settings.server.path_external + "/Src;")
-        stdin, stdout, stderr = client.exec_command("make clean")
-        # data = stdout.read() + stderr.read()
-        client.close()
-        sftp.close()
-    else:
-        path_loc_nix = Settings.project.path_local
-        if not os.path.exists(fs.path_double_nix(path_loc_nix + "//Build//bin//")):
-            return
-        if True:
-            paramiko.util.log_to_file('clean.log')
-            client = paramiko.SSHClient()
-            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
+    paramiko.util.log_to_file('clean.log')
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
+    stdin, stdout, stderr = client.exec_command("make -C /home/" + Settings.server.user + Settings.server.path_external + "/Src clean")
+    data = stdout.read() + stderr.read()
+    func.prompt_print(data)
+    client.close()
 
-            stdin, stdout, stderr = client.exec_command("make -C /home/" + Settings.server.user + Settings.server.path_external + "/Src clean")
-            data = stdout.read() + stderr.read()
-
-            i = 0
-            while i < len(data):
-                print(chr(data[i]), end="")
-                i += 1
-            client.close()
-            
 
 def sftp_callback(transferred, toBeTransferred):
     print("Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred))
