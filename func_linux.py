@@ -3,6 +3,13 @@
 import os
 import fs
 
+from core import _SYNC_FILES_
+from core import _UPLOAD_FILES_
+from core import _SFTP_
+from core import _SCP_
+from core import _NXP_
+from core import _ATOM_
+
 
 def upload(Settings):
     """
@@ -14,7 +21,7 @@ def upload(Settings):
     file_name = 'upload' + Settings.device.ip
     path_loc_nix = Settings.project.path_local + "//Build//bin//" + Settings.project.name + ".bin"
     path_dest_nix = "//home//" + Settings.device.user + "//" + Settings.project.name + "//bin//"
-    if Settings.device.file_protocol == 'sftp': # sftp, not tested
+    if Settings.device.file_protocol == _SFTP_:
         f = open(file_name, "w+")
         f.write("sftp %s@%s << EOF\n" % (Settings.device.user, Settings.device.ip))
         f.write("rename %s %s_backup\n" % (path_loc_nix, path_dest_nix))
@@ -24,7 +31,7 @@ def upload(Settings):
         os.system("chmod 777 %s" % file_name)
         os.system("%s" % file_name)
         os.remove(file_name)
-    elif Settings.device.file_protocol == 'scp': # scp
+    elif Settings.device.file_protocol == _SCP_:  # scp
         os.system("scp %s %s@%s:%s" % (path_loc_nix, Settings.device.user, Settings.device.ip, path_dest_nix))
 
 
@@ -35,7 +42,7 @@ def killall(Settings):
     :param Settings: configuration
     :return: None
     """
-    os.system("ssh %s@%s 'killall sn4215_respawn.sh %s.bin | exit'" % (Settings.device.user, Settings.device.ip, Settings.project.name))
+    os.system("ssh %s@%s \"killall sn4215_respawn.sh %s.bin | exit\"" % (Settings.device.user, Settings.device.ip, Settings.project.name))
 
 
 def reboot(Settings):
