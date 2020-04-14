@@ -65,7 +65,7 @@ class Cache_file:
         paths = vars(self)
         for item in paths:
             listing.append(str(paths[item]))
-        for i in range(2, 8):
+        for i in range(3, 9):
             self.list.append(listing[i])
 
         for file in self.list:
