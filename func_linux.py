@@ -103,7 +103,7 @@ def rmdir(Settings):
     return
 
 
-def compile(Settings, build):
+def make(Settings, build):
     # see para_compile
     return
 
