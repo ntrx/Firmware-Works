@@ -25,14 +25,14 @@ SETTINGS_FILE: str = "settings.py"
 # File protocols ( device.file_protocol )
 _SFTP_: int = 1
 _SCP_: int = 0
-# System arch ( device.system )
+# System arch ( d evice.system )
 _NXP_: int = 0
 _ATOM_: int = 1
 # Sync files ( server.sync_files )
 _UPLOAD_FILES_: bool = False
 _SYNC_FILES_: bool = True
 # Compiler version ( server.compiler )
-_GCC_: str = "gcc"
+_GCC_: str = ""
 _GCC8_: str = "gcc8"
 # Connection type ( local.connection_type )
 _WINSCP_PUTTY_: int = 0
@@ -46,6 +46,7 @@ _LINUX_: int = 1
 
 
 class Cache_file:
+    """ Cache files list and functions """
     source: str = "source-history.log"
     project: str = "project-history.log"
     device_ip: str = "device-ip-history.log"
@@ -55,6 +56,11 @@ class Cache_file:
     list = []
 
     def init(self):
+        """
+        Init filenames list
+
+        :return: filename list
+        """
         listing = []
         paths = vars(self)
         for item in paths:
@@ -68,14 +74,17 @@ class Cache_file:
 
 
 class Settings:
-    class device:               # Embedded device properties
-        user: str = ""                              # Username to login
+    """ Application configuration  """
+    class device:
+        """ Embedded device properties """
+        user: str = ""                              #: Username to login
         password: str = ""                          # Password to login
         ip: str = ""                                # IP address
         file_protocol: int = _SCP_                  # Type of file protocol 1-SFTP or 0-SCP
         system: int = _NXP_                         # 0 - using NXP processors, 1 - using Intem Atom processors
 
-    class server:               # Build-server properties
+    class server:
+        """ Build-server properties """
         user: str = ""                              # Username to login
         password: str = ""                          # Password to login
         ip: str = ""                                # Server IP
@@ -84,14 +93,15 @@ class Settings:
         sync_files: bool = _UPLOAD_FILES_           # Upload files (true), sync files (false)
         compiler: str = _GCC_                       # Type of compiler gcc or gcc8
         compile_mode: bool = False                  # If true then clean object files before compiling (recompiling)
-        using: bool = True                          # Linux only: compiling on external build-server or (false) using built-in gcc compiler
 
-    class project:              # Project settings
+    class project:
+        """ Project settings """
         name: str = ""                              # Name of project which has been applied to output binary file
         path_local: str = ""                        # Local PATH of sources
         path_psplash: str = ""                      # Local PATH of psplash file
 
-    class local:                # Some miscellaneous properties
+    class local:
+        """ Some miscellaneous properties (local for app) """
         path_winscp: str = ""                       # WinSCP local PATH
         path_putty: str = ""                        # PuTTy local PATH
         winscp_ok: bool = False                     # is WinSCP found
@@ -100,6 +110,7 @@ class Settings:
         os: int = _WINDOWS_                         # 0 - Windows / 1 - Linux
 
     def load(self):
+        """ Loading configuration file and creating default if not found """
         if not os.path.exists(SETTINGS_FILE):  # Create default configuration file
             print("User settings not found, creating preset file.")
             self.device.user = 'example_user'
@@ -117,7 +128,7 @@ class Settings:
             self.local.path_winscp = 'C:/example'
             self.local.path_putty = 'C:/example'
             self.project.path_psplash = 'C:/example'
-            self.save(self)
+            self.save()
 
         # If find == 0 its our parameter (because all they is starting from 0)
         with open(SETTINGS_FILE) as fp:
@@ -188,6 +199,7 @@ class Settings:
             fp.close()
 
     def save(self):
+        """ Saving configuration file """
         fp = open(SETTINGS_FILE, 'w')
         fp.write("# Auto created settings file. Remember that value is framed by '' \n")
         check = func.check_value(self.device.user)
@@ -225,6 +237,7 @@ class Settings:
         fp.close()
 
     def init(self, gui):
+        """ Initialize configuration to GUI """
         fs.cache_read(gui.comboBox_3, MyCache.source)
         fs.cache_read(gui.comboBox, MyCache.project)
         fs.cache_read(gui.comboBox_2, MyCache.device_ip)
@@ -289,18 +302,18 @@ class Settings:
             gui.lineEdit_13.setText(self.server.path_executable)
 
         if self.local.connection_type == _WINSCP_PUTTY_:  # If selected 'winscp + putty'
-            gui.checkBox_3.setChecked(True)
+            gui.comboBox_11.setCurrentIndex(_WINSCP_PUTTY_)
             gui.radioButton.setEnabled(True)
             gui.radioButton_2.setEnabled(True)
         elif self.local.connection_type == _PARAMIKO_:  # If selected 'paramiko'
-            gui.checkBox_3.setChecked(False)
+            gui.comboBox_11.setCurrentIndex(_PARAMIKO_)
             gui.radioButton.setEnabled(False)
             gui.radioButton_2.setEnabled(False)
             self.server.sync_files = False
         elif self.local.connection_type == _SSH_SCP_SFTP_:
-            pass
+            gui.comboBox_11.setCurrentIndex(_SSH_SCP_SFTP_)
         elif self.local.connection_type == _LINUX_BUILT_IN_:
-            pass
+            gui.comboBox_11.setCurrentIndex(_LINUX_BUILT_IN_)
 
         if self.server.sync_files == _SYNC_FILES_:
             gui.radioButton.setChecked(True)
@@ -419,9 +432,6 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         MySettings.init(MySettings, self)
 
         if MySettings.local.os == _WINDOWS_:
-            # Compiler type field
-            self.label_18.setVisible(False)
-            self.comboBox_9.setVisible(False)
             pass
         elif MySettings.local.os == _LINUX_:
             # Tab: External
@@ -477,9 +487,6 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.toolButton_4.clicked.connect(self.on_path_putty)
         self.toolButton_5.clicked.connect(self.on_path_psplash)
 
-        # check boxes
-        self.checkBox_3.clicked.connect(self.on_winscp_use)
-
         # comboboxes
         self.comboBox.currentIndexChanged.connect(self.on_project_change)
         self.comboBox_3.currentIndexChanged.connect(self.on_source_change)
@@ -487,8 +494,8 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.comboBox_4.currentIndexChanged.connect(self.on_winscp_change)
         self.comboBox_5.currentIndexChanged.connect(self.on_putty_change)
         self.comboBox_6.currentIndexChanged.connect(self.on_psplash_change)
-        self.comboBox_9.currentIndexChanged.connect(self.on_bs_using_change)
         self.comboBox_10.currentIndexChanged.connect(self.on_system_change)
+        self.comboBox_11.currentIndexChanged.connect(self.on_connection_type_change)
 
         # action menu
         self.actionOpen_2.triggered.connect(self.on_button_open)
@@ -688,18 +695,11 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_project_change(self):
         self.lineEdit.setText(self.comboBox.currentText())
 
-    # OPTIONS: build server type changed (local / external)
-    # TODO: need bind this option to local.connection_type
-    @pyqtSlot(name='on_bs_using_change')
-    def on_bs_using_change(self):
-        # Tab: Build-Server
-        if self.comboBox_9.currentIndex() == 1:  # Build-in compiler
-            Settings.server.using = False              
-            self.comboBox_9.setCurrentIndex(1)
-        elif self.comboBox_9.currentIndex() == 0:  # Build-server compiler
-            Settings.server.using = True
-            self.comboBox_9.setCurrentIndex(0)
-        self.tabWidget.setTabEnabled(1, Settings.server.using)
+    # OPTION: connection type changed
+    @pyqtSlot(name='on_connection_type_change')
+    def on_connection_type_change(self):
+        MySettings.local.connection_type = int(self.comboBox_11.currentIndex())
+        self.comboBox_11.setCurrentIndex(int(MySettings.local.connection_type))
 
     # OPTIONS: arch changed
     @pyqtSlot(name='on_system_change')
@@ -777,7 +777,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     # HANDLER: set putty path
     @pyqtSlot(name='set_putty')
     def set_putty(self):
-        conf_file = QFileDialog.getOpenFileName()
+        conf_file = QFileDialog.getOpenFileName(filter="PuTTy.exe")
         if conf_file[0] == "":
             return
 
@@ -792,7 +792,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     # HANDLER: set psplash path
     @pyqtSlot(name='set_psplash')
     def set_psplash(self):
-        psplash_file = QFileDialog.getOpenFileName()
+        psplash_file = QFileDialog.getOpenFileName(filter="psplash.*")
         if psplash_file[0] == "":
             return
         MySettings.project.path_psplash = psplash_file[0]
@@ -806,7 +806,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     # HANDLER: set winscp path
     @pyqtSlot(name='set_winscp')
     def set_winscp(self):
-        conf_file = QFileDialog.getOpenFileName()
+        conf_file = QFileDialog.getOpenFileName(filter="WinSCP.*")
         if conf_file[0] == "":
             return
 
@@ -817,78 +817,93 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_button_reboot')
     def on_button_reboot(self):
         MySettings.device.file_protocol = func.protocol_get(self)
-        if os.name == "nt":  # Windows
-            if MySettings.device.ftp_mode == '1':  # winSCP
-                func_winscp.reboot(Settings)
-            elif MySettings.device.ftp_mode == '0':  # Paramiko
-                pass
-        else:  # Linux
+        if MySettings.local.connection_type == _WINSCP_PUTTY_:
+            func_winscp.reboot(MySettings)
+        elif MySettings.local.connection_type == _PARAMIKO_:
+            func_paramiko.reboot(MySettings)
+        elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+            func_linux.reboot(MySettings)
+        elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-        self.label_9.setText("Reboot command send.")
+        self.label_9.setText("SENT: reboot command.")
 
+    # Shutdown device
     @pyqtSlot(name='on_button_poweroff')
     def on_button_poweroff(self):
         MySettings.device.file_protocol = func.protocol_get(self)
-        if os.name == "nt":  # Windows
-            if MySettings.device.ftp_mode == '1':  # winSCP
-                func_winscp.poweroff(Settings)
-            elif MySettings.device.ftp_mode == '0':  # Paramiko
-                pass
-        else:  # Linux
+        if MySettings.local.connection_type == _WINSCP_PUTTY_:
+            func_winscp.poweroff(MySettings)
+        elif MySettings.local.connection_type == _PARAMIKO_:
+            func_paramiko.poweroff(MySettings)
+        elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+            func_linux.poweroff(MySettings)
+        elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-        self.label_9.setText("Power off command activate.")
+        self.label_9.setText("SENT: shutdown command.")
 
+    # Touchscreen calibration test
     @pyqtSlot(name='on_button_ts_test')
     def on_button_ts_test(self):
         MySettings.device.file_protocol = func.protocol_get(self)
-        if os.name == "nt":  # Windows
-            if MySettings.device.ftp_mode == '1':  # winSCP
-                func_winscp.ts_test(Settings)
-            elif MySettings.device.ftp_mode == '0':  # Paramiko
-                pass
-        else:  # Linux
+        if MySettings.local.connection_type == _WINSCP_PUTTY_:
+            func_winscp.ts_test(MySettings)
+        elif MySettings.local.connection_type == _PARAMIKO_:
+            func_paramiko.ts_test(MySettings)
+        elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+            func_linux.ts_test(MySettings)
+        elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
         self.label_9.setText('Device stopped. TSLIB_TSDEVICE ts_test launched.')
 
+    # Touchscreen calibration app
     @pyqtSlot(name='on_button_ts_calibrate')
     def on_button_ts_calibrate(self):
         MySettings.device.file_protocol = func.protocol_get(self)
-        if os.name == "nt":  # Windows
-            if MySettings.device.ftp_mode == '1':  # winSCP
-                func_winscp.ts_calibrate(Settings)
-            elif MySettings.device.ftp_mode == '0':  # Paramiko
-                pass
-        else:  # Linux
+        if MySettings.local.connection_type == _WINSCP_PUTTY_:
+            func_winscp.ts_calibrate(MySettings)
+        elif MySettings.local.connection_type == _PARAMIKO_:
+            func_paramiko.ts_calibrate(MySettings)
+        elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+            func_linux.ts_calibrate(MySettings)
+        elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
         self.label_9.setText("Device stopped. TSLIB_TSDEVICE ts_calibrate launched.")
 
+    # Device killall command (for firmware and autorun.sh)
     @pyqtSlot(name='on_button_killall')
     def on_button_killall(self):
         MySettings.device.file_protocol = func.protocol_get(self)
-        if os.name == "nt":  # Windows
-            if MySettings.device.ftp_mode == '1':  # winSCP
-                func_winscp.killall(Settings)
-            elif MySettings.device.ftp_mode == '0':  # Paramiko
-                pass
-        else:  # Linux
+        if MySettings.local.connection_type == _WINSCP_PUTTY_:
+            func_winscp.killall(MySettings)
+        elif MySettings.local.connection_type == _PARAMIKO_:
+            func_paramiko.killall(MySettings)
+        elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+            func_linux.killall(MySettings)
+        elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
+        self.label_9.setText("SENT: killall command for %s.bin and autorun.sh" % MySettings.project.name)
 
+    # Using winscp option
     @pyqtSlot(name='on_winscp_use')
     def on_winscp_user(self):
-        if self.checkBox_3.isChecked():
+        if self.comboBox_11.currentIndex() == _WINSCP_PUTTY_:
             self.radioButton.setEnabled(True)
             self.radioButton_2.setEnabled(True)
-
-        elif not self.checkBox.isChecked():
+        elif self.comboBox_11.currentIndex() == _PARAMIKO_:
             self.radioButton.setEnabled(False)
             self.radioButton_2.setEnabled(False)
-            MySettings.server.sync_files = '0'
+            MySettings.server.sync_files = _UPLOAD_FILES_
             self.radioButton.setChecked(True)
+        elif self.comboBox_11.currentIndex() == _SSH_SCP_SFTP_:
+            pass
+        elif self.comboBox_11.currentIndex() == _LINUX_BUILT_IN_:
+            pass
 
+    # Open settings file
     @pyqtSlot(name='on_button_open')
     def on_button_open(self):
         global SETTINGS_FILE
-        conf_file = QFileDialog.getOpenFileName()
+        conf_file = QFileDialog.getOpenFileName(filter=SETTINGS_FILE)
         if conf_file[0] == "":
             return
 
@@ -897,6 +912,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         MySettings.load(MySettings)
         MySettings.init(MySettings, self)
 
+    # OPTION: Applying new configuration
     @pyqtSlot(name='on_button_apply')
     def on_button_apply(self):
         MySettings.device.user = self.lineEdit_3.text()
@@ -909,13 +925,10 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         MySettings.server.password = self.lineEdit_8.text()
         MySettings.server.path_external = self.lineEdit_12.text()
         if self.radioButton_2.isChecked():
-            MySettings.server.sync_files = '1'
+            MySettings.server.sync_files = _SYNC_FILES_
         elif self.radioButton.isChecked():
-            MySettings.server.sync_files = '0'
-        if self.checkBox_3.isChecked():
-            MySettings.device.ftp_mode = '1'
-        else:
-            MySettings.device.ftp_mode = '0'
+            MySettings.server.sync_files = _UPLOAD_FILES_
+        MySettings.local.connection_type = self.comboBox_11.currentIndex()
         MySettings.local.path_winscp = self.lineEdit_9.text()
         MySettings.local.path_putty = self.lineEdit_10.text()
         MySettings.project.path_psplash = self.lineEdit_11.text()
@@ -934,17 +947,19 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         # cache saving psplash path history
         fs.cache_save(MyCache.psplash, MySettings.project.path_psplash)
 
+    # BUTTON: opening sources apth
     @pyqtSlot(name='on_path_project')
     def on_path_project(self):
         self.open_file_dialog()
 
+    # HANDLER: opening sources path
     def open_file_dialog(self):
         path_project = QFileDialog.getExistingDirectory()
         if path_project == "":
             return
-        if os.name == "nt":
+        if MySettings.local.os == _WINDOWS_:
             path_tmp = fs.path_double_win(path_project)
-        else:
+        elif MySettings.local.os == _LINUX_:
             path_tmp = fs.path_double_nix(path_project)
 
         print('Path changes with SYSTEM requires: \n')
@@ -952,6 +967,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         MySettings.project.name = path_tmp
         self.lineEdit_5.setText(MySettings.project.name)
 
+    # OPTION: reload configuration from file
     @pyqtSlot(name='on_button_reload')
     def on_button_reload(self):
         self.lineEdit.clear()
@@ -970,6 +986,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         MySettings.init(MySettings, self)
         self.label_9.setText("Configuration re-init")
 
+    # OPTION: save configuration to file
     @pyqtSlot(name='on_button_save')
     def on_button_save(self):
         MySettings.device.user = self.lineEdit_3.text()
@@ -982,54 +999,55 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         MySettings.server.password = self.lineEdit_8.text()
         MySettings.server.path_external = self.lineEdit_12.text()
         if self.radioButton_2.isChecked():
-            MySettings.server.sync_files = '1'
+            MySettings.server.sync_files = _SYNC_FILES_
         elif self.radioButton.isChecked():
-            MySettings.server.sync_files = '0'
+            MySettings.server.sync_files = _UPLOAD_FILES_
 
-        if self.checkBox_3.isChecked():
-            MySettings.device.ftp_mode = '1'
-        else:
-            MySettings.device.ftp_mode = '0'
+        MySettings.local.connection_type = int(self.comboBox_11.currentIndex())
         MySettings.local.path_winscp = self.lineEdit_9.text()
         MySettings.local.path_putty = self.lineEdit_10.text()
         MySettings.project.path_psplash = self.lineEdit_11.text()
         MySettings.save(MySettings)
         self.label_9.setText("Configuration save")
 
+    # Ping device
     @pyqtSlot(name='on_button_ping')
     def on_button_ping(self):
         status = func.is_online(MySettings.device.ip)
-
         if status == 1:
             self.label_9.setText("Device online [%s status: %d]" % (MySettings.device.ip, status))
         elif status == 0:
             self.label_9.setText("Device offline [%s status: %d]" % (MySettings.device.ip, status))
-        pass
 
+    # BUTTON: stop command for autorun.sh
     @pyqtSlot(name='on_button_stop')
     def on_button_stop(self):
         MySettings.device.file_protocol = func.protocol_get(self)
-        if os.name == "nt":  # Windows
-            if MySettings.device.ftp_mode == '1':  # winSCP
-                func_winscp.stop(Settings)
-            elif MySettings.device.ftp_mode == '0':  # Paramiko
-                pass
-        else:  # Linux
+        if MySettings.local.connection_type == _WINSCP_PUTTY_:
+            func_winscp.stop(MySettings)
+        elif MySettings.local.connection_type == _PARAMIKO_:
+            func_paramiko.stop(MySettings)
+        elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+            func_linux.stop(MySettings)
+        elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-        self.label_9.setText("Stop command has been sent")
+        self.label_9.setText("SENT: stop command.")
 
+    # BUTTON: restart command for autorun.sh
     @pyqtSlot(name='on_button_restart')
     def on_button_restart(self):
         MySettings.device.file_protocol = func.protocol_get(self)
-        if os.name == "nt":  # Windows
-            if MySettings.device.ftp_mode == '1':  # winSCP
-                func_winscp.restart(Settings)
-            elif MySettings.device.ftp_mode == '0':  # Paramiko
-                pass
-        else:  # Linux
+        if MySettings.local.connection_type == _WINSCP_PUTTY_:
+            func_winscp.restart(MySettings)
+        elif MySettings.local.connection_type == _PARAMIKO_:
+            func_paramiko.restart(MySettings)
+        elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+            func_linux.restart(MySettings)
+        elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-        self.label_9.setText("Restart command has been sent")
+        self.label_9.setText("SENT: restart command.")
 
+    # Thread handler for firmware compiling
     def on_working_change(self, value):
         if value == 1:
             self.label_9.setText("Working...")
@@ -1039,6 +1057,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         else:
             self.label_9.setText("Unknown operation.")
 
+    # Thread handler for firmware compiling debug version
     def on_working_change_debug(self, value):
         if value == 1:
             self.label_9.setText("Working...")
@@ -1051,9 +1070,9 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_button_compile_debug_once(self):
         MySettings.server.compile_mode = True
         if self.comboBox_7.currentText().find('gcc8') == 0:
-            MySettings.server.compiler = 'gcc8'
+            MySettings.server.compiler = _GCC8_
         else:
-            MySettings.server.compiler = ''
+            MySettings.server.compiler = _GCC_
         self.calc = EProgBar_debug()
         self.calc.working_status_debug.connect(self.on_working_change_debug)
         self.calc.start()
@@ -1062,9 +1081,9 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_button_compile_debug(self):
         MySettings.server.compile_mode = False
         if self.comboBox_7.currentText().find('gcc8') == 0:
-            MySettings.server.compiler = 'gcc8'
+            MySettings.server.compiler = _GCC8_
         else:
-            MySettings.server.compiler = ''
+            MySettings.server.compiler = _GCC_
         self.calc = EProgBar_debug()
         self.calc.working_status_debug.connect(self.on_working_change_debug)
         self.calc.start()
@@ -1073,9 +1092,9 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_button_compile_once(self):
         MySettings.server.compile_mode = True
         if self.comboBox_7.currentText().find('gcc8') == 0:
-            MySettings.server.compiler = 'gcc8'
+            MySettings.server.compiler = _GCC8_
         else:
-            MySettings.server.compiler = ''
+            MySettings.server.compiler = _GCC_
         self.calc = EProgBar()
         self.calc.working_status.connect(self.on_working_change)
         self.calc.start()
@@ -1083,38 +1102,40 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_button_compile')
     def on_button_compile(self):
         if self.comboBox_7.currentText().find('gcc8') == 0:
-            MySettings.server.compiler = 'gcc8'
+            MySettings.server.compiler = _GCC8_
         else:
-            MySettings.server.compiler = ''
+            MySettings.server.compiler = _GCC_
         MySettings.server.compile_mode = False
         self.calc.working_status.connect(self.on_working_change)
         self.calc.start()
 
     @pyqtSlot(name='on_button_upload')
     def on_button_upload(self):
-        if os.name == "nt":  # Windows
-            if MySettings.device.ftp_mode == '1':  # winSCP
-                func_winscp.upload(Settings)
-            elif MySettings.device.ftp_mode == '0':  # Paramiko
-                pass
-        else:  # Linux
+        if MySettings.local.connection_type == _WINSCP_PUTTY_:
+            func_winscp.upload(MySettings)
+        elif MySettings.local.connection_type == _PARAMIKO_:
+            func_paramiko.upload(MySettings)
+        elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+            func_linux.upload(MySettings)
+        elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-        self.label_9.setText("Update without restarting command has been sent")
+        self.label_9.setText("SENT: shadow upload command.")
 
     @pyqtSlot(name='on_button_auto')
     def on_button_auto(self):
         if self.checkBox_2.isChecked():
             if self.comboBox_7.currentText().find('gcc8') == 0:
-                MySettings.server.compiler = 'gcc8'
+                MySettings.server.compiler = _GCC8_
             else:
-                MySettings.server.compiler = ''
+                MySettings.server.compiler = _GCC_
             if os.path.exists(Settings.project.path_local):
-                if os.name == "nt":  # Windows
-                    if MySettings.device.ftp_mode == '1':  # winSCP
-                        func_winscp.compile(Settings, 'release')
-                    elif MySettings.device.ftp_mode == '0':  # Paramiko
-                        pass
-                else:  # Linux
+                if MySettings.local.connection_type == _WINSCP_PUTTY_:
+                    func_winscp.compile(MySettings)
+                elif MySettings.local.connection_type == _PARAMIKO_:
+                    func_paramiko.compile(MySettings)
+                elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+                    func_linux.compile(MySettings)
+                elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
                     pass
             else:
                 self.label_9.setText("Project PATH not found. Exiting.")
@@ -1128,21 +1149,37 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.label_9.setText("Trying to connect...")
             self.label_9.setText("Connect established.")
             if is_online:
-                func_winscp.stop(MySettings)
-                func_winscp.upload(MySettings)
-                func_winscp.restart(MySettings)
+                if MySettings.local.connection_type == _WINSCP_PUTTY_:
+                    func_winscp.stop(MySettings)
+                    func_winscp.upload(MySettings)
+                    func_winscp.restart(MySettings)
+                elif MySettings.local.connection_type == _PARAMIKO_:
+                    func_paramiko.stop(MySettings)
+                    func_paramiko.upload(MySettings)
+                    func_paramiko.restart(MySettings)
+                elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+                    func_linux.stop(MySettings)
+                    func_linux.upload(MySettings)
+                    func_linux.restart(MySettings)
+                elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
+                    pass
                 self.label_9.setText("Auto compile&stop&upload command has been sent")
             else:
                 self.label_9.setText("process has been interrupted")
         else:
-            if os.name == "nt":  # Windows
-                if MySettings.device.ftp_mode == '1':  # winSCP
-                    func_winscp.stop(MySettings)
-                    func_winscp.upload(MySettings)
-                    func_winscp.restart(MySettings)
-                elif MySettings.device.ftp_mode == '0':  # Paramiko
-                    pass
-            else:  # Linux
+            if MySettings.local.connection_type == _WINSCP_PUTTY_:
+                func_winscp.stop(MySettings)
+                func_winscp.upload(MySettings)
+                func_winscp.restart(MySettings)
+            elif MySettings.local.connection_type == _PARAMIKO_:
+                func_paramiko.stop(MySettings)
+                func_paramiko.upload(MySettings)
+                func_paramiko.restart(MySettings)
+            elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
+                func_linux.stop(MySettings)
+                func_linux.upload(MySettings)
+                func_linux.restart(MySettings)
+            elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
                 pass
             self.label_9.setText("Once compile&stop&upload command has been sent")
 
@@ -1162,3 +1199,4 @@ if __name__ == '__main__':
     MySettings = Settings
     MyCache = Cache_file
     main()
+
