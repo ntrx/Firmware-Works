@@ -3,6 +3,15 @@
 import os
 import subprocess
 import fs
+from datetime import datetime
+from core import _GCC_
+from core import _GCC8_
+from core import _SYNC_FILES_
+from core import _UPLOAD_FILES_
+from core import _SFTP_
+from core import _SCP_
+from core import _NXP_
+from core import _ATOM_
 
 
 def winscp_path(file_name, path):
@@ -55,16 +64,18 @@ def upload(Settings):
     :param Settings: configuration
     :return: None
     """
+    today = datetime.now()
+    backup_date = today.strftime("%y-%m-%d-%H-%M")
     file_name = 'upload' + Settings.device.ip
     path_loc_win = Settings.project.path_local + "\\Build\\bin\\" + Settings.project.name + ".bin"
     path_dest_win = "//home//" + Settings.device.user + "//" + Settings.project.name + "//bin//" + Settings.project.name + ".bin"
     f = open(file_name, "w+")
     f.write("option confirm off\n")
-    if Settings.device.file_protocol == 'sftp':
+    if Settings.device.file_protocol == _SFTP_:
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
-    elif Settings.device.file_protocol == 'scp':
+    elif Settings.device.file_protocol == _SCP_:
         f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.ip, Settings.device.password))
-    f.write("cp %s %s_backup\n" % (path_dest_win, path_dest_win))
+    f.write("cp %s %s_backup_%s\n" % (path_dest_win, path_dest_win, backup_date))
     f.write("put %s %s\n" % (path_loc_win, path_dest_win))
     f.write("chmod 777 \"%s\"\n" % path_dest_win)
     f.write("exit\n")
@@ -83,9 +94,9 @@ def killall(Settings):
     file_name = 'killall' + Settings.device.ip
     f = open(file_name, "w+")
     f.write("option confirm off\n")
-    if Settings.device.file_protocol == 'sftp':
+    if Settings.device.file_protocol == _SFTP_:
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
-    elif Settings.device.file_protocol == 'scp':
+    elif Settings.device.file_protocol == _SCP_:
         f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.ip, Settings.device.password))
     f.write("call killall sn4215_respawn.sh %s.bin\n" % Settings.project.name)
     f.write("exit\n")
@@ -104,9 +115,9 @@ def reboot(Settings):
     file_name = 'reboot' + Settings.device.ip
     f = open(file_name, "w+")
     f.write("option confirm off\n")
-    if Settings.device.file_protocol == 'sftp':
+    if Settings.device.file_protocol == _SFTP_:
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
-    elif Settings.device.file_protocol == 'scp':
+    elif Settings.device.file_protocol == _SCP_:
         f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.ip, Settings.device.password))
     f.write("call shutdown -r now\n")  # shutdown -r now - on default linux its works
     f.write("exit\n")
@@ -125,9 +136,9 @@ def poweroff(Settings):
     file_name = 'poweroff' + Settings.device.ip
     f = open(file_name, "w+")
     f.write("option confirm off\n")
-    if Settings.device.file_protocol == 'sftp':
+    if Settings.device.file_protocol == _SFTP_:
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
-    elif Settings.device.file_protocol == 'scp':
+    elif Settings.device.file_protocol == _SCP_:
         f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.ip, Settings.device.password))
     f.write("call poweroff\n")
     f.write("exit\n")
@@ -146,9 +157,9 @@ def ts_test(Settings):
     file_name = 'ts_test' + Settings.device.ip
     f = open(file_name, "w+")
     f.write("option confirm off\n")
-    if Settings.device.file_protocol == 'sftp':
+    if Settings.device.file_protocol == _SFTP_:
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
-    elif Settings.device.file_protocol == 'scp':
+    elif Settings.device.file_protocol == _SCP_:
         f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.ip, Settings.device.password))
     f.write("call /etc/init.d/autorun.sh stop\n")
     f.write("call TSLIB_TSDEVICE=/dev/input/event2 ts_test\n")
@@ -168,9 +179,9 @@ def ts_calibrate(Settings):
     file_name = 'ts_calibrate' + Settings.device.ip
     f = open(file_name, "w+")
     f.write("option confirm off\n")
-    if Settings.device.file_protocol == 'sftp':
+    if Settings.device.file_protocol == _SFTP_:
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
-    elif Settings.device.file_protocol == 'scp':
+    elif Settings.device.file_protocol == _SCP_:
         f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.ip, Settings.device.password))
     f.write("call /etc/init.d/autorun.sh stop\n")
     f.write("call TSLIB_TSDEVICE=/dev/input/event2 ts_calibrate\n")
@@ -190,9 +201,9 @@ def stop(Settings):
     file_name = 'stop' + Settings.device.ip
     f = open(file_name, "w+")
     f.write("option confirm off\n")
-    if Settings.device.file_protocol == 'sftp':
+    if Settings.device.file_protocol == _SFTP_:
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
-    elif Settings.device.file_protocol == 'scp':
+    elif Settings.device.file_protocol == _SCP_:
         f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.ip, Settings.device.password))
     f.write("call /etc/init.d/autorun.sh stop\n")
     f.write("exit\n")
@@ -211,9 +222,9 @@ def restart(Settings):
     file_name = 'restart' + Settings.device.ip
     f = open(file_name, "w+")
     f.write("option confirm off\n")
-    if Settings.device.file_protocol == 'sftp':
+    if Settings.device.file_protocol == _SFTP_:
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
-    elif Settings.device.file_protocol == 'scp':
+    elif Settings.device.file_protocol == _SCP_:
         f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.ip, Settings.device.password))
     f.write("call /etc/init.d/autorun.sh restart\n")
     f.write("exit\n")
@@ -241,7 +252,7 @@ def rmdir(Settings):
     os.remove(file_name)
 
 
-def compile(Settings, build):
+def make(Settings, build):
     """
     Upload/sync sources with local dir and compiling firmware on server or device builtin compiler
 
@@ -250,27 +261,27 @@ def compile(Settings, build):
     :type build: str
     :return: None
     """
-    if Settings.device.system == 0:  # NXP iMX6
+    if Settings.device.system == _NXP_:  # NXP iMX6
         path_loc_win = Settings.project.path_local  # os.getcwd()
-        path_dest_win = "//home//" + Settings.server.user + Settings.server.path_external
+        path_dest_win = "//home//" + Settings.server.user + fs.path_double_nix(Settings.server.path_external)
         file_name = 'compile' + Settings.project.name
         if not os.path.exists(fs.path_double_win(path_loc_win + "\\Build\\bin\\")):
             os.mkdir(path=fs.path_double_win(path_loc_win + "\\Build\\bin\\"))
         f = open(file_name, 'w+')
         f.write("option confirm off\n")
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.server.user, Settings.server.password, Settings.server.ip))
-        if Settings.server.sync_files == '0':
+        if Settings.server.sync_files == _UPLOAD_FILES_:
             f.write("mkdir //home//%s//%s\n" % (Settings.server.user, Settings.server.path_external))
             f.write("put -filemask=*|%s/Src/Windows/device/ %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
-        elif Settings.server.sync_files == '1':
+        elif Settings.server.sync_files == _SYNC_FILES_:
             f.write("synchronize -filemask=*|%s/Src/Windows/device/ remote %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
         f.write("cd //home//" + Settings.server.user + Settings.server.path_external + "//Src\n")
         if not Settings.server.compile_mode:
             f.write("call make clean\n")
         if build == 'release':
-            if Settings.server.compiler == 'gcc8':
+            if Settings.server.compiler == _GCC8_:
                 f.write("call make gcc8 -j7\n")
-            else:
+            elif Settings.server.compiler == _GCC_:
                 f.write("call make -j7\n")
         elif build == 'debug':
             f.write("call make %s debug -j7\n" % Settings.server.compiler)
@@ -284,14 +295,13 @@ def compile(Settings, build):
         f.close()
 
         result = winscp_path(file_name, Settings.local.path_winscp)
-        # replace /script with /command
         os.remove(file_name)
 
         if result >= 1:
             print("error while executing code")
             print(result)
 
-    elif Settings.device.system == 1:  # Intel Atom
+    elif Settings.device.system == _ATOM_:  # Intel Atom
         path_loc_win = Settings.project.path_local  # os.getcwd()
         path_dest_win = Settings.server.path_external
         file_name = 'compile' + Settings.project.name
@@ -299,10 +309,10 @@ def compile(Settings, build):
         f = open(file_name, 'w+')
         f.write("option confirm off\n")
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
-        if Settings.server.sync_files == '0':
+        if Settings.server.sync_files == _UPLOAD_FILES_:
             f.write("mkdir %s\n" % Settings.server.path_external)
             f.write("put -filemask=*|%s/Src/Windows/device/ %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
-        elif Settings.server.sync_files == '1':
+        elif Settings.server.sync_files == _SYNC_FILES_:
             f.write("synchronize -filemask=*|%s/Src/Windows/device/ remote %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
         f.write("cd " + Settings.server.path_external + "//Src\n")
         if not Settings.server.compile_mode:
@@ -316,7 +326,7 @@ def compile(Settings, build):
             return
         # TODO: Change hard-links to Settings parameter
         f.write("mv //root//navigation//bin//%s.bin //root//navigation//bin//%s.bin-backup\n")
-        f.write("mv //root//%s//Build//bin//%s.bin\n" % (path_dest_win, Settings.project.name))
+        f.write("mv %s//Build//bin//%s.bin //root//navigation//bin//%s.bin\n" % (Settings.server.path_external, Settings.project.name, Settings.project.name))
         f.write("exit\n")
         f.close()
 
@@ -343,9 +353,9 @@ def psplash_upload(Settings, self):
     path_loc_win = Settings.project.path_psplash
     f = open(script_file, "w+")
     f.write("option confirm off\n")
-    if Settings.device.file_protocol == 'sftp':
+    if Settings.device.file_protocol == _SFTP_:
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.password, Settings.device.ip))
-    elif Settings.device.file_protocol == 'scp':
+    elif Settings.device.file_protocol == _SCP_:
         f.write("open scp://%s@%s:%s/ -hostkey=*\n" % (Settings.device.user, Settings.device.ip, Settings.device.password))
     f.write("put %s %s\n" % (path_loc_win, path_dest))
     f.write("chmod 777 %s\n" % path_dest)
