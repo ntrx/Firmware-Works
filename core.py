@@ -434,9 +434,6 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         elif MySettings.local.os == _LINUX_:
             # Tab: External
             self.tabWidget.setTabEnabled(2, False)
-            # Compiler type field
-            self.label_18.setVisible(True)
-            self.comboBox_9.setVisible(True)
             # Button: open with winSCP
             self.pushButton_25.setVisible(False)
             # Button: open with Putty
