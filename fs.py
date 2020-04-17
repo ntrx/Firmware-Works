@@ -77,13 +77,16 @@ def path_double_win(path):
     :type path: str
     :return: new string
     """
-    result = ""
-    for symbol in range(0, len(path)):
-        if path[symbol] == '/':
-            result += '\\'
-            continue
-        result += path[symbol]
-    print("PATH: %s => %s" % (path, result))
+    if os.name == "nt":
+        result = ""
+        for symbol in range(0, len(path)):
+            if path[symbol] == '/':
+                result += '\\'
+                continue
+            result += path[symbol]
+        print("PATH: %s => %s" % (path, result))
+    else:
+        pass
     return result
 
 
