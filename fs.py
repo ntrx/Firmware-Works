@@ -83,6 +83,7 @@ def path_double_win(path):
             result += '\\'
             continue
         result += path[symbol]
+    print("PATH: %s => %s" % (path, result))
     return result
 
 
@@ -141,3 +142,34 @@ def path_get_firmware(path, self):
         self.setText("Firmware compiled at %s, size: %2.2f MB" % (time.ctime(firmware_time), firmware_size / 1024000))
     else:
         self.setText("No firmware compiled found.")
+
+
+def path_quotes_check(path):
+    """
+    Take path with spaced catalogs with qoutes
+
+    :param path: path
+    :type path: str
+    :return: New path, with quoted catalogs with space in name
+    """
+    space_position = path.find(" ")
+    last_slash = 0
+    first_slash = 0
+    if space_position >= 0:
+        for i in range(space_position, len(path)):
+            if path[i] == '\\':
+                last_slash = i
+                break
+        for i in range(0, space_position):
+            if path[i] == '\\':
+                first_slash = i+1
+                break
+        new_path = path[0:first_slash]
+        new_path += "\""
+        new_path += path[first_slash:last_slash]
+        new_path += "\""
+        new_path += path[last_slash:len(path)]
+        print("PATH: %s => %s" % (path, new_path))
+        return new_path
+    else:
+        return path
