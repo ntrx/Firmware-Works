@@ -35,6 +35,11 @@ _LINUX_BUILT_IN_: int = 3
 # OS ( local.os )
 _WINDOWS_: int = 0
 _LINUX_: int = 1
+# Build/bin directory
+if os.name == "nt":
+    _BUILD_BIN_: str = "\\Build\\bin\\"
+else:
+    _BUILD_BIN_: str = "/Build/bin/"
 # *** end of global constants and definitions
 
 import fs
@@ -237,6 +242,11 @@ class Settings:
 
     def init(self, gui):
         """ Initialize configuration to GUI """
+        if os.name == "nt":
+            self.local.os = _WINDOWS_
+        else:
+            self.local.os = _LINUX_
+
         fs.cache_read(gui.comboBox_3, MyCache.source)
         fs.cache_read(gui.comboBox, MyCache.project)
         fs.cache_read(gui.comboBox_2, MyCache.device_ip)
@@ -340,40 +350,37 @@ class Settings:
         elif self.server.sync_files == _SYNC_FILES_:
             gui.radioButton_2.setChecked(True)
 
-        if len(self.local.path_winscp) == 0:
-            gui.lineEdit_9.setText(SETTINGS_EMPTY)
-        else:
-            if not os.path.isfile(self.local.path_winscp):
-                gui.lineEdit_9.setStyleSheet("background-color: red")
-                gui.label_9.setText("Some errors found during initialization settings.")
-                self.local.winscp_ok = False
+        if self.local.os == _WINDOWS_:
+            if len(self.local.path_winscp) == 0:
+                gui.lineEdit_9.setText(SETTINGS_EMPTY)
             else:
-                self.local.winscp_ok = True
-            gui.lineEdit_9.setText(self.local.path_winscp)
+                if not os.path.isfile(self.local.path_winscp):
+                    gui.lineEdit_9.setStyleSheet("background-color: red")
+                    gui.label_9.setText("Some errors found during initialization settings.")
+                    self.local.winscp_ok = False
+                else:
+                    self.local.winscp_ok = True
+                gui.lineEdit_9.setText(self.local.path_winscp)
 
-        if len(self.local.path_putty) == 0:
-            gui.lineEdit_10.setText(SETTINGS_EMPTY)
-        else:
-            if not os.path.isfile(self.local.path_putty):
-                gui.lineEdit_10.setStyleSheet("background-color: red")
-                gui.label_9.setText("Some errors found during initialization settings.")
-                self.local.putty_ok = False
+        if self.local.os == _WINDOWS_:
+            if len(self.local.path_putty) == 0:
+                gui.lineEdit_10.setText(SETTINGS_EMPTY)
             else:
-                self.local.putty_ok = True
-            gui.lineEdit_10.setText(self.local.path_putty)
+                if not os.path.isfile(self.local.path_putty):
+                    gui.lineEdit_10.setStyleSheet("background-color: red")
+                    gui.label_9.setText("Some errors found during initialization settings.")
+                    self.local.putty_ok = False
+                else:
+                    self.local.putty_ok = True
+                gui.lineEdit_10.setText(self.local.path_putty)
 
         if len(self.project.path_psplash) == 0:
             gui.lineEdit_11.setText(SETTINGS_EMPTY)
         else:
             gui.lineEdit_11.setText(self.project.path_psplash)
 
-        firmware_path = self.project.path_local + "\\Build\\bin\\" + self.project.name + ".bin"
+        firmware_path = self.project.path_local + _BUILD_BIN_ + self.project.name + ".bin"
         fs.path_get_firmware(firmware_path, gui.label_16)
-
-        if os.name == "nt":
-            self.local.os = _WINDOWS_
-        else:
-            self.local.os = _LINUX_
 
 
 class EProgBar(QThread):
@@ -510,7 +517,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             func_paramiko.rmdir(MySettings)
             self.label_9.setText("SENT: remove external source directory storage.")
         elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
-            pass
+            func_linux.rmdir(MySettings)
             self.label_9.setText("SENT: remove external source directory storage.")
         elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
@@ -563,7 +570,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     # Delete firmware binary file on local storage
     @pyqtSlot(name='on_act_remove')
     def on_act_remove(self):
-        dest_path = MySettings.project.path_local + "/Build/bin/" + MySettings.project.name + ".bin"
+        dest_path = MySettings.project.path_local + _BUILD_BIN_ + MySettings.project.name + ".bin"
         if os.path.exists(dest_path):
             os.remove(dest_path)
             self.label_9.setText("Firmware remove command.")
@@ -899,7 +906,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_button_open')
     def on_button_open(self):
         global SETTINGS_FILE
-        conf_file = QFileDialog.getOpenFileName(filter=SETTINGS_FILE, options="Any")
+        conf_file = QFileDialog.getOpenFileName(filter=SETTINGS_FILE)
         if conf_file[0] == "":
             return
 
@@ -957,7 +964,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         if MySettings.local.os == _WINDOWS_:
             path_tmp = fs.path_double_win(path_project)
         elif MySettings.local.os == _LINUX_:
-            path_tmp = fs.path_double_nix(path_project)
+            path_tmp = path_project
 
         print('Path changes with SYSTEM requires: \n')
         print('From: %s\nTo: %s\n' % (path_project, path_tmp))
@@ -1050,7 +1057,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.label_9.setText("Working...")
         elif value == 0:
             self.label_9.setText("Firmware is compiled.")
-            fs.path_get_firmware(MySettings.project.path_local + "\\Build\\bin\\" + MySettings.project.name + ".bin", self.label_16)
+            fs.path_get_firmware(MySettings.project.path_local + _BUILD_BIN_ + MySettings.project.name + ".bin", self.label_16)
         else:
             self.label_9.setText("Unknown operation.")
 
@@ -1060,7 +1067,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.label_9.setText("Working...")
         elif value == 0:
             self.label_9.setText("Firmware debug is compiled.")
-            fs.path_get_firmware(MySettings.project.path_local + "\\Build\\bin\\" + MySettings.project.name + ".bin",  self.label_16)
+            fs.path_get_firmware(MySettings.project.path_local + _BUILD_BIN_ + MySettings.project.name + ".bin",  self.label_16)
         else:
             self.label_9.setText("Unknown operation.")
 
