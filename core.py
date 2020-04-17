@@ -18,7 +18,7 @@ SETTINGS_FILE: str = "settings.py"
 # File protocols ( device.file_protocol )
 _SFTP_: int = 1
 _SCP_: int = 0
-# System arch ( d evice.system )
+# System arch ( device.system )
 _NXP_: int = 0
 _ATOM_: int = 1
 # Sync files ( server.sync_files )
@@ -401,9 +401,9 @@ class EProgBar_debug(QThread):
     def run(self):
         self.working_status_debug.emit(1)
         if os.path.exists(Settings.project.path_local):
-            if MySettings.local.connection_type == _WINSCP_PUTTY_:  # Windows/winSCP
+            if MySettings.local.connection_type == _WINSCP_PUTTY_:
                 func_winscp.make(MySettings, 'debug')
-            elif MySettings.local.connection_type == _PARAMIKO_:  # Paramiko
+            elif MySettings.local.connection_type == _PARAMIKO_:
                 func_paramiko.make(MySettings, 'debug')
             elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
                 pass
@@ -946,7 +946,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         # cache saving psplash path history
         fs.cache_save(MyCache.psplash, MySettings.project.path_psplash)
 
-    # BUTTON: opening sources apth
+    # BUTTON: opening sources path
     @pyqtSlot(name='on_path_project')
     def on_path_project(self):
         self.open_file_dialog()
