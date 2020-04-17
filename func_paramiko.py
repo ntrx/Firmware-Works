@@ -205,7 +205,7 @@ def rmdir(Settings):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(Settings.server.ip, 22, Settings.server.user, Settings.server.password)
-    stdin, stdout, stderr = client.exec_command("rmdir " + path_dest_win)
+    stdin, stdout, stderr = client.exec_command("rm -r " + path_dest_win)
     data = stdout.read() + stderr.read()
     func.prompt_print(data)
     client.close()
