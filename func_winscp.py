@@ -262,20 +262,21 @@ def make(Settings, build):
     :return: None
     """
     if Settings.device.system == _NXP_:  # NXP iMX6
-        path_loc_win = Settings.project.path_local  # os.getcwd()
+        path_loc_win = fs.path_quotes_check(Settings.project.path_local)  # os.getcwd()
         path_dest_win = "//home//" + Settings.server.user + fs.path_double_nix(Settings.server.path_external)
         file_name = 'compile' + Settings.project.name
-        if not os.path.exists(fs.path_double_win(path_loc_win + "\\Build\\bin\\")):
-            os.mkdir(path=fs.path_double_win(path_loc_win + "\\Build\\bin\\"))
+        path_loc_bin = "\\Build\\bin\\"
+        if not os.path.exists(Settings.project.path_local + path_loc_bin):
+            os.mkdir(path=Settings.project.path_local + path_loc_bin)
         f = open(file_name, 'w+')
         f.write("option confirm off\n")
         f.write("open sftp://%s:%s@%s/ -hostkey=*\n" % (Settings.server.user, Settings.server.password, Settings.server.ip))
         if Settings.server.sync_files == _UPLOAD_FILES_:
             f.write("mkdir //home//%s//%s\n" % (Settings.server.user, Settings.server.path_external))
-            f.write("put -filemask=*|%s/Src/Windows/device/ %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
+            f.write("put -filemask=*|%s\Src\Windows\device\ %s %s\Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
         elif Settings.server.sync_files == _SYNC_FILES_:
-            f.write("synchronize -filemask=*|%s/Src/Windows/device/ remote %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
-        f.write("cd //home//" + Settings.server.user + Settings.server.path_external + "//Src\n")
+            f.write("synchronize -filemask=*|%s\Src\Windows\device\ remote %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
+        f.write("cd //home//" + Settings.server.user + fs.path_double_nix(Settings.server.path_external) + "//Src\n")
         if not Settings.server.compile_mode:
             f.write("call make clean\n")
         if build == 'release':
