@@ -2,6 +2,7 @@
 # Using external apps on linux systems
 import os
 import fs
+import subprocess
 
 from core import _SYNC_FILES_
 from core import _UPLOAD_FILES_
@@ -106,8 +107,15 @@ def restart(Settings):
 
 
 def rmdir(Settings):
-    # see para_rmdir
-    return
+    """
+    Removing DIR on external server (SSH)
+
+    :param Settings: configuration
+    :return: None
+    """
+    path_dest = "/home/" + Settings.server.user + Settings.server.path_external
+    string = "-p %s ssh %s@%s 'rm -r %s | exit'" % (Settings.server.password, Settings.server.user, Settings.server.ip, path_dest)
+    subprocess.Popen(args=["sshpass", string], shell=True)
 
 
 def make(Settings, build):
