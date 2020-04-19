@@ -1328,6 +1328,11 @@
         <string>Intel Atom</string>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>NXP i.MX6QP</string>
+       </property>
+      </item>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_2">

@@ -21,6 +21,7 @@ _SCP_: int = 0
 # System arch ( device.system )
 _NXP_: int = 0
 _ATOM_: int = 1
+_NXP_QP_: int = 2
 # Sync files ( server.sync_files )
 _UPLOAD_FILES_: bool = False
 _SYNC_FILES_: bool = True
@@ -707,8 +708,8 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     # OPTIONS: arch changed
     @pyqtSlot(name='on_system_change')
     def on_system_change(self):
-        if self.comboBox_10.currentIndex() == 0:  # NXP iMX6(QP)
-            Settings.device.system = _NXP_
+        if self.comboBox_10.currentIndex() == 0:  # NXP iMX6
+            MySettings.device.system = _NXP_
             self.comboBox_10.setCurrentIndex(0)
             self.comboBox_7.setEnabled(True)
             self.comboBox_8.setEnabled(True)
@@ -723,13 +724,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.pushButton_22.setEnabled(True)
             self.pushButton_4.setEnabled(True)
             self.pushButton.setEnabled(True)
-            self.checkBox.setEnabled(True)
             self.checkBox_2.setEnabled(True)
             # Enabling executable path line
             self.lineEdit_13.setEnabled(True)
             self.label_20.setEnabled(True)
         elif self.comboBox_10.currentIndex() == 1:  # Intel Atom
-            Settings.device.system = _ATOM_
+            MySettings.device.system = _ATOM_
             self.comboBox_10.setCurrentIndex(1)
             # Only SFTP protocol there
             self.comboBox_8.setCurrentIndex(1)
@@ -748,11 +748,32 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.pushButton_22.setEnabled(False)
             self.pushButton_4.setEnabled(False)
             self.pushButton.setEnabled(False)
-            self.checkBox.setEnabled(False)
             self.checkBox_2.setEnabled(False)
             # Disabling executable path line
             self.lineEdit_13.setEnabled(False)
             self.label_20.setEnabled(False)
+        elif self.comboBox_10.currentIndex() == 2:  # NXP i.MX6QP
+            MySettings.device.system = _NXP_QP_
+            self.comboBox_10.setCurrentIndex(2)
+            self.comboBox_7.setEnabled(True)
+            # Only SFTP protocol there
+            self.comboBox_8.setCurrentIndex(0)
+            self.comboBox_8.setEnabled(False)
+            # Enabling autorun.sh scripts and project detecting
+            self.pushButton_12.setEnabled(True)
+            self.pushButton_11.setEnabled(True)
+            self.pushButton_2.setText("restart")
+            self.pushButton_5.setEnabled(True)
+            # Enabling sensor functions and upload firmware/psplash
+            self.pushButton_14.setEnabled(True)
+            self.pushButton_13.setEnabled(True)
+            self.pushButton_22.setEnabled(True)
+            self.pushButton_4.setEnabled(True)
+            self.pushButton.setEnabled(True)
+            self.checkBox_2.setEnabled(True)
+            # Enabling executable path line
+            self.lineEdit_13.setEnabled(True)
+            self.label_20.setEnabled(True)
 
     # Opening device in putty
     @pyqtSlot(name='on_open_putty')
