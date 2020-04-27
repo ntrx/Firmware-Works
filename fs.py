@@ -3,7 +3,7 @@ import os
 import time
 
 
-def cache_save(HISTORY_FILE, SETTING_VALUE):
+def cache_save(HISTORY_FILE, SETTING_VALUE) -> None:
     """
     Cache saving source history
 
@@ -32,7 +32,7 @@ def cache_save(HISTORY_FILE, SETTING_VALUE):
         f.close()
 
 
-def cache_read(self, HISTORY_FILE):
+def cache_read(self, HISTORY_FILE) -> None:
     """
     Reading cache from history file
 
@@ -55,7 +55,7 @@ def cache_read(self, HISTORY_FILE):
         f.close()
 
 
-def cache_create(file_list):
+def cache_create(file_list) -> None:
     """
     Creation cache files (if not found before)
 
@@ -69,7 +69,7 @@ def cache_create(file_list):
             f.close()
 
 
-def path_double_win(path):
+def path_double_win(path) -> str:
     """
     Redirect slashes in string for Windows
 
@@ -85,12 +85,12 @@ def path_double_win(path):
                 continue
             result += path[symbol]
         print("PATH: %s => %s" % (path, result))
+        return result
     else:
         pass
-    return result
 
 
-def path_double_nix(path):
+def path_double_nix(path) -> str:
     """
     Doubles slashes in string for Linux
 
@@ -107,7 +107,7 @@ def path_double_nix(path):
     return result
 
 
-def path_get_filename(path):
+def path_get_filename(path) -> str:
     """
     Getting filename in PATH string
 
@@ -129,7 +129,7 @@ def path_get_filename(path):
     return reversed_result
 
 
-def path_get_firmware(path, self):
+def path_get_firmware(path, self) -> None:
     """
     Getting size and time creation of file (specified for firmwares)
 
@@ -147,7 +147,7 @@ def path_get_firmware(path, self):
         self.setText("No firmware compiled found.")
 
 
-def path_quotes_check(path):
+def path_quotes_check(path) -> str:
     """
     Take path with spaced catalogs with qoutes
 

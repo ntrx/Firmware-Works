@@ -7,7 +7,7 @@ from core import _SCP_
 from core import _SFTP_
 
 
-def is_online(host, times=1):
+def is_online(host, times=1) -> int:
     """
     Ping specified IP address (once)
 
@@ -38,7 +38,7 @@ def is_online(host, times=1):
             return 0
 
 
-def get_value(line, start):
+def get_value(line, start) -> str:
     """
     Getting parameter value from string. Begin from 'start'
 
@@ -58,7 +58,7 @@ def get_value(line, start):
     return value
 
 
-def check_value(line):
+def check_value(line) -> str:
     """
     Clearing new line symbol from str
 
@@ -73,7 +73,7 @@ def check_value(line):
     return new_value
 
 
-def protocol_get(self):
+def protocol_get(self) -> int:
     """
     Returning selected protocol (str) in combobox
 
@@ -86,7 +86,7 @@ def protocol_get(self):
         return _SFTP_
 
 
-def prompt_print(data):
+def prompt_print(data) -> None:
     """
     Display data to console from output result after exec_command
 

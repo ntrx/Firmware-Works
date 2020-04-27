@@ -15,7 +15,7 @@ import fs
 import func
 
 
-def createSSHClient(server, port, user, secret):
+def createSSHClient(server, port, user, secret) -> paramiko.SSHClient:
     """
     Creating SSH Client for perform SSH commands
 
@@ -67,7 +67,7 @@ class MySCPClient(SCPClient):
                 self.put_dir(os.path.join(source, item), '%s/%s' % (target, item))
 
 
-def upload(Settings):
+def upload(Settings) -> None:
     """
     Upload firmware binary file to device by sFTP, added 777 rights to file.
 
@@ -86,7 +86,7 @@ def upload(Settings):
     sftp.close()
 
 
-def killall(Settings):
+def killall(Settings) -> None:
     """
     Using autorun.sh on device by SSH to launch killall command
 
@@ -101,7 +101,7 @@ def killall(Settings):
     client.close()
 
 
-def reboot(Settings):
+def reboot(Settings) -> None:
     """
     Perform reboot command on device (SSH)
 
@@ -116,7 +116,7 @@ def reboot(Settings):
     client.close()
 
 
-def poweroff(Settings):
+def poweroff(Settings) -> None:
     """
     Perform shutdown command on device (SSH)
 
@@ -131,7 +131,7 @@ def poweroff(Settings):
     client.close()
 
 
-def ts_test(Settings):
+def ts_test(Settings) -> None:
     """
     Using autorun.sh to launch test app after calibration (SSH)
 
@@ -147,7 +147,7 @@ def ts_test(Settings):
     client.close()
 
 
-def ts_calibrate(Settings):
+def ts_calibrate(Settings) -> None:
     """
     Using autorun.sh to launch touchscreen calibration app (SSH)
 
@@ -163,7 +163,7 @@ def ts_calibrate(Settings):
     client.close()
 
 
-def stop(Settings):
+def stop(Settings) -> None:
     """
     Using autorun.sh to stop firmware process on device (SSH)
 
@@ -178,7 +178,7 @@ def stop(Settings):
     client.close()
 
 
-def restart(Settings):
+def restart(Settings) -> None:
     """
     Using autorun.sh to restart firmware on device (SSH)
 
@@ -193,7 +193,7 @@ def restart(Settings):
     client.close()
 
 
-def rmdir(Settings):
+def rmdir(Settings) -> None:
     """
     Removing DIR on external server (SSH)
 
@@ -211,7 +211,7 @@ def rmdir(Settings):
     client.close()
 
 
-def make(Settings, build):
+def make(Settings, build) -> None:
     """
     Upload sources from local dir and compiling firmware on server or device builtin compiler
 
@@ -310,7 +310,7 @@ def make(Settings, build):
         sftp.close()
 
 
-def detect_project(Settings, self):
+def detect_project(Settings, self) -> None:
     """
     Detect project available on device (correctly work only if on device available one project)
 
@@ -336,7 +336,7 @@ def detect_project(Settings, self):
         pass
 
 
-def detect_outdated_firmware(Settings, self):
+def detect_outdated_firmware(Settings, self) -> None:
     """
     Getting firmware from device and checking it with last compiled firmware
 
@@ -370,7 +370,7 @@ def detect_outdated_firmware(Settings, self):
         self.setText("Unavailable to compare firmwares!")
 
 
-def psplash_upload(Settings, self):
+def psplash_upload(Settings, self) -> None:
     """
     Upload psplash file with preset location to device by sFTP
 
@@ -394,7 +394,7 @@ def psplash_upload(Settings, self):
     self.setText("psplash command sent")
 
 
-def clean(Settings):
+def clean(Settings) -> None:
     """
     Perform 'make clean' to sources on build-server (sFTP)
 
@@ -415,5 +415,5 @@ def clean(Settings):
     client.close()
 
 
-def sftp_callback(transferred, toBeTransferred):
+def sftp_callback(transferred, toBeTransferred) -> None:
     print("Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred))
