@@ -6,6 +6,7 @@ from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
 from gui import Ui_MainWindow
 import os
 import subprocess
+from typing import Final
 
 PROG_NAME = "Firmware Works"
 VERSION = "1.0.5"
@@ -16,31 +17,31 @@ SETTINGS_FILE: str = "settings.py"
 
 # *** Global constants and definitions
 # File protocols ( device.file_protocol )
-_SFTP_: int = 1
-_SCP_: int = 0
+_SFTP_: Final[int] = 1
+_SCP_: Final[int] = 0
 # System arch ( device.system )
-_NXP_: int = 0
-_ATOM_: int = 1
-_NXP_QP_: int = 2
+_NXP_: Final[int] = 0
+_ATOM_: Final[int] = 1
+_NXP_QP_: Final[int] = 2
 # Sync files ( server.sync_files )
-_UPLOAD_FILES_: bool = False
-_SYNC_FILES_: bool = True
+_UPLOAD_FILES_: Final[bool] = False
+_SYNC_FILES_: Final[bool] = True
 # Compiler version ( server.compiler )
-_GCC_: str = ""
-_GCC8_: str = "gcc8"
+_GCC_: Final[str] = ""
+_GCC8_: Final[str] = "gcc8"
 # Connection type ( local.connection_type )
-_WINSCP_PUTTY_: int = 0
-_PARAMIKO_: int = 1
-_SSH_SCP_SFTP_: int = 2
-_LINUX_BUILT_IN_: int = 3
+_WINSCP_PUTTY_: Final[int] = 0
+_PARAMIKO_: Final[int] = 1
+_SSH_SCP_SFTP_: Final[int] = 2
+_LINUX_BUILT_IN_: Final[int] = 3
 # OS ( local.os )
-_WINDOWS_: int = 0
-_LINUX_: int = 1
+_WINDOWS_: Final[int] = 0
+_LINUX_: Final[int] = 1
 # Build/bin directory
 if os.name == "nt":
-    _BUILD_BIN_: str = "\\Build\\bin\\"
+    _BUILD_BIN_: Final[str] = "\\Build\\bin\\"
 else:
-    _BUILD_BIN_: str = "/Build/bin/"
+    _BUILD_BIN_: Final[str] = "/Build/bin/"
 # *** end of global constants and definitions
 
 import fs
@@ -60,7 +61,7 @@ class Cache_file:
     psplash: str = "psplash-history.log"
     list = []
 
-    def init(self):
+    def init(self) -> None:
         """
         Init filenames list
 
@@ -114,7 +115,7 @@ class Settings:
         connection_type: int = _WINSCP_PUTTY_       # by 0 - winscp+putty / 1 - paramiko / 2 - ssh+scp+sftp / 3 - builtin (linux) apps
         os: int = _WINDOWS_                         # 0 - Windows / 1 - Linux
 
-    def load(self):
+    def load(self) -> None:
         """ Loading configuration file and creating default if not found """
         if not os.path.exists(SETTINGS_FILE):  # Create default configuration file
             print("User settings not found, creating preset file.")
@@ -203,7 +204,7 @@ class Settings:
                     self.project.path_psplash = func.get_value(line, index)
             fp.close()
 
-    def save(self):
+    def save(self) -> None:
         """ Saving configuration file """
         fp = open(SETTINGS_FILE, 'w')
         fp.write("# Auto created settings file. Remember that value is framed by '' \n")
@@ -241,7 +242,7 @@ class Settings:
         fp.write("path_psplash = '%s' # - path to pslpash file\n" % check)
         fp.close()
 
-    def init(self, gui):
+    def init(self, gui) -> None:
         """ Initialize configuration to GUI """
         if os.name == "nt":
             self.local.os = _WINDOWS_
@@ -387,7 +388,7 @@ class Settings:
 class EProgBar(QThread):
     working_status = pyqtSignal(int)
 
-    def run(self):
+    def run(self) -> None:
         self.working_status.emit(1)
         if os.path.exists(Settings.project.path_local):
             if MySettings.local.connection_type == _WINSCP_PUTTY_:  # Windows/winSCP
@@ -406,7 +407,7 @@ class EProgBar(QThread):
 class EProgBar_debug(QThread):
     working_status_debug = pyqtSignal(int)
 
-    def run(self):
+    def run(self) -> None:
         self.working_status_debug.emit(1)
         if os.path.exists(Settings.project.path_local):
             if MySettings.local.connection_type == _WINSCP_PUTTY_:
@@ -510,7 +511,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.actionRemove.triggered.connect(self.on_act_remove)
 
     @pyqtSlot(name='on_button_rmdir')
-    def on_button_rmdir(self):
+    def on_button_rmdir(self) -> None:
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             func_winscp.rmdir(MySettings)
             self.label_9.setText("SENT: remove external source directory storage.")
@@ -526,7 +527,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Opening Build Server in Putty or Xterm
     @pyqtSlot(name='on_button_bs_putty')
-    def on_button_bs_putty(self):
+    def on_button_bs_putty(self) -> None:
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             if MySettings.local.putty_ok:
                 func_winscp.putty_path(MySettings.server.ip, MySettings.server.user, MySettings.local.path_putty)
@@ -544,7 +545,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Opening Build Server in WinSCP
     @pyqtSlot(name='on_button_bs_winscp')
-    def on_button_bs_winscp(self):
+    def on_button_bs_winscp(self) -> None:
         if MySettings.local.os == _WINDOWS_:
             winscp_exe = MySettings.local.path_winscp.replace("com", "exe")
             MySettings.device.file_protocol = func.protocol_get(self)
@@ -555,7 +556,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Opening device in WinSCP by SCP or SFTP protocol
     @pyqtSlot(name='on_button_winscp')
-    def on_button_winscp(self):
+    def on_button_winscp(self) -> None:
         command = ""
         if MySettings.local.os == _WINDOWS_:
             winscp_exe = MySettings.local.path_winscp.replace("com", "exe")
@@ -570,7 +571,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Delete firmware binary file on local storage
     @pyqtSlot(name='on_act_remove')
-    def on_act_remove(self):
+    def on_act_remove(self) -> None:
         dest_path = MySettings.project.path_local + _BUILD_BIN_ + MySettings.project.name + ".bin"
         if os.path.exists(dest_path):
             os.remove(dest_path)
@@ -580,7 +581,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Performs make clean
     @pyqtSlot(name='on_button_clean')
-    def on_button_clean(self):
+    def on_button_clean(self) -> None:
         MySettings.device.file_protocol = func.protocol_get(self)
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             func_winscp.clean(MySettings)
@@ -597,17 +598,17 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Toggle sync files
     @pyqtSlot(name='on_radioButton_sync_mode')
-    def on_radioButton_sync_mode(self):
+    def on_radioButton_sync_mode(self) -> None:
         MySettings.server.sync_files = _SYNC_FILES_
 
     # Toggle upload files
     @pyqtSlot(name='on_radioButton_upload_mode')
-    def on_radioButton_upload_mode(self):
+    def on_radioButton_upload_mode(self) -> None:
         MySettings.server.sync_files = _UPLOAD_FILES_
 
     # Uploading psplash file to device
     @pyqtSlot(name='on_button_psplash')
-    def on_button_psplash(self):
+    def on_button_psplash(self) -> None:
         if func.is_online(MySettings.device.ip):
             MySettings.device.file_protocol = func.protocol_get(self)
             if MySettings.local.connection_type == _WINSCP_PUTTY_:
@@ -623,12 +624,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # If psplash path has been changed
     @pyqtSlot(name='on_psplash_change')
-    def on_psplash_change(self):
+    def on_psplash_change(self) -> None:
         self.lineEdit_11.setText(self.comboBox_6.currentText())
 
     # Checking firmware outdate
     @pyqtSlot(name='on_button_outdated')
-    def on_button_outdated(self):
+    def on_button_outdated(self) -> None:
         if func.is_online(MySettings.device.ip):
             MySettings.device.file_protocol = func.protocol_get(self)
             if MySettings.local.connection_type == _WINSCP_PUTTY_:
@@ -644,7 +645,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Detect firmware outdate
     @pyqtSlot(name='on_button_detect')
-    def on_button_detect(self):
+    def on_button_detect(self) -> None:
         if func.is_online(MySettings.device.ip):
             MySettings.device.file_protocol = func.protocol_get(self)
             if MySettings.local.connection_type == _WINSCP_PUTTY_:
@@ -660,14 +661,14 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # OPTIONS: Clear cache (history files)
     @pyqtSlot(name='on_button_clear_cache')
-    def on_button_clear_cache(self):
+    def on_button_clear_cache(self) -> None:
         fs.cache_create(MyCache.list)
         self.on_button_apply()
         self.label_9.setText("Cached information has been clear.")
 
     # OPTIONS: edit settings
     @pyqtSlot(name='on_button_edit')
-    def on_button_edit(self):
+    def on_button_edit(self) -> None:
         if MySettings.local.os == _WINDOWS_:
             CREATE_NO_WINDOW = 0x08000000
             return subprocess.Popen("notepad %s" % SETTINGS_FILE, creationflags=CREATE_NO_WINDOW)
@@ -676,38 +677,38 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # OPTIONS: winscp path changed
     @pyqtSlot(name='on_winscp_change')
-    def on_winscp_change(self):
+    def on_winscp_change(self) -> None:
         self.lineEdit_9.setText(self.comboBox_4.currentText())
 
     # OPTIONS: device ip changed
     @pyqtSlot(name='on_device_ip_change')
-    def on_device_ip_change(self):
+    def on_device_ip_change(self) -> None:
         self.lineEdit_2.setText(func.check_value(self.comboBox_2.currentText()))
 
     # OPTIONS: putty path changed
     @pyqtSlot(name='on_putty_change')
-    def on_putty_change(self):
+    def on_putty_change(self) -> None:
         self.lineEdit_10.setText(self.comboBox_5.currentText())
 
     # OPTIONS: sources path changed
     @pyqtSlot(name='on_source_change')
-    def on_source_change(self):
+    def on_source_change(self) -> None:
         self.lineEdit_5.setText(self.comboBox_3.currentText())
 
     # OPTIONS: project name changed
     @pyqtSlot(name='on_project_change')
-    def on_project_change(self):
+    def on_project_change(self) -> None:
         self.lineEdit.setText(self.comboBox.currentText())
 
     # OPTION: connection type changed
     @pyqtSlot(name='on_connection_type_change')
-    def on_connection_type_change(self):
+    def on_connection_type_change(self) -> None:
         MySettings.local.connection_type = int(self.comboBox_11.currentIndex())
         self.comboBox_11.setCurrentIndex(int(MySettings.local.connection_type))
 
     # OPTIONS: arch changed
     @pyqtSlot(name='on_system_change')
-    def on_system_change(self):
+    def on_system_change(self) -> None:
         if self.comboBox_10.currentIndex() == 0:  # NXP iMX6
             MySettings.device.system = _NXP_
             self.comboBox_10.setCurrentIndex(0)
@@ -777,7 +778,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Opening device in putty
     @pyqtSlot(name='on_open_putty')
-    def on_open_putty(self):
+    def on_open_putty(self) -> None:
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             if MySettings.local.putty_ok:
                 func_winscp.putty_path(MySettings.server.ip, MySettings.server.user, MySettings.local.path_putty)
@@ -795,12 +796,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # OPTION: set putty path
     @pyqtSlot(name='on_path_putty')
-    def on_path_putty(self):
+    def on_path_putty(self) -> None:
         self.set_putty()
 
     # HANDLER: set putty path
     @pyqtSlot(name='set_putty')
-    def set_putty(self):
+    def set_putty(self) -> None:
         conf_file = QFileDialog.getOpenFileName(filter="PuTTy.exe")
         if conf_file[0] == "":
             return
@@ -810,12 +811,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # OPTION: set psplash path
     @pyqtSlot(name='on_path_psplash')
-    def on_path_psplash(self):
+    def on_path_psplash(self) -> None:
         self.set_psplash()
 
     # HANDLER: set psplash path
     @pyqtSlot(name='set_psplash')
-    def set_psplash(self):
+    def set_psplash(self) -> None:
         psplash_file = QFileDialog.getOpenFileName(filter="psplash.*")
         if psplash_file[0] == "":
             return
@@ -824,12 +825,12 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # OPTION: set winscp path
     @pyqtSlot(name='on_path_winscp')
-    def on_path_winscp(self):
+    def on_path_winscp(self) -> None:
         self.set_winscp()
 
     # HANDLER: set winscp path
     @pyqtSlot(name='set_winscp')
-    def set_winscp(self):
+    def set_winscp(self) -> None:
         conf_file = QFileDialog.getOpenFileName(filter="WinSCP.*")
         if conf_file[0] == "":
             return
@@ -839,7 +840,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Reboot device
     @pyqtSlot(name='on_button_reboot')
-    def on_button_reboot(self):
+    def on_button_reboot(self) -> None:
         MySettings.device.file_protocol = func.protocol_get(self)
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             func_winscp.reboot(MySettings)
@@ -853,7 +854,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Shutdown device
     @pyqtSlot(name='on_button_poweroff')
-    def on_button_poweroff(self):
+    def on_button_poweroff(self) -> None:
         MySettings.device.file_protocol = func.protocol_get(self)
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             func_winscp.poweroff(MySettings)
@@ -867,7 +868,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Touchscreen calibration test
     @pyqtSlot(name='on_button_ts_test')
-    def on_button_ts_test(self):
+    def on_button_ts_test(self) -> None:
         MySettings.device.file_protocol = func.protocol_get(self)
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             func_winscp.ts_test(MySettings)
@@ -881,7 +882,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Touchscreen calibration app
     @pyqtSlot(name='on_button_ts_calibrate')
-    def on_button_ts_calibrate(self):
+    def on_button_ts_calibrate(self) -> None:
         MySettings.device.file_protocol = func.protocol_get(self)
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             func_winscp.ts_calibrate(MySettings)
@@ -895,7 +896,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Device killall command (for firmware and autorun.sh)
     @pyqtSlot(name='on_button_killall')
-    def on_button_killall(self):
+    def on_button_killall(self) -> None:
         MySettings.device.file_protocol = func.protocol_get(self)
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             func_winscp.killall(MySettings)
@@ -909,7 +910,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Using winscp option
     @pyqtSlot(name='on_winscp_use')
-    def on_winscp_user(self):
+    def on_winscp_user(self) -> None:
         if self.comboBox_11.currentIndex() == _WINSCP_PUTTY_:
             self.radioButton.setEnabled(True)
             self.radioButton_2.setEnabled(True)
@@ -925,7 +926,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Open settings file
     @pyqtSlot(name='on_button_open')
-    def on_button_open(self):
+    def on_button_open(self) -> None:
         global SETTINGS_FILE
         conf_file = QFileDialog.getOpenFileName(filter=SETTINGS_FILE)
         if conf_file[0] == "":
@@ -938,7 +939,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # OPTION: Applying new configuration
     @pyqtSlot(name='on_button_apply')
-    def on_button_apply(self):
+    def on_button_apply(self) -> None:
         MySettings.device.user = self.lineEdit_3.text()
         MySettings.device.ip = self.lineEdit_2.text()
         MySettings.device.password = self.lineEdit_4.text()
@@ -973,11 +974,11 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # BUTTON: opening sources path
     @pyqtSlot(name='on_path_project')
-    def on_path_project(self):
+    def on_path_project(self) -> None:
         self.open_file_dialog()
 
     # HANDLER: opening sources path
-    def open_file_dialog(self):
+    def open_file_dialog(self) -> None:
         path_tmp = ""
         path_project = QFileDialog.getExistingDirectory()
         if path_project == "":
@@ -994,7 +995,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # OPTION: reload configuration from file
     @pyqtSlot(name='on_button_reload')
-    def on_button_reload(self):
+    def on_button_reload(self) -> None:
         self.lineEdit.clear()
         self.lineEdit_2.clear()
         self.lineEdit_3.clear()
@@ -1013,7 +1014,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # OPTION: save configuration to file
     @pyqtSlot(name='on_button_save')
-    def on_button_save(self):
+    def on_button_save(self) -> None:
         MySettings.device.user = self.lineEdit_3.text()
         MySettings.device.ip = self.lineEdit_2.text()
         MySettings.device.password = self.lineEdit_4.text()
@@ -1037,7 +1038,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # Ping device
     @pyqtSlot(name='on_button_ping')
-    def on_button_ping(self):
+    def on_button_ping(self) -> None:
         status = func.is_online(MySettings.device.ip)
         if status == 1:
             self.label_9.setText("Device online [%s status: %d]" % (MySettings.device.ip, status))
@@ -1046,7 +1047,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # BUTTON: stop command for autorun.sh
     @pyqtSlot(name='on_button_stop')
-    def on_button_stop(self):
+    def on_button_stop(self) -> None:
         MySettings.device.file_protocol = func.protocol_get(self)
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             func_winscp.stop(MySettings)
@@ -1060,7 +1061,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
     # BUTTON: restart command for autorun.sh
     @pyqtSlot(name='on_button_restart')
-    def on_button_restart(self):
+    def on_button_restart(self) -> None:
         MySettings.device.file_protocol = func.protocol_get(self)
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             func_winscp.restart(MySettings)
@@ -1073,7 +1074,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.label_9.setText("SENT: restart command.")
 
     # Thread handler for firmware compiling
-    def on_working_change(self, value):
+    def on_working_change(self, value) -> None:
         if value == 1:
             self.label_9.setText("Working...")
         elif value == 0:
@@ -1083,7 +1084,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.label_9.setText("Unknown operation.")
 
     # Thread handler for firmware compiling debug version
-    def on_working_change_debug(self, value):
+    def on_working_change_debug(self, value) -> None:
         if value == 1:
             self.label_9.setText("Working...")
         elif value == 0:
@@ -1093,7 +1094,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             self.label_9.setText("Unknown operation.")
 
     @pyqtSlot(name='on_button_compile_debug_once')
-    def on_button_compile_debug_once(self):
+    def on_button_compile_debug_once(self) -> None:
         MySettings.server.compile_mode = True
         if self.comboBox_7.currentText().find('gcc8') == 0:
             MySettings.server.compiler = _GCC8_
@@ -1104,7 +1105,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.calc.start()
 
     @pyqtSlot(name='on_button_compile_debug')
-    def on_button_compile_debug(self):
+    def on_button_compile_debug(self) -> None:
         MySettings.server.compile_mode = False
         if self.comboBox_7.currentText().find('gcc8') == 0:
             MySettings.server.compiler = _GCC8_
@@ -1115,7 +1116,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.calc.start()
 
     @pyqtSlot(name='on_button_compile_once')
-    def on_button_compile_once(self):
+    def on_button_compile_once(self) -> None:
         MySettings.server.compile_mode = True
         if self.comboBox_7.currentText().find('gcc8') == 0:
             MySettings.server.compiler = _GCC8_
@@ -1126,7 +1127,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.calc.start()
 
     @pyqtSlot(name='on_button_compile')
-    def on_button_compile(self):
+    def on_button_compile(self) -> None:
         if self.comboBox_7.currentText().find('gcc8') == 0:
             MySettings.server.compiler = _GCC8_
         else:
@@ -1136,7 +1137,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.calc.start()
 
     @pyqtSlot(name='on_button_upload')
-    def on_button_upload(self):
+    def on_button_upload(self) -> None:
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             func_winscp.upload(MySettings)
         elif MySettings.local.connection_type == _PARAMIKO_:
@@ -1148,7 +1149,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.label_9.setText("SENT: shadow upload command.")
 
     @pyqtSlot(name='on_button_auto')
-    def on_button_auto(self):
+    def on_button_auto(self) -> None:
         MySettings.device.file_protocol = func.protocol_get(self)
         if self.checkBox_2.isChecked():
             if self.comboBox_7.currentIndex() == 0:
