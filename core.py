@@ -781,7 +781,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_open_putty(self) -> None:
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             if MySettings.local.putty_ok:
-                func_winscp.putty_path(MySettings.server.ip, MySettings.server.user, MySettings.local.path_putty)
+                func_winscp.putty_path(MySettings.device.ip, MySettings.device.user, MySettings.local.path_putty)
             else:
                 self.label_9.setText("Putty not found!")
         elif MySettings.local.connection_type == _PARAMIKO_ and MySettings.local.os == _WINDOWS_:
