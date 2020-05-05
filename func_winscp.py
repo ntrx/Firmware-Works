@@ -67,7 +67,7 @@ def upload(Settings) -> None:
     today = datetime.now()
     backup_date = today.strftime("%y-%m-%d-%H-%M")
     file_name = 'upload' + Settings.device.ip
-    path_loc_win = Settings.project.path_local + "\\Build\\bin\\" + Settings.project.name + ".bin"
+    path_loc_win = fs.path_quotes_check(Settings.project.path_local) + "\\Build\\bin\\" + Settings.project.name + ".bin"
     path_dest_win = "//home//" + Settings.device.user + "//" + Settings.project.name + "//bin//" + Settings.project.name + ".bin"
     f = open(file_name, "w+")
     f.write("option confirm off\n")
@@ -314,7 +314,8 @@ def make(Settings, build) -> None:
             f.write("mkdir %s\n" % Settings.server.path_external)
             f.write("put -filemask=*|%s/Src/Windows/device/ %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
         elif Settings.server.sync_files == _SYNC_FILES_:
-            f.write("synchronize -filemask=*|%s/Src/Windows/device/ remote %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
+            # f.write("synchronize remote -filemask=\"*|%s/Src/Windows/device/"" %s %s//Src\n" % (path_loc_win, path_loc_win + "\\Src", path_dest_win))
+            f.write("synchronize remote %s %s//Src\n" % (path_loc_win + "\\Src", path_dest_win))
         f.write("cd " + Settings.server.path_external + "//Src\n")
         if not Settings.server.compile_mode:
             f.write("call make clean\n")
