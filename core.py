@@ -430,7 +430,8 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         QtWidgets.QMainWindow.__init__(self)
         self.calc = EProgBar()
         self.setupUi(self)
-        self.setWindowTitle("%s %s %s" % (PROG_NAME, VERSION, RELEASE))
+        # Try to use f-string
+        self.setWindowTitle(f'{PROG_NAME} {VERSION} {RELEASE}')
 
         # self.label_9.setStyleSheet('background-color: red') for future
         MySettings.load(MySettings)
