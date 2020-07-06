@@ -285,7 +285,10 @@ def make(Settings, build) -> None:
             elif Settings.server.compiler == _GCC_:
                 f.write("call make -j7\n")
         elif build == 'debug':
-            f.write("call make %s debug -j7\n" % Settings.server.compiler)
+            if Settings.server.compiler == _GCC8_:
+                f.write("call make gcc8debug -j7\n")
+            elif Settings.server.compiler == _GCC_:
+                f.write("call make debug -j7\n");
         else:
             print("Error while exclude code, exiting.")
             return

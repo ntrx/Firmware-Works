@@ -7,6 +7,8 @@ from core import _SFTP_
 from core import _SCP_
 from core import _NXP_
 from core import _ATOM_
+from core import _GCC_
+from core import _GCC8_
 
 import os
 import paramiko
@@ -254,7 +256,10 @@ def make(Settings, build) -> None:
             if build == 'release':
                 stdin, stdout, stderr = client.exec_command("make " + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7")
             elif build == 'debug':
-                stdin, stdout, stderr = client.exec_command("make debug" + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7")
+                if Settings.server.compiler == _GCC_:
+                    stdin, stdout, stderr = client.exec_command("make debug" + Settings.server.compiler + " -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7")
+                elif Settings.server.compiler == _GCC8_:
+                    stdin, stdout, stderr = client.exec_command("make gcc8debug -C /home/" + Settings.server.user + Settings.server.path_external + "/Src -j7")
             data = stdout.read() + stderr.read()
         func.prompt_print(data)
         client.close()
@@ -297,6 +302,7 @@ def make(Settings, build) -> None:
                 stdin, stdout, stderr = client.exec_command("make " + Settings.server.compiler + " -C /" + Settings.server.path_external + "/Src ")
             elif build == 'debug':
                 stdin, stdout, stderr = client.exec_command("make debug" + Settings.server.compiler + " -C /" + Settings.server.path_external + "/Src ")
+
             data = stdout.read() + stderr.read()
         func.prompt_print(data)
 
