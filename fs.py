@@ -142,9 +142,9 @@ def path_get_firmware(path, self) -> None:
     if os.path.exists(firmware_path):
         firmware_size = os.path.getsize(firmware_path)
         firmware_time = os.path.getctime(firmware_path)
-        self.setText("Firmware compiled at %s, size: %2.2f MB" % (time.ctime(firmware_time), firmware_size / 1024000))
+        self.setText("Прошивка скомпилирована %s, размер: %2.2f MB" % (time.ctime(firmware_time), firmware_size / 1024000))
     else:
-        self.setText("No firmware compiled found.")
+        self.setText("Прошивка для данного каталога не найдена.")
 
 
 def path_quotes_check(path) -> str:

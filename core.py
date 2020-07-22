@@ -207,32 +207,32 @@ class Settings:
     def save(self) -> None:
         """ Saving configuration file """
         fp = open(SETTINGS_FILE, 'w')
-        fp.write("# Auto created settings file. Remember that value is framed by '' \n")
+        fp.write("# Файл создан автоматически. Редактируйте при уверености того что делаете! \n")
         check = func.check_value(self.device.user)
-        fp.write("user = '%s' # user login to device (default: root) \n" % check)
+        fp.write("user = '%s' # логин поключения к устройству (default: root) \n" % check)
         check = func.check_value(self.device.ip)
-        fp.write("host = '%s' # device IP \n" % check)
+        fp.write("host = '%s' # IP адрес устройства \n" % check)
         check = func.check_value(self.device.password)
-        fp.write("secret = '%s' # user pass to device (default: empty) \n" % check)
+        fp.write("secret = '%s' # пароль устройства (default: empty) \n" % check)
         check = func.check_value(self.project.name)
-        fp.write("project = '%s' # project name (sn4215, sn3307) \n" % check)
+        fp.write("project = '%s' # имя проектов (sn4215, sn3307) \n" % check)
         check = func.check_value(self.project.path_local)
-        fp.write("source = '%s' # path to project (must contain: Build, Src) \n" % check)
+        fp.write("source = '%s' # путь к проекту (в нем должны быть: Build, Src) \n" % check)
         check = func.check_value(self.server.ip)
         fp.write("global_build_server = '%s' # Build-Server IP  \n" % check)
         check = func.check_value(self.server.user)
-        fp.write("global_bs_user = '%s' # Your login to build-server \n" % check)
+        fp.write("global_bs_user = '%s' # логин для build-server \n" % check)
         check = func.check_value(self.server.password)
-        fp.write("global_bs_secret = '%s' # Pass\n" % check)
+        fp.write("global_bs_secret = '%s' # пароль для build-server\n" % check)
         check = func.check_value(self.server.path_external)
-        fp.write("global_bs_dir = '%s' # uploading directory on build-server\n" % check)
+        fp.write("global_bs_dir = '%s' # каталог исходников на build-server\n" % check)
         check = func.check_value(self.server.path_executable)
-        fp.write("path_executable = '%s' # executable directory on build-server (if BS built-in to device)\n" % check)
+        fp.write("path_executable = '%s' # исполняемая директория на build-server (для СН-3210)\n" % check)
         if self.server.sync_files == _SYNC_FILES_:
             check = 1
         elif self.server.sync_files == _UPLOAD_FILES_:
             check = 0
-        fp.write("update = '%d' #  0 - update, 1 - sync \n" % check)
+        fp.write("update = '%d' #  0 - загрузка исходников, 1 - синхронизация \n" % check)
         fp.write("connection_type = '%d' # - 0 - use winSCP+putty, 1 - paramiko, 2 - ssh+scp+sftp, 3 - linux onboard\n" % self.local.connection_type)
         check = func.check_value(self.local.path_winscp)
         fp.write("path_scp = '%s' # - path to WinSCP .com file \n" % check)
@@ -358,7 +358,7 @@ class Settings:
             else:
                 if not os.path.isfile(self.local.path_winscp):
                     gui.lineEdit_9.setStyleSheet("background-color: red")
-                    gui.label_9.setText("Some errors found during initialization settings.")
+                    gui.label_9.setText("Обнаружены ошибки во время загрузки конфигурации.")
                     self.local.winscp_ok = False
                 else:
                     self.local.winscp_ok = True
@@ -370,7 +370,7 @@ class Settings:
             else:
                 if not os.path.isfile(self.local.path_putty):
                     gui.lineEdit_10.setStyleSheet("background-color: red")
-                    gui.label_9.setText("Some errors found during initialization settings.")
+                    gui.label_9.setText("Обнаружены ошибки во время загрузки конфигурации.")
                     self.local.putty_ok = False
                 else:
                     self.local.putty_ok = True
@@ -515,16 +515,16 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
     def on_button_rmdir(self) -> None:
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             func_winscp.rmdir(MySettings)
-            self.label_9.setText("SENT: remove external source directory storage.")
+            self.label_9.setText("SENT: очистка удалённого каталога исходников.")
         elif MySettings.local.connection_type == _PARAMIKO_:
             func_paramiko.rmdir(MySettings)
-            self.label_9.setText("SENT: remove external source directory storage.")
+            self.label_9.setText("SENT: очистка удалённого каталога исходников.")
         elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
             func_linux.rmdir(MySettings)
-            self.label_9.setText("SENT: remove external source directory storage.")
+            self.label_9.setText("SENT: очистка удалённого каталога исходников.")
         elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-            self.label_9.setText("Remove local source directory storage.")
+            self.label_9.setText("очистка локального каталога исходников.")
 
     # Opening Build Server in Putty or Xterm
     @pyqtSlot(name='on_button_bs_putty')
@@ -533,16 +533,16 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             if MySettings.local.putty_ok:
                 func_winscp.putty_path(MySettings.server.ip, MySettings.server.user, MySettings.local.path_putty)
             else:
-                self.label_9.setText("Putty not found!")
+                self.label_9.setText("Putty не найдена!")
         elif MySettings.local.connection_type == _PARAMIKO_ and MySettings.local.os == _WINDOWS_:
             if MySettings.local.putty_ok:
                 func_winscp.putty_path(MySettings.server.ip, MySettings.server.user, MySettings.local.path_putty)
             else:
-                self.label_9.setText("Putty not found!")
+                self.label_9.setText("Putty не найдена!")
         elif MySettings.local.connection_type == _SSH_SCP_SFTP_ and MySettings.local.os == _LINUX_:
             os.system("xterm -hold -e 'ssh %s@%s'" % (MySettings.server.user, MySettings.server.ip))
         else:
-            self.label_9.setText("Not compatible setup, try install Putty or Xterm!")
+            self.label_9.setText("Не совместимые настройки, попробуйте установить putty или Xterm!")
 
     # Opening Build Server in WinSCP
     @pyqtSlot(name='on_button_bs_winscp')
@@ -553,7 +553,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             command = ("sftp://%s:%s@%s/" % (MySettings.server.user, MySettings.server.password, MySettings.server.ip))
             func_winscp.command(command, winscp_exe)
         elif MySettings.local.os == _LINUX_:
-            self.label_9.setText("Not supported!")
+            self.label_9.setText("Не поддерживается!")
 
     # Opening device in WinSCP by SCP or SFTP protocol
     @pyqtSlot(name='on_button_winscp')
@@ -568,7 +568,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
                 command = ("scp://%s@%s:%s/" % (MySettings.device.user, MySettings.device.ip, MySettings.device.password))
             func_winscp.command(command, winscp_exe)
         else:
-            self.label_9.setText("Not supported!")
+            self.label_9.setText("Не поддерживается!")
 
     # Delete firmware binary file on local storage
     @pyqtSlot(name='on_act_remove')
@@ -576,9 +576,9 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         dest_path = MySettings.project.path_local + _BUILD_BIN_ + MySettings.project.name + ".bin"
         if os.path.exists(dest_path):
             os.remove(dest_path)
-            self.label_9.setText("Firmware remove command.")
+            self.label_9.setText("Прошивка удалена.")
         else:
-            self.label_9.setText("Nothing to remove, firmware not found.")
+            self.label_9.setText("Прошивка не найдена.")
 
     # Performs make clean
     @pyqtSlot(name='on_button_clean')
@@ -586,15 +586,15 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         MySettings.device.file_protocol = func.protocol_get(self)
         if MySettings.local.connection_type == _WINSCP_PUTTY_:
             func_winscp.clean(MySettings)
-            self.label_9.setText("SENT: clean firmware on remote server.")
+            self.label_9.setText("SENT: make clean.")
         elif MySettings.local.connection_type == _PARAMIKO_:
             func_paramiko.clean(MySettings)
-            self.label_9.setText("SENT: clean firmware on remote server.")
+            self.label_9.setText("SENT: make clean.")
         elif MySettings.local.connection_type == _SSH_SCP_SFTP_:
-            self.label_9.setText("SENT: clean firmware on remote server.")
+            self.label_9.setText("SENT: make clean.")
             pass
         elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
-            self.label_9.setText("Localy clean firmware.")
+            self.label_9.setText("make clean.")
             pass
 
     # Toggle sync files
@@ -621,7 +621,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
                 pass
         else:
-            self.label_9.setText("Host is unreachable")
+            self.label_9.setText("Хост не доступный.")
 
     # If psplash path has been changed
     @pyqtSlot(name='on_psplash_change')
@@ -642,7 +642,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
                 pass
         else:
-            self.label_9.setText('Host is unreachable')
+            self.label_9.setText('Хост не доступный.')
 
     # Detect firmware outdate
     @pyqtSlot(name='on_button_detect')
@@ -658,14 +658,14 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
                 pass
         else:
-            self.label_9.setText('Host is unreachable')
+            self.label_9.setText('Хост не доступный.')
 
     # OPTIONS: Clear cache (history files)
     @pyqtSlot(name='on_button_clear_cache')
     def on_button_clear_cache(self) -> None:
         fs.cache_create(MyCache.list)
         self.on_button_apply()
-        self.label_9.setText("Cached information has been clear.")
+        self.label_9.setText("История была удалена.")
 
     # OPTIONS: edit settings
     @pyqtSlot(name='on_button_edit')
@@ -784,16 +784,16 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             if MySettings.local.putty_ok:
                 func_winscp.putty_path(MySettings.device.ip, MySettings.device.user, MySettings.local.path_putty)
             else:
-                self.label_9.setText("Putty not found!")
+                self.label_9.setText("Putty не найдена!")
         elif MySettings.local.connection_type == _PARAMIKO_ and MySettings.local.os == _WINDOWS_:
             if MySettings.local.putty_ok:
                 func_winscp.putty_path(MySettings.device.ip, MySettings.device.user, MySettings.local.path_putty)
             else:
-                self.label_9.setText("Putty not found!")
+                self.label_9.setText("Putty не найдена!")
         elif MySettings.local.connection_type == _SSH_SCP_SFTP_ and MySettings.local.os == _LINUX_:
             os.system("xterm -hold -e 'ssh %s@%s'" % (MySettings.device.user, MySettings.device.ip))
         else:
-            self.label_9.setText("Not compatible setup, try install Putty or Xterm!")
+            self.label_9.setText("Не совместимые настройки, попробуйте установить putty или Xterm!")
 
     # OPTION: set putty path
     @pyqtSlot(name='on_path_putty')
@@ -851,7 +851,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             func_linux.reboot(MySettings)
         elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-        self.label_9.setText("SENT: reboot command.")
+        self.label_9.setText("SENT: перезагрузка.")
 
     # Shutdown device
     @pyqtSlot(name='on_button_poweroff')
@@ -865,7 +865,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             func_linux.poweroff(MySettings)
         elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-        self.label_9.setText("SENT: shutdown command.")
+        self.label_9.setText("SENT: выключение.")
 
     # Touchscreen calibration test
     @pyqtSlot(name='on_button_ts_test')
@@ -879,7 +879,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             func_linux.ts_test(MySettings)
         elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-        self.label_9.setText('Device stopped. TSLIB_TSDEVICE ts_test launched.')
+        self.label_9.setText('Устройство остановлено. TSLIB_TSDEVICE ts_test запущено.')
 
     # Touchscreen calibration app
     @pyqtSlot(name='on_button_ts_calibrate')
@@ -893,7 +893,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             func_linux.ts_calibrate(MySettings)
         elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-        self.label_9.setText("Device stopped. TSLIB_TSDEVICE ts_calibrate launched.")
+        self.label_9.setText("Устройство остановлено. TSLIB_TSDEVICE ts_calibrate запущено.")
 
     # Device killall command (for firmware and autorun.sh)
     @pyqtSlot(name='on_button_killall')
@@ -907,7 +907,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             func_linux.killall(MySettings)
         elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-        self.label_9.setText("SENT: killall command for %s.bin and autorun.sh" % MySettings.project.name)
+        self.label_9.setText("SENT: killall command для %s.bin и autorun.sh" % MySettings.project.name)
 
     # Using winscp option
     @pyqtSlot(name='on_winscp_use')
@@ -958,14 +958,14 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         MySettings.local.path_winscp = self.lineEdit_9.text()
         MySettings.local.path_putty = self.lineEdit_10.text()
         MySettings.project.path_psplash = self.lineEdit_11.text()
-        self.label_9.setText("New configuration applied.")
+        self.label_9.setText("Новая конфигурация применена.")
 
         # cache saving source history
         fs.cache_save(MyCache.source, MySettings.project.path_local)
         # cache saving project name history
         fs.cache_save(MyCache.project, MySettings.project.name)
         # cache saving device ip history
-        fs.cache_save(MyCache.device_ip, MySettings.device.user)
+        fs.cache_save(MyCache.device_ip, MySettings.device.ip)
         # cache saving winscp path history
         fs.cache_save(MyCache.winscp, MySettings.local.path_winscp)
         # cache saving putty path history
@@ -1011,7 +1011,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         self.lineEdit_12.clear()
         MySettings.load(MySettings)
         MySettings.init(MySettings, self)
-        self.label_9.setText("Configuration re-init")
+        self.label_9.setText("Перезагрузка конфигурация выполнена.")
 
     # OPTION: save configuration to file
     @pyqtSlot(name='on_button_save')
@@ -1035,16 +1035,16 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
         MySettings.local.path_putty = self.lineEdit_10.text()
         MySettings.project.path_psplash = self.lineEdit_11.text()
         MySettings.save(MySettings)
-        self.label_9.setText("Configuration save")
+        self.label_9.setText("Конфигурация сохранена")
 
     # Ping device
     @pyqtSlot(name='on_button_ping')
     def on_button_ping(self) -> None:
         status = func.is_online(MySettings.device.ip)
         if status == 1:
-            self.label_9.setText("Device online [%s status: %d]" % (MySettings.device.ip, status))
+            self.label_9.setText("Устройство найдено [%s status: %d]" % (MySettings.device.ip, status))
         elif status == 0:
-            self.label_9.setText("Device offline [%s status: %d]" % (MySettings.device.ip, status))
+            self.label_9.setText("Устройство недоступно [%s status: %d]" % (MySettings.device.ip, status))
 
     # BUTTON: stop command for autorun.sh
     @pyqtSlot(name='on_button_stop')
@@ -1058,7 +1058,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             func_linux.stop(MySettings)
         elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-        self.label_9.setText("SENT: stop command.")
+        self.label_9.setText("SENT: autorun.sh stop")
 
     # BUTTON: restart command for autorun.sh
     @pyqtSlot(name='on_button_restart')
@@ -1072,27 +1072,27 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             func_linux.restart(MySettings)
         elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-        self.label_9.setText("SENT: restart command.")
+        self.label_9.setText("SENT: autorun.sh restart")
 
     # Thread handler for firmware compiling
     def on_working_change(self, value) -> None:
         if value == 1:
-            self.label_9.setText("Working...")
+            self.label_9.setText("В процессе....")
         elif value == 0:
-            self.label_9.setText("Firmware is compiled.")
+            self.label_9.setText("Прошивка готова.")
             fs.path_get_firmware(MySettings.project.path_local + _BUILD_BIN_ + MySettings.project.name + ".bin", self.label_16)
         else:
-            self.label_9.setText("Unknown operation.")
+            self.label_9.setText("Неизвестная операция.")
 
     # Thread handler for firmware compiling debug version
     def on_working_change_debug(self, value) -> None:
         if value == 1:
-            self.label_9.setText("Working...")
+            self.label_9.setText("В процессе...")
         elif value == 0:
-            self.label_9.setText("Firmware debug is compiled.")
+            self.label_9.setText("Прошивка отладочная готова.")
             fs.path_get_firmware(MySettings.project.path_local + _BUILD_BIN_ + MySettings.project.name + ".bin",  self.label_16)
         else:
-            self.label_9.setText("Unknown operation.")
+            self.label_9.setText("Неизвестная операция.")
 
     @pyqtSlot(name='on_button_compile_debug_once')
     def on_button_compile_debug_once(self) -> None:
@@ -1147,7 +1147,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
             func_linux.upload(MySettings)
         elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
             pass
-        self.label_9.setText("SENT: shadow upload command.")
+        self.label_9.setText("SENT: загрузка прошивки на устройство.")
 
     @pyqtSlot(name='on_button_auto')
     def on_button_auto(self) -> None:
@@ -1173,8 +1173,8 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
 
         if self.checkBox.isChecked():
             is_online = func.is_online(MySettings.device.ip, 1)
-            self.label_9.setText("Trying to connect...")
-            self.label_9.setText("Connect established.")
+            self.label_9.setText("Попытка подключения...")
+            self.label_9.setText("Подключение установлено.")
             if is_online:
                 if MySettings.local.connection_type == _WINSCP_PUTTY_:
                     func_winscp.stop(MySettings)
@@ -1190,9 +1190,9 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
                     func_linux.restart(MySettings)
                 elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
                     pass
-                self.label_9.setText("Auto compile&stop&upload command has been sent")
+                self.label_9.setText("Автоматическая компиляция и загрузка выполенена")
             else:
-                self.label_9.setText("process has been interrupted")
+                self.label_9.setText("процесс был прерван")
         else:
             if MySettings.local.connection_type == _WINSCP_PUTTY_:
                 func_winscp.stop(MySettings)
@@ -1208,7 +1208,7 @@ class MainWindow(QtWidgets. QMainWindow, Ui_MainWindow):
                 func_linux.restart(MySettings)
             elif MySettings.local.connection_type == _LINUX_BUILT_IN_:
                 pass
-            self.label_9.setText("Once compile&stop&upload command has been sent")
+            self.label_9.setText("компиляция и загрузка выполенана.")
 
 
 def main():

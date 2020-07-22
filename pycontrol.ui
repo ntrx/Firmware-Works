@@ -60,7 +60,7 @@
      </rect>
     </property>
     <property name="title">
-     <string>Firmware on device and scripts (autorun.sh)</string>
+     <string>Команды на устройстве (autorun.sh)</string>
     </property>
     <widget class="QPushButton" name="pushButton_5">
      <property name="geometry">
@@ -72,7 +72,7 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Send autorun.sh stop&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Команда: autorun.sh stop&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>stop</string>
@@ -97,7 +97,7 @@
       </font>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Send autorun.sh restart&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Команда: autorun.sh restart&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>restart</string>
@@ -113,7 +113,7 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;send killall sn4215_respawn.sh and current *.bin program started.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Команда: killall sn4215_respawn.sh *.bin&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>killall</string>
@@ -138,7 +138,7 @@
       </font>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open SSH connection with current device via PuTTy&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Открыть SSH соединение через Putty&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>putty</string>
@@ -163,10 +163,10 @@
       </font>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check timestamp of firmware on device and compare with local firmware. Keep up projects setups.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Проверяет актуальность прошивки по дате создания файла. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
-      <string>check outdate</string>
+      <string>проверка</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButton_12">
@@ -181,8 +181,11 @@
        <height>23</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Определить какая прошивка находится на устройстве.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="text">
-      <string>detect project</string>
+      <string>определить</string>
      </property>
      <property name="checkable">
       <bool>false</bool>
@@ -207,7 +210,7 @@
       </font>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open SCP connection with current device via winSCP&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Открыть SCP соединение с устройством через winSCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>winSCP</string>
@@ -236,7 +239,7 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Run make clean &amp;amp; make command&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Команда: make clean; make;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>[re]compile release</string>
@@ -252,7 +255,7 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Run make clean &amp;amp; make debug command&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Команда: make clean; make debug;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>[re] compile debug</string>
@@ -268,7 +271,7 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Run make command&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Команда: make&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>compile release</string>
@@ -284,7 +287,7 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Run make debug command&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Команда: make debug&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>compile debug</string>
@@ -300,7 +303,7 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Run make clean&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Команда: make clean&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>clean</string>
@@ -314,6 +317,9 @@
        <width>101</width>
        <height>22</height>
       </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;gcc - старый процессор (imx6q)&lt;/p&gt;&lt;p&gt;gcc8 - новый процессор (imx6qp)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <item>
       <property name="text">
@@ -337,7 +343,7 @@
      </rect>
     </property>
     <property name="title">
-     <string>Device</string>
+     <string>Устройство</string>
     </property>
     <widget class="QPushButton" name="pushButton_4">
      <property name="geometry">
@@ -348,8 +354,11 @@
        <height>23</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Загрузка/замена прошивки на устройстве, без killall, stop, restart комманд.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="text">
-      <string>only upload firmware</string>
+      <string>загрузка прошивки на устройство</string>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox">
@@ -365,10 +374,10 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>Auto ping device before establishing connection</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Автоматический пинг перед встановлением подключения к устройству.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
-      <string>upload when available</string>
+      <string>при доступности</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -824,10 +833,10 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Compile on build server firmware then upload&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Компиляция прошивки перед загрузкой на устройство.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
-      <string>compile before upload</string>
+      <string>компиляция</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButton_13">
@@ -840,10 +849,10 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Run ts_calibrate command&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Запустить TS_CALIBRATE на устройстве&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
-      <string>calibrate sensor display</string>
+      <string>калибровка сенсорной панели</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButton_14">
@@ -856,10 +865,10 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Run ts_test command&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Запустить на приборе TS_TEST&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
-      <string>test sensor display</string>
+      <string>тест сенсорной панели</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButton_7">
@@ -872,10 +881,10 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ping device&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Пинг устройства&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
-      <string>ping</string>
+      <string>пинг</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButton_22">
@@ -887,8 +896,11 @@
        <height>21</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Загрузка файла psplash. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="text">
-      <string>psplash upload</string>
+      <string>загрузить файл psplash.*</string>
      </property>
     </widget>
    </widget>
@@ -961,7 +973,7 @@
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
-      <string>Device</string>
+      <string>Устройство</string>
      </attribute>
      <widget class="QLineEdit" name="lineEdit_2">
       <property name="enabled">
@@ -1016,8 +1028,11 @@
         <height>16</height>
        </rect>
       </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;IP устройства в сети&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
       <property name="text">
-       <string>Device IP</string>
+       <string>IP адрес</string>
       </property>
       <property name="buddy">
        <cstring>lineEdit_2</cstring>
@@ -1075,10 +1090,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Device user must be root&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Имя пользователя. По умолчанию должен быть root.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>Device login</string>
+       <string>Логин:</string>
       </property>
       <property name="buddy">
        <cstring>lineEdit_3</cstring>
@@ -1094,10 +1109,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Name must be like&lt;/p&gt;&lt;p&gt;sn3307 or sn4215&lt;/p&gt;&lt;p&gt;(its name of binary file)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Имя прошивки в исполняемом файле. (sn4215 / sn4308)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>Project name</string>
+       <string>Имя проекта</string>
       </property>
       <property name="buddy">
        <cstring>lineEdit</cstring>
@@ -1113,10 +1128,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set working directory it must contain Src and Build catalogs&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Установка каталога с исходниками. Каталог должен вмещать в себе Build, Src директории&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>Source</string>
+       <string>Исходники:</string>
       </property>
       <property name="buddy">
        <cstring>lineEdit_5</cstring>
@@ -1148,10 +1163,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Password for device usually is empty&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Пароль для устройства. По умолчанию отсутствует.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>Device password</string>
+       <string>Пароль:</string>
       </property>
       <property name="buddy">
        <cstring>lineEdit_4</cstring>
@@ -1248,10 +1263,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set working directory it must contain Src and Build catalogs&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>psplash file</string>
+       <string>psplash файл:</string>
       </property>
       <property name="buddy">
        <cstring>lineEdit_5</cstring>
@@ -1287,10 +1302,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Network protocol&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Сетевой протокол для соединения с устройством.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>File protocol</string>
+       <string>Протокол:</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_19">
@@ -1303,10 +1318,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;File structure on device and compiling algorithm&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Алгоритм построения и структура каталогов&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>System:</string>
+       <string>Процессор:</string>
       </property>
      </widget>
      <widget class="QComboBox" name="comboBox_10">
@@ -1337,7 +1352,7 @@
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
-      <string>Build-Server</string>
+      <string>Build сервер</string>
      </attribute>
      <widget class="QLabel" name="label_7">
       <property name="geometry">
@@ -1349,10 +1364,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Your account name&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Имя вашего аккаунта&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>User login</string>
+       <string>Логин</string>
       </property>
       <property name="buddy">
        <cstring>lineEdit_7</cstring>
@@ -1366,15 +1381,15 @@
        <rect>
         <x>10</x>
         <y>180</y>
-        <width>82</width>
+        <width>111</width>
         <height>17</height>
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Synchronize files, faster when only updates in existing files&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Синхронизация локального и внешнего каталога исходников.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>sync files</string>
+       <string>синхронизация</string>
       </property>
      </widget>
      <widget class="QRadioButton" name="radioButton">
@@ -1390,10 +1405,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(re)upload all files on server&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Загрузка исходников на сервер. Только первый раз, когда не созданы каталоги!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>upload files</string>
+       <string>загрузка</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_6">
@@ -1409,7 +1424,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Build server 192.168.9.111&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>IP address</string>
+       <string>IP адрес</string>
       </property>
       <property name="buddy">
        <cstring>lineEdit_6</cstring>
@@ -1438,10 +1453,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Your password&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Пароль&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>Password</string>
+       <string>Пароль</string>
       </property>
       <property name="buddy">
        <cstring>lineEdit_8</cstring>
@@ -1483,10 +1498,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set here path for upload sources. Address will be automatically generates as /home/%your_login%/%path%&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Каталог исходников на сервере. Адрес будет /home/%user%/ поэтому сюда вписать нада только имя каталоге в каталоге пользователя. Например: /projects/SN4215N/&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>Upload to</string>
+       <string>Загружать</string>
       </property>
       <property name="buddy">
        <cstring>lineEdit_8</cstring>
@@ -1524,10 +1539,10 @@
        </font>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open SCP connection with current device via winSCP&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Открыть каталог сервера через winSCP по SCP протоколу.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>open with winSCP</string>
+       <string>открыть в winSCP</string>
       </property>
      </widget>
      <widget class="QPushButton" name="pushButton_26">
@@ -1549,10 +1564,10 @@
        </font>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open SCP connection with current device via winSCP&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Открыть Putty для ssh соединения с сервером.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>open with PUTTY</string>
+       <string>открыть в PUTTY</string>
       </property>
      </widget>
      <widget class="QPushButton" name="pushButton_27">
@@ -1568,10 +1583,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remove this directory on external server.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Удалить каталог на сервере.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>rm dir</string>
+       <string>очист.</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="lineEdit_13">
@@ -1597,10 +1612,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set here path for executable directory on build-server builtin compiler.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Путь к исполяемой директории на устройстве на котором компилируется прошивка. Для Сн3210.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>Executable:</string>
+       <string>Исполн.</string>
       </property>
       <property name="buddy">
        <cstring>lineEdit_8</cstring>
@@ -1609,7 +1624,7 @@
     </widget>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
-      <string>External</string>
+      <string>Внеш.</string>
      </attribute>
      <widget class="QLabel" name="label_10">
       <property name="geometry">
@@ -1748,7 +1763,7 @@
     </widget>
     <widget class="QWidget" name="tab_4">
      <attribute name="title">
-      <string>Options</string>
+      <string>Опции</string>
      </attribute>
      <widget class="QPushButton" name="pushButton_20">
       <property name="geometry">
@@ -1760,10 +1775,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clear all cached files. And reinit configuration with last one value filled fields.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Очистить файлы с историей настроек (имена проектов, IP и т.д.)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>clear cache</string>
+       <string>очистить</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_12">
@@ -1776,7 +1791,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Cache size on disk:</string>
+       <string>Размер истории:</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_13">
@@ -1832,10 +1847,10 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set of software for handle operations&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Набор инструментов для взаимодействия с устройством и build-сервером. Лучше всего работает связка winscp+putty&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>Software Kit:</string>
+       <string>Инструменты:</string>
       </property>
       <property name="buddy">
        <cstring>lineEdit_5</cstring>
@@ -1856,10 +1871,10 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reloads configuration&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Перегрузка конфигурационного файла.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="text">
-     <string>reload</string>
+     <string>загр.</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_6">
@@ -1875,10 +1890,10 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Apply and saving configuration&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Сохранить конфигурационный файл.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="text">
-     <string>save</string>
+     <string>сохр.</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_10">
@@ -1894,10 +1909,10 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load another configuration&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Загрузить новую конфигурацию.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="text">
-     <string>open</string>
+     <string>откр.</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_19">
@@ -1913,10 +1928,10 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Edit configuration manually, after modify use 'reload' button for apply changes&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Редактировать файл настроек через notepad.exe&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="text">
-     <string>edit</string>
+     <string>ред.</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_8">
@@ -1932,10 +1947,10 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Apply configuration, without saving&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Применить настройки которые написаны в полях программы.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="text">
-     <string>apply</string>
+     <string>прим.</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_16">
@@ -1958,19 +1973,19 @@
      <x>0</x>
      <y>0</y>
      <width>602</width>
-     <height>18</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuControls">
     <property name="title">
-     <string>Controls</string>
+     <string>Управление</string>
     </property>
     <addaction name="actionReboot"/>
     <addaction name="actionPower_off"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
-     <string>Settings</string>
+     <string>Конфигурация</string>
     </property>
     <addaction name="actionSave"/>
     <addaction name="actionOpen_2"/>
@@ -1982,7 +1997,7 @@
    </widget>
    <widget class="QMenu" name="menuFirmware">
     <property name="title">
-     <string>Firmware</string>
+     <string>Прошивка</string>
     </property>
     <addaction name="actionRemove"/>
    </widget>
@@ -1992,12 +2007,12 @@
   </widget>
   <action name="actionReboot">
    <property name="text">
-    <string>Reboot</string>
+    <string>Перезагрузка</string>
    </property>
   </action>
   <action name="actionPower_off">
    <property name="text">
-    <string>Power off</string>
+    <string>Выключение</string>
    </property>
   </action>
   <action name="actionExit">
@@ -2012,7 +2027,7 @@
   </action>
   <action name="actionSave">
    <property name="text">
-    <string>Save</string>
+    <string>Сохранить</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -2020,7 +2035,7 @@
   </action>
   <action name="actionReload">
    <property name="text">
-    <string>Reload</string>
+    <string>Перезагрузка</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -2028,7 +2043,7 @@
   </action>
   <action name="actionOpen_2">
    <property name="text">
-    <string>Open</string>
+    <string>Открыть</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -2036,7 +2051,7 @@
   </action>
   <action name="actionEdit">
    <property name="text">
-    <string>Edit</string>
+    <string>Редактировать</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>
@@ -2044,7 +2059,7 @@
   </action>
   <action name="actionApple">
    <property name="text">
-    <string>Apply</string>
+    <string>Применить</string>
    </property>
   </action>
   <action name="actionRemove_firmware">
@@ -2054,7 +2069,7 @@
   </action>
   <action name="actionRemove">
    <property name="text">
-    <string>Remove</string>
+    <string>Удалить</string>
    </property>
   </action>
  </widget>
